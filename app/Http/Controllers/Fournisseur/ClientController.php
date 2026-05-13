@@ -16,11 +16,6 @@ class ClientController extends Controller
         $frsId = (int) session('frs_id');
         $q = trim((string) $request->query('q', ''));
 
-        $clientIdsFromOrders = DB::table('cmd1')
-            ->select('id_client')
-            ->where('id_frs', $frsId)
-            ->groupBy('id_client');
-
         $cmdCounts = DB::table('cmd1')
             ->selectRaw('id_client, COUNT(*) as nb')
             ->where('id_frs', $frsId)
@@ -36,10 +31,7 @@ class ClientController extends Controller
                 'commune.COMMUNE as commune_nom',
                 DB::raw('COALESCE(cc.nb, 0) as nb_commandes'),
             ])
-            ->where(function ($query) use ($frsId, $clientIdsFromOrders) {
-                $query->where('client.id_frs', $frsId)
-                    ->orWhereIn('client.id', $clientIdsFromOrders);
-            })
+            ->where('client.id_frs', $frsId)
             ->when($q !== '', function ($query) use ($q) {
                 $query->where(function ($sub) use ($q) {
                     $sub->where('client.nom', 'like', "%{$q}%")
@@ -65,15 +57,7 @@ class ClientController extends Controller
 
         $client = Client::query()
             ->where('id', $id)
-            ->where(function ($query) use ($frsId) {
-                $query->where('id_frs', $frsId)
-                    ->orWhereExists(function ($sub) use ($frsId) {
-                        $sub->selectRaw('1')
-                            ->from('cmd1')
-                            ->whereColumn('cmd1.id_client', 'client.id')
-                            ->where('cmd1.id_frs', $frsId);
-                    });
-            })
+            ->where('id_frs', $frsId)
             ->firstOrFail();
 
         $commandes = Cmd1::query()

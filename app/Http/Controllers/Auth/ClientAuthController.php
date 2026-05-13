@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Client;
 use App\Models\Commune;
+use App\Models\Fournisseur;
 use App\Models\Wilaya;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -120,7 +121,7 @@ class ClientAuthController extends Controller
             'id_wilaya' => $idWilaya,
             'id_commune' => $idCommune,
             'type_client' => 'simple',
-            'id_frs' => null,
+            'id_frs' => (int) (Fournisseur::single()?->id ?? 0) ?: null,
             'actif' => 1,
             'email_verified_at' => null,
         ];
