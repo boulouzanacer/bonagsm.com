@@ -18,7 +18,6 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([
-            'auth.admin' => \App\Http\Middleware\AdminMiddleware::class,
             'auth.fournisseur' => \App\Http\Middleware\FournisseurMiddleware::class,
             'auth.pme' => \App\Http\Middleware\PmeTokenAuth::class,
             'auth.optional' => \App\Http\Middleware\OptionalSanctumAuth::class,

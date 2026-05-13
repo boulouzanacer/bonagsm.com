@@ -1,14 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\Auth\ClientAuthController;
 use App\Http\Controllers\Auth\FrsAuthController;
-use App\Http\Controllers\Admin\AdminDashboardController;
-use App\Http\Controllers\Admin\FournisseurController;
-use App\Http\Controllers\Admin\ClientController as AdminClientController;
-use App\Http\Controllers\Admin\ProduitController as AdminProduitController;
-use App\Http\Controllers\Admin\CommandeController as AdminCommandeController;
 use App\Http\Controllers\Fournisseur\DashboardController as FrsDashboardController;
 use App\Http\Controllers\Fournisseur\ProduitController as FrsProduitController;
 use App\Http\Controllers\Fournisseur\CategorieController as FrsCategorieController;
@@ -41,49 +35,12 @@ Route::post('/checkout', [StoreController::class, 'checkoutStore']);
 Route::get('/mes-commandes', [StoreController::class, 'mesCommandes']);
 Route::get('/mes-commandes/{id}', [StoreController::class, 'commandeShow']);
 
-Route::get('/admin/login', function () {
-    return view('auth.admin-login');
-});
-
-Route::post('/admin/login', [AdminAuthController::class, 'login']);
-Route::post('/admin/logout', [AdminAuthController::class, 'logout']);
-
 Route::get('/fournisseur/login', function () {
     return view('auth.fournisseur-login');
 });
 
 Route::post('/fournisseur/login', [FrsAuthController::class, 'login']);
 Route::post('/fournisseur/logout', [FrsAuthController::class, 'logout']);
-
-Route::prefix('admin')->middleware('auth.admin')->group(function () {
-    Route::get('/dashboard', [AdminDashboardController::class, 'index']);
-
-    Route::get('/fournisseurs', [FournisseurController::class, 'index']);
-    Route::get('/fournisseurs/create', [FournisseurController::class, 'create']);
-    Route::post('/fournisseurs', [FournisseurController::class, 'store']);
-    Route::get('/fournisseurs/{id}/edit', [FournisseurController::class, 'edit']);
-    Route::put('/fournisseurs/{id}', [FournisseurController::class, 'update']);
-    Route::delete('/fournisseurs/{id}', [FournisseurController::class, 'destroy']);
-    Route::post('/fournisseurs/{id}/toggle-actif', [FournisseurController::class, 'toggleActif']);
-
-    Route::get('/wilayas/{idWilaya}/communes', [FournisseurController::class, 'communes']);
-
-    Route::get('/clients', [AdminClientController::class, 'index']);
-    Route::get('/produits', [AdminProduitController::class, 'index']);
-    Route::get('/commandes', [AdminCommandeController::class, 'index']);
-
-    Route::get('/api-docs', function () {
-        return view('admin.api-docs', ['title' => 'API Doc']);
-    });
-
-    Route::get('/parametres', function () {
-        return view('admin.parametres', ['title' => 'Paramètres']);
-    });
-
-    Route::get('/profil', function () {
-        return view('admin.profil', ['title' => 'Profil']);
-    });
-});
 
 Route::prefix('fournisseur')->middleware('auth.fournisseur')->group(function () {
     Route::get('/dashboard', [FrsDashboardController::class, 'index']);
