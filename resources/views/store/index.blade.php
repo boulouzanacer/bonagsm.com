@@ -126,7 +126,11 @@
                                 {{ $p->categorie ?: '—' }}
                             </span>
 
-                            <form method="POST" action="{{ url('/panier/add') }}">
+                            @php($pixelUnit = (($can_show_prices ?? false) || ($client ?? null)) ? (float)$p->prixUnitairePourQuantite($client ?? null, 1) : 0.0)
+                            <form method="POST"
+                                  action="{{ url('/panier/add') }}"
+                                  data-pixel-product-id="{{ $p->id }}"
+                                  data-pixel-price="{{ $pixelUnit }}">
                                 @csrf
                                 <input type="hidden" name="produit_id" value="{{ $p->id }}">
                                 <input type="hidden" name="qty" value="1">

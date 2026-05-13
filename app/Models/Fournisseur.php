@@ -34,6 +34,8 @@ class Fournisseur extends Authenticatable
         'is_visible',
         'show_prices_to_guests',
         'enable_frais_livraison',
+        'meta_pixel_id',
+        'tiktok_pixel_id',
     ];
 
     protected $appends = [

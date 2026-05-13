@@ -200,7 +200,21 @@ class StoreController extends Controller
                 ->where('id', $frsId)
                 ->where('actif', 1)
                 ->whereNull('deleted_at')
-                ->first(['id', 'nom_frs', 'logo_path', 'adresse', 'telephone', 'id_wilaya', 'id_commune', 'latitude', 'longitude']);
+                ->first([
+                    'id',
+                    'nom_frs',
+                    'logo_path',
+                    'adresse',
+                    'telephone',
+                    'id_wilaya',
+                    'id_commune',
+                    'latitude',
+                    'longitude',
+                    'show_prices_to_guests',
+                    'enable_frais_livraison',
+                    'meta_pixel_id',
+                    'tiktok_pixel_id',
+                ]);
         }
 
         $this->setCart($cart, $frsId);
@@ -627,6 +641,18 @@ class StoreController extends Controller
 
             return $cmd;
         });
+
+        $contents = collect($summary['items'])->map(function ($it) {
+            $p = $it['produit'];
+            return ['id' => (string) ($p->id ?? ''), 'quantity' => (int) ($it['qty'] ?? 1)];
+        })->filter(fn ($r) => ($r['id'] ?? '') !== '')->values()->all();
+
+        session()->flash('pixel_purchase', [
+            'order_id' => (int) $result->id,
+            'value' => (float) ($result->montant_total ?? 0),
+            'currency' => 'DZD',
+            'contents' => $contents,
+        ]);
 
         session()->forget(['cart', 'cart_frs_id']);
 

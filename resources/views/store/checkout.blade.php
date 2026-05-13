@@ -140,6 +140,14 @@
     const shippingEnabled = @json((bool)($shipping_enabled ?? false));
     const shippingFees = @json(($shipping_fees ?? []));
     const subtotal = Number(@json((float)$total));
+    const contents = @json(collect($items)->map(function ($it) {
+        $p = $it['produit'] ?? null;
+        return [
+            'id' => (string) ($p?->id ?? ''),
+            'quantity' => (int) ($it['qty'] ?? 1),
+            'unit_price' => (float) ($it['prix_unitaire'] ?? 0),
+        ];
+    })->filter(fn ($r) => ($r['id'] ?? '') !== '')->values()->all());
     const shippingEl = document.getElementById('shippingFeeEl');
     const motifEl = document.getElementById('shippingMotifEl');
     const totalEl = document.getElementById('totalEl');
@@ -185,6 +193,11 @@
         if (totalEl) totalEl.textContent = (subtotal + fee).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' DA';
         const label = (wilayaSelect.selectedOptions && wilayaSelect.selectedOptions[0]) ? wilayaSelect.selectedOptions[0].textContent.trim() : id;
         if (motifEl) motifEl.textContent = 'Motif: Livraison vers ' + label;
+    }
+
+    if (typeof window.trackInitiateCheckout === 'function') {
+        const fee = shippingEnabled ? Number(shippingFees[wilayaSelect.value] ?? 0) : 0;
+        window.trackInitiateCheckout({ value: subtotal + fee, contents: contents });
     }
 })();
 </script>

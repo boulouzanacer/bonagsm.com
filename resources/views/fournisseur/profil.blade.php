@@ -115,6 +115,28 @@
                     </label>
                 </div>
 
+                <div class="md:col-span-2 pt-2">
+                    <div class="text-sm font-extrabold tracking-wide text-white/80">Pixels</div>
+                    <div class="text-xs text-white/60 mt-1">Meta Pixel et TikTok Pixel pour le suivi.</div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-white/70 mb-1">Meta Pixel ID</label>
+                    <input name="meta_pixel_id"
+                           value="{{ old('meta_pixel_id', $frs->meta_pixel_id ?? '') }}"
+                           inputmode="numeric"
+                           class="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--frs-primary)]"
+                           placeholder="ex: 123456789012345">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-white/70 mb-1">TikTok Pixel ID</label>
+                    <input name="tiktok_pixel_id"
+                           value="{{ old('tiktok_pixel_id', $frs->tiktok_pixel_id ?? '') }}"
+                           class="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--frs-primary)]"
+                           placeholder="ex: C3ABCDEFG12345">
+                </div>
+
                 <div>
                     <label class="block text-sm font-semibold text-white/70 mb-1">Wilaya</label>
                     <select name="id_wilaya"

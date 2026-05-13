@@ -109,4 +109,16 @@
         </div>
     </div>
 </div>
+
+@if(session('pixel_purchase') && (int)(session('pixel_purchase.order_id') ?? 0) === (int)$commande->id)
+    <script>
+        (function () {
+            const payload = @json(session('pixel_purchase'));
+            if (!payload) return;
+            if (typeof window.trackPurchase === 'function') {
+                window.trackPurchase(payload);
+            }
+        })();
+    </script>
+@endif
 @endsection

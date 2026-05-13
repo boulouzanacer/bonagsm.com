@@ -115,7 +115,11 @@
                             <span class="hidden sm:inline-flex text-[11px] font-bold px-2 py-1 rounded-full border border-slate-200 bg-slate-50 text-slate-600">
                                 {{ $p->categorie ?: '—' }}
                             </span>
-                            <form method="POST" action="{{ url('/panier/add') }}">
+                            @php($pixelUnit = (float)$p->prixUnitairePourQuantite($client ?? null, 1))
+                            <form method="POST"
+                                  action="{{ url('/panier/add') }}"
+                                  data-pixel-product-id="{{ $p->id }}"
+                                  data-pixel-price="{{ $pixelUnit }}">
                                 @csrf
                                 <input type="hidden" name="produit_id" value="{{ $p->id }}">
                                 <input type="hidden" name="qty" value="1">

@@ -103,7 +103,12 @@
             @endif
 
             <div class="mt-6">
-                <form method="POST" action="{{ url('/panier/add') }}" class="flex items-center gap-2">
+                <form method="POST"
+                      action="{{ url('/panier/add') }}"
+                      id="addToCartForm"
+                      class="flex items-center gap-2"
+                      data-pixel-product-id="{{ $produit->id }}"
+                      data-pixel-price="{{ (($can_show_prices ?? false) || ($client ?? null)) ? (float)$produit->prixUnitairePourQuantite($client ?? null, 1) : 0 }}">
                     @csrf
                     <input type="hidden" name="produit_id" value="{{ $produit->id }}">
                     <input type="number"
@@ -132,6 +137,7 @@
             const qtyInput = document.getElementById('qtyInput');
             const unitEl = document.getElementById('unitPrice');
             const totalEl = document.getElementById('totalPrice');
+            const formEl = document.getElementById('addToCartForm');
 
             if (!qtyInput || !unitEl || !totalEl) return;
 
@@ -163,6 +169,9 @@
                 const unit = matchTier(qty) ?? baseUnit;
                 unitEl.textContent = fmt(unit);
                 totalEl.textContent = fmt(unit * qty);
+                if (formEl) {
+                    formEl.setAttribute('data-pixel-price', String(unit));
+                }
             }
 
             qtyInput.addEventListener('input', update);
