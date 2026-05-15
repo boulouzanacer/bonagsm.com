@@ -200,21 +200,7 @@ class StoreController extends Controller
                 ->where('id', $frsId)
                 ->where('actif', 1)
                 ->whereNull('deleted_at')
-                ->first([
-                    'id',
-                    'nom_frs',
-                    'logo_path',
-                    'adresse',
-                    'telephone',
-                    'id_wilaya',
-                    'id_commune',
-                    'latitude',
-                    'longitude',
-                    'show_prices_to_guests',
-                    'enable_frais_livraison',
-                    'meta_pixel_id',
-                    'tiktok_pixel_id',
-                ]);
+                ->first();
         }
 
         $this->setCart($cart, $frsId);
