@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\QueryException;
 use Illuminate\Validation\Rule;
+use Throwable;
 
 class ProduitController extends Controller
 {
@@ -85,39 +86,47 @@ class ProduitController extends Controller
         $categorie = trim((string) $request->query('categorie', ''));
 
         $dbError = null;
-        try {
-            $categories = Categorie::query()
-                ->where('id_frs', $frsId)
-                ->orderBy('nom')
-                ->pluck('nom')
-                ->values();
-        } catch (QueryException $e) {
-            $categories = collect();
-            $dbError = 'La base de données n’est pas à jour. Lancez les migrations (php artisan migrate --force).';
-        }
+        $categories = collect();
+        $produits = new LengthAwarePaginator(
+            [],
+            0,
+            18,
+            (int) $request->query('page', 1),
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
 
         try {
-            $produits = Produit::query()
-                ->where('id_frs', $frsId)
-                ->when($q !== '', function ($query) use ($q) {
-                    $query->where(function ($sub) use ($q) {
-                        $sub->where('designation', 'like', "%{$q}%")
-                            ->orWhere('reference', 'like', "%{$q}%");
-                    });
-                })
-                ->when($categorie !== '', fn ($query) => $query->where('categorie', $categorie))
-                ->orderByDesc('created_at')
-                ->paginate(18)
-                ->withQueryString();
-        } catch (QueryException $e) {
-            $produits = new LengthAwarePaginator(
-                [],
-                0,
-                18,
-                (int) $request->query('page', 1),
-                ['path' => $request->url(), 'query' => $request->query()]
-            );
-            $dbError = 'La base de données n’est pas à jour. Lancez les migrations (php artisan migrate --force).';
+            try {
+                $categories = Categorie::query()
+                    ->where('id_frs', $frsId)
+                    ->orderBy('nom')
+                    ->pluck('nom')
+                    ->values();
+            } catch (QueryException $e) {
+                $dbError = 'La base de données n’est pas à jour. Lancez les migrations (php artisan migrate --force).';
+            }
+
+            try {
+                $produits = Produit::query()
+                    ->where('id_frs', $frsId)
+                    ->when($q !== '', function ($query) use ($q) {
+                        $query->where(function ($sub) use ($q) {
+                            $sub->where('designation', 'like', "%{$q}%")
+                                ->orWhere('reference', 'like', "%{$q}%");
+                        });
+                    })
+                    ->when($categorie !== '', fn ($query) => $query->where('categorie', $categorie))
+                    ->orderByDesc('created_at')
+                    ->paginate(18)
+                    ->withQueryString();
+            } catch (QueryException $e) {
+                $dbError = 'La base de données n’est pas à jour. Lancez les migrations (php artisan migrate --force).';
+            }
+        } catch (Throwable $e) {
+            report($e);
+            if ($dbError === null) {
+                $dbError = 'Erreur serveur. Consultez le fichier storage/logs/laravel.log.';
+            }
         }
 
         return view('fournisseur.produits.index', [
