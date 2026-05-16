@@ -38,9 +38,9 @@
                 @if(($storeFrs?->logo_url ?? '') !== '')
                     <img src="{{ $storeFrs->logo_url }}"
                          alt=""
-                         class="h-9 w-9 rounded-xl object-cover border border-slate-200 bg-white flex-shrink-0">
+                         class="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl object-contain border border-slate-200 bg-white p-1 flex-shrink-0">
                 @else
-                    <div class="h-9 w-9 rounded-xl flex items-center justify-center font-extrabold text-white flex-shrink-0"
+                    <div class="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl flex items-center justify-center font-extrabold text-white flex-shrink-0"
                          style="background: linear-gradient(135deg, var(--store-primary), #0A3D7A);">
                         {{ strtoupper(substr((string)($storeFrs?->nom_frs ?? 'S'), 0, 1)) }}
                     </div>
