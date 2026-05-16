@@ -487,6 +487,23 @@
         const imageList = document.getElementById('imageList');
         const orderInputs = document.getElementById('orderInputs');
         const primaryInput = document.getElementById('primaryImageInput');
+        const form = imagesInput ? imagesInput.closest('form') : null;
+
+        function updateEnctype() {
+            if (!form || !imagesInput) return;
+            const hasFiles = imagesInput.files && imagesInput.files.length > 0;
+            if (hasFiles) {
+                form.enctype = 'multipart/form-data';
+            } else {
+                form.removeAttribute('enctype');
+            }
+        }
+
+        if (form && imagesInput) {
+            imagesInput.addEventListener('change', updateEnctype);
+            form.addEventListener('submit', updateEnctype);
+            updateEnctype();
+        }
 
         function rebuildOrderInputs() {
             orderInputs.innerHTML = '';
