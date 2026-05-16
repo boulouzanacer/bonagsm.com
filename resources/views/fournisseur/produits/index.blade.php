@@ -3,6 +3,7 @@
 @section('content')
 @php
     $canEdit = (string)session('role', '') === 'fournisseur' || (int)session('is_admin', 0) === 1;
+    $returnUrl = request()->fullUrl();
 @endphp
 <div class="space-y-4" x-data="productImport()">
     @if(($db_error ?? null))
@@ -12,11 +13,11 @@
     @endif
 
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-        <form method="GET" action="{{ url('/fournisseur/produits') }}" class="grid grid-cols-1 md:grid-cols-3 gap-3 w-full lg:w-auto">
+        <form id="produitsFilterForm" method="GET" action="{{ url('/fournisseur/produits') }}" class="grid grid-cols-1 md:grid-cols-3 gap-3 w-full lg:w-auto">
             <div class="md:col-span-2">
                 <div class="relative">
                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-white/50"></i>
-                    <input name="q"
+                    <input id="produitsSearchInput" name="q"
                            value="{{ $q }}"
                            placeholder="Rechercher désignation ou référence..."
                            class="w-full rounded-2xl border border-white/10 bg-[var(--frs-card)] pl-11 pr-4 py-3 outline-none focus:border-[var(--frs-primary)]">
@@ -24,7 +25,7 @@
             </div>
 
             <div>
-                <select name="categorie"
+                <select id="produitsCategorieSelect" name="categorie"
                         class="w-full rounded-2xl border border-white/10 bg-[var(--frs-card)] px-4 py-3 outline-none focus:border-[var(--frs-primary)]">
                     <option value="">Toutes catégories</option>
                     @foreach($categories as $cat)
@@ -130,12 +131,12 @@
                             </td>
                             <td class="py-3 px-4 text-right">
                                 <div class="inline-flex items-center gap-2">
-                                    <a href="{{ url('/fournisseur/produits/'.$p->id) }}"
+                                    <a href="{{ url('/fournisseur/produits/'.$p->id).'?'.http_build_query(['return' => $returnUrl]) }}"
                                        class="rounded-xl px-3 py-2 text-xs font-extrabold border border-white/10 hover:bg-white/10">
                                         Détail
                                     </a>
                                     @if($canEdit)
-                                        <a href="{{ url('/fournisseur/produits/'.$p->id.'/edit') }}"
+                                        <a href="{{ url('/fournisseur/produits/'.$p->id.'/edit').'?'.http_build_query(['return' => $returnUrl]) }}"
                                            class="rounded-xl px-3 py-2 text-xs font-extrabold border border-white/10 hover:bg-white/10">
                                             Modifier
                                         </a>
@@ -583,5 +584,28 @@
             }
         };
     }
+
+    (function () {
+        const form = document.getElementById('produitsFilterForm');
+        const input = document.getElementById('produitsSearchInput');
+        const select = document.getElementById('produitsCategorieSelect');
+        if (!form || !input || !select) return;
+
+        let t = null;
+        const debounceSubmit = () => {
+            if (t) window.clearTimeout(t);
+            t = window.setTimeout(() => {
+                form.submit();
+            }, 450);
+        };
+
+        input.addEventListener('input', () => {
+            debounceSubmit();
+        });
+
+        select.addEventListener('change', () => {
+            form.submit();
+        });
+    })();
 </script>
 @endsection

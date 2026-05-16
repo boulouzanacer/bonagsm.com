@@ -1,13 +1,20 @@
 @extends('layouts.fournisseur')
 
 @section('content')
+@php
+    $returnParam = trim((string) request('return', ''));
+    $defaultReturn = url('/fournisseur/produits');
+    $safeReturn = (\Illuminate\Support\Str::startsWith($returnParam, $defaultReturn) || \Illuminate\Support\Str::startsWith($returnParam, $defaultReturn.'?'))
+        ? $returnParam
+        : $defaultReturn;
+@endphp
 <div class="max-w-4xl">
     <div class="flex items-center justify-between mb-4">
         <div>
             <div class="text-2xl font-extrabold tracking-wide">Éditer produit</div>
             <div class="text-sm text-white/60">{{ $produit->designation }} • {{ $produit->reference }}</div>
         </div>
-        <a href="{{ url('/fournisseur/produits') }}"
+        <a href="{{ $safeReturn }}"
            class="rounded-2xl px-4 py-3 font-bold border border-white/10 hover:bg-white/10">
             Retour
         </a>

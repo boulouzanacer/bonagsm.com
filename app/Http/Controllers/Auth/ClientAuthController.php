@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Database\QueryException;
+use Throwable;
 
 class ClientAuthController extends Controller
 {
@@ -25,38 +27,50 @@ class ClientAuthController extends Controller
 
     public function login(Request $request): RedirectResponse
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
-        ]);
+        try {
+            $credentials = $request->validate([
+                'email' => ['required', 'email'],
+                'password' => ['required', 'string'],
+            ]);
 
-        $client = Client::query()->where('email', $credentials['email'])->first();
+            $client = Client::query()->where('email', $credentials['email'])->first();
 
-        if (! $client || ! Hash::check($credentials['password'], $client->password)) {
+            if (! $client || ! Hash::check($credentials['password'], $client->password)) {
+                return back()
+                    ->withInput($request->only('email'))
+                    ->withErrors(['email' => 'Identifiants invalides.']);
+            }
+
+            if ((int) $client->actif !== 1) {
+                return back()
+                    ->withInput($request->only('email'))
+                    ->withErrors(['email' => 'Compte désactivé.']);
+            }
+
+            if ($client->type_client === 'simple' && empty($client->email_verified_at)) {
+                return back()
+                    ->withInput($request->only('email'))
+                    ->withErrors(['email' => 'Email non vérifié. Veuillez vérifier votre boîte mail.']);
+            }
+
+            $request->session()->regenerate();
+            $request->session()->put([
+                'role' => 'client',
+                'client_id' => $client->id,
+            ]);
+
+            return redirect()->intended('/');
+        } catch (QueryException $e) {
+            report($e);
             return back()
                 ->withInput($request->only('email'))
-                ->withErrors(['email' => 'Identifiants invalides.']);
-        }
-
-        if ((int) $client->actif !== 1) {
+                ->withErrors(['email' => 'Erreur base de données. Veuillez contacter l’administrateur.']);
+        } catch (Throwable $e) {
+            report($e);
             return back()
                 ->withInput($request->only('email'))
-                ->withErrors(['email' => 'Compte désactivé.']);
+                ->withErrors(['email' => 'Erreur serveur. Veuillez réessayer.']);
         }
-
-        if ($client->type_client === 'simple' && empty($client->email_verified_at)) {
-            return back()
-                ->withInput($request->only('email'))
-                ->withErrors(['email' => 'Email non vérifié. Veuillez vérifier votre boîte mail.']);
-        }
-
-        $request->session()->regenerate();
-        $request->session()->put([
-            'role' => 'client',
-            'client_id' => $client->id,
-        ]);
-
-        return redirect()->intended('/');
     }
 
     public function showRegister(): View

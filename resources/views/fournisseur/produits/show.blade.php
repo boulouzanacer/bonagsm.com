@@ -3,6 +3,11 @@
 @section('content')
 @php
     $canEdit = (string)session('role', '') === 'fournisseur' || (int)session('is_admin', 0) === 1;
+    $returnParam = trim((string) request('return', ''));
+    $defaultReturn = url('/fournisseur/produits');
+    $safeReturn = (\Illuminate\Support\Str::startsWith($returnParam, $defaultReturn) || \Illuminate\Support\Str::startsWith($returnParam, $defaultReturn.'?'))
+        ? $returnParam
+        : $defaultReturn;
     $tiers = ($produit->relationLoaded('quantityPrices') ? $produit->quantityPrices : collect())
         ->map(fn ($t) => [
             'quantity_min' => (int) $t->quantity_min,
@@ -22,13 +27,13 @@
         </div>
         <div class="flex items-center gap-2">
             @if($canEdit)
-                <a href="{{ url('/fournisseur/produits/'.$produit->id.'/edit') }}"
+                <a href="{{ url('/fournisseur/produits/'.$produit->id.'/edit').'?'.http_build_query(['return' => $safeReturn]) }}"
                    class="rounded-2xl px-4 py-3 font-bold text-white"
                    style="background: linear-gradient(135deg, var(--frs-primary), #0A3D7A);">
                     Modifier
                 </a>
             @endif
-            <a href="{{ url('/fournisseur/produits') }}"
+            <a href="{{ $safeReturn }}"
                class="rounded-2xl px-4 py-3 font-bold border border-white/10 hover:bg-white/10">
                 Retour
             </a>
