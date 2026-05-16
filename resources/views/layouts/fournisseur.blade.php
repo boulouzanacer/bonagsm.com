@@ -81,7 +81,7 @@
              :class="dark ? 'border-white/10' : 'border-slate-200'">
             <div class="h-10 w-10 rounded-xl flex items-center justify-center font-extrabold text-white"
                  style="background: linear-gradient(135deg, var(--frs-primary), #0A3D7A);">
-                G2D
+                S
             </div>
             <div class="leading-tight">
                 <div class="font-extrabold tracking-wide">Soltane Dz</div>
