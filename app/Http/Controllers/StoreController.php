@@ -41,21 +41,31 @@ class StoreController extends Controller
 
     private function fraisLivraisonMap(int $frsId): array
     {
-        return DB::table('frais_livraison')
-            ->where('id_frs', $frsId)
-            ->pluck('frais', 'id_wilaya')
-            ->map(fn ($v) => (float) $v)
-            ->all();
+        try {
+            return DB::table('frais_livraison')
+                ->where('id_frs', $frsId)
+                ->pluck('frais', 'id_wilaya')
+                ->map(fn ($v) => (float) $v)
+                ->all();
+        } catch (QueryException $e) {
+            report($e);
+            return [];
+        }
     }
 
     private function fraisLivraisonFor(int $frsId, int $idWilaya): float
     {
-        $v = DB::table('frais_livraison')
-            ->where('id_frs', $frsId)
-            ->where('id_wilaya', $idWilaya)
-            ->value('frais');
+        try {
+            $v = DB::table('frais_livraison')
+                ->where('id_frs', $frsId)
+                ->where('id_wilaya', $idWilaya)
+                ->value('frais');
 
-        return $v === null ? 0.0 : (float) $v;
+            return $v === null ? 0.0 : (float) $v;
+        } catch (QueryException $e) {
+            report($e);
+            return 0.0;
+        }
     }
 
     private function currentClient(): ?Client
@@ -473,42 +483,54 @@ class StoreController extends Controller
             return redirect()->to('/login')->with('error', 'Connectez-vous pour continuer.');
         }
 
-        $summary = $this->cartSummary();
-        if (count($summary['items']) === 0) {
-            return redirect()->to('/panier')->with('error', 'Votre panier est vide.');
+        try {
+            $summary = $this->cartSummary();
+            if (count($summary['items']) === 0) {
+                return redirect()->to('/panier')->with('error', 'Votre panier est vide.');
+            }
+
+            $boutique = $this->singleFournisseur();
+
+            $wilayas = Wilaya::query()->orderBy('ID_WILAYA')->get(['ID_WILAYA', 'WILAYA']);
+            $selectedWilaya = (int) ($client->id_wilaya ?? 0);
+            if ($selectedWilaya <= 0) {
+                $selectedWilaya = (int) ($wilayas->first()?->ID_WILAYA ?? 1);
+            }
+
+            $communes = Commune::query()
+                ->where('ID_WILAYA', $selectedWilaya)
+                ->orderBy('COMMUNE')
+                ->get(['ID_COMMUNE', 'COMMUNE', 'ID_WILAYA']);
+
+            $shippingEnabled = $this->fraisLivraisonEnabled($boutique);
+            $feesMap = ($shippingEnabled && $boutique) ? $this->fraisLivraisonMap((int) $boutique->id) : [];
+            $shippingFee = ($shippingEnabled && $boutique) ? ($feesMap[$selectedWilaya] ?? 0.0) : 0.0;
+
+            return view('store.checkout', [
+                'title' => 'Finaliser la commande',
+                'client' => $client,
+                'items' => $summary['items'],
+                'total' => $summary['total'],
+                'boutique' => $boutique,
+                'wilayas' => $wilayas,
+                'communes' => $communes,
+                'selected_wilaya' => $selectedWilaya,
+                'shipping_enabled' => $shippingEnabled,
+                'shipping_fees' => $feesMap,
+                'shipping_fee' => $shippingFee,
+                'total_with_shipping' => (float) $summary['total'] + $shippingFee,
+            ]);
+        } catch (QueryException $e) {
+            report($e);
+            return redirect()
+                ->to('/panier')
+                ->with('error', 'Erreur base de données. Lancez les migrations sur le serveur (php artisan migrate --force).');
+        } catch (Throwable $e) {
+            report($e);
+            return redirect()
+                ->to('/panier')
+                ->with('error', 'Erreur serveur. Veuillez réessayer.');
         }
-
-        $boutique = $this->singleFournisseur();
-
-        $wilayas = Wilaya::query()->orderBy('ID_WILAYA')->get(['ID_WILAYA', 'WILAYA']);
-        $selectedWilaya = (int) ($client->id_wilaya ?? 0);
-        if ($selectedWilaya <= 0) {
-            $selectedWilaya = (int) ($wilayas->first()?->ID_WILAYA ?? 1);
-        }
-
-        $communes = Commune::query()
-            ->where('ID_WILAYA', $selectedWilaya)
-            ->orderBy('COMMUNE')
-            ->get(['ID_COMMUNE', 'COMMUNE', 'ID_WILAYA']);
-
-        $shippingEnabled = $this->fraisLivraisonEnabled($boutique);
-        $feesMap = ($shippingEnabled && $boutique) ? $this->fraisLivraisonMap((int) $boutique->id) : [];
-        $shippingFee = ($shippingEnabled && $boutique) ? ($feesMap[$selectedWilaya] ?? 0.0) : 0.0;
-
-        return view('store.checkout', [
-            'title' => 'Finaliser la commande',
-            'client' => $client,
-            'items' => $summary['items'],
-            'total' => $summary['total'],
-            'boutique' => $boutique,
-            'wilayas' => $wilayas,
-            'communes' => $communes,
-            'selected_wilaya' => $selectedWilaya,
-            'shipping_enabled' => $shippingEnabled,
-            'shipping_fees' => $feesMap,
-            'shipping_fee' => $shippingFee,
-            'total_with_shipping' => (float) $summary['total'] + $shippingFee,
-        ]);
     }
 
     public function checkoutStore(Request $request): RedirectResponse
