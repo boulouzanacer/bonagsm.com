@@ -160,6 +160,7 @@ class ProduitController extends Controller
     public function store(Request $request, ImageProduitService $imageService): RedirectResponse
     {
         $frsId = (int) session('frs_id');
+        $isAdmin = (int) session('is_admin', 0) === 1 || (string) session('role', '') === 'fournisseur';
 
         $data = $request->validate([
             'reference' => ['required', 'string', 'max:100'],
@@ -252,7 +253,7 @@ class ProduitController extends Controller
         }
 
         return redirect()
-            ->to("/fournisseur/produits/{$produit->id}/edit")
+            ->to($isAdmin ? "/fournisseur/produits/{$produit->id}/edit" : "/fournisseur/produits/{$produit->id}")
             ->with('success', 'Produit créé.');
     }
 
