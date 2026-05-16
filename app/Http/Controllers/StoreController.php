@@ -506,6 +506,26 @@ class StoreController extends Controller
             $feesMap = ($shippingEnabled && $boutique) ? $this->fraisLivraisonMap((int) $boutique->id) : [];
             $shippingFee = ($shippingEnabled && $boutique) ? ($feesMap[$selectedWilaya] ?? 0.0) : 0.0;
 
+            $pixelContents = collect($summary['items'])
+                ->map(function ($it) {
+                    $p = $it['produit'] ?? null;
+                    $id = '';
+                    if ($p && isset($p->id)) {
+                        $id = (string) $p->id;
+                    }
+
+                    return [
+                        'id' => $id,
+                        'quantity' => (int) ($it['qty'] ?? 1),
+                        'unit_price' => (float) ($it['prix_unitaire'] ?? 0),
+                    ];
+                })
+                ->filter(function ($r) {
+                    return isset($r['id']) && (string) $r['id'] !== '';
+                })
+                ->values()
+                ->all();
+
             return view('store.checkout', [
                 'title' => 'Finaliser la commande',
                 'client' => $client,
@@ -519,6 +539,7 @@ class StoreController extends Controller
                 'shipping_fees' => $feesMap,
                 'shipping_fee' => $shippingFee,
                 'total_with_shipping' => (float) $summary['total'] + $shippingFee,
+                'pixel_contents' => $pixelContents,
             ]);
         } catch (QueryException $e) {
             report($e);
