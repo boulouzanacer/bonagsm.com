@@ -1,7 +1,9 @@
 @extends('layouts.fournisseur')
 
 @section('content')
-@php($canEdit = (string)session('role', '') === 'fournisseur' || (int)session('is_admin', 0) === 1)
+@php
+    $canEdit = (string)session('role', '') === 'fournisseur' || (int)session('is_admin', 0) === 1;
+@endphp
 <div class="space-y-4" x-data="{ enabled: @json($enabled), canEdit: @json($canEdit) }">
     @if(session('success'))
         <div class="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-emerald-200">
@@ -35,9 +37,8 @@
                            class="sr-only peer"
                            x-model="enabled"
                            :disabled="!canEdit">
-                    <div class="w-12 h-7 rounded-full bg-white/15 peer-checked:bg-[var(--frs-primary)] transition relative">
-                         :class="canEdit ? '' : 'opacity-60'"
-                    >
+                    <div class="w-12 h-7 rounded-full bg-white/15 peer-checked:bg-[var(--frs-primary)] transition relative"
+                         :class="canEdit ? '' : 'opacity-60'">
                         <div class="absolute left-1 top-1 h-5 w-5 rounded-full bg-white transition peer-checked:translate-x-5"></div>
                     </div>
                     <span class="text-sm font-extrabold text-white/80" x-text="enabled ? 'Activé' : 'Désactivé'"></span>
