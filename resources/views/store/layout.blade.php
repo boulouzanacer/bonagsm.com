@@ -33,89 +33,91 @@
 @php($tiktokPixelId = trim((string)($storeFrs?->tiktok_pixel_id ?? '')))
 <div class="min-h-screen flex flex-col">
     <header class="sticky top-0 z-40 border-b border-slate-200 bg-white/80 backdrop-blur">
-        <div class="max-w-7xl mx-auto px-4 py-3 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-center sm:justify-between">
-            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 min-w-0">
+        <div class="max-w-7xl mx-auto px-4 py-3">
+            <div class="grid grid-cols-[auto,1fr] items-center gap-3 sm:flex sm:flex-wrap sm:items-center sm:justify-between">
                 <a href="{{ url('/') }}" class="inline-flex items-center gap-3 min-w-0">
-                @if(($storeFrs?->logo_url ?? '') !== '')
-                    <img src="{{ $storeFrs->logo_url }}"
-                         alt=""
-                         class="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl object-contain border border-slate-200 bg-white p-1 flex-shrink-0">
-                @else
-                    <div class="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl flex items-center justify-center font-extrabold text-white flex-shrink-0"
-                         style="background: linear-gradient(135deg, var(--store-primary), #0A3D7A);">
-                        {{ strtoupper(substr((string)($storeFrs?->nom_frs ?? 'S'), 0, 1)) }}
-                    </div>
-                @endif
-                <div class="leading-tight min-w-0 hidden sm:block">
-                    <div class="font-extrabold tracking-wide truncate">{{ $storeFrs?->nom_frs ?? config('app.name') }}</div>
-                    <div class="text-xs text-slate-500">
-                        @if(($storeFrs?->telephone ?? '') !== '')
-                            <a href="tel:{{ $storeFrs->telephone }}" class="hover:underline">{{ $storeFrs->telephone }}</a>
-                        @else
-                            Store
-                        @endif
-                        @if(($storeFrs?->google_maps_url ?? '') !== '')
-                            <span class="mx-2 text-slate-300">•</span>
-                            <a href="{{ $storeFrs->google_maps_url }}" target="_blank" class="hover:underline">Localisation</a>
-                        @endif
-                    </div>
-                </div>
-            </a>
+                    @if(($storeFrs?->logo_url ?? '') !== '')
+                        <img src="{{ $storeFrs->logo_url }}"
+                             alt=""
+                             class="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl object-contain border border-slate-200 bg-white p-1 flex-shrink-0">
+                    @else
+                        <div class="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl flex items-center justify-center font-extrabold text-white flex-shrink-0"
+                             style="background: linear-gradient(135deg, var(--store-primary), #0A3D7A);">
+                            {{ strtoupper(substr((string)($storeFrs?->nom_frs ?? 'S'), 0, 1)) }}
+                        </div>
+                    @endif
 
-                <div class="flex items-center gap-2 justify-start">
-                <a href="{{ url('/panier') }}"
-                   class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold border border-slate-200 bg-white hover:bg-slate-50">
-                    <i class="fa-solid fa-cart-shopping text-[var(--store-primary)]"></i>
-                    <span>Panier</span>
-                    <span class="ml-1 inline-flex items-center justify-center min-w-[22px] h-5 px-1.5 rounded-full text-xs font-extrabold bg-slate-100 text-slate-700">
-                        {{ $cartCount }}
-                    </span>
+                    <div class="leading-tight min-w-0 hidden sm:block">
+                        <div class="font-extrabold tracking-wide truncate">{{ $storeFrs?->nom_frs ?? config('app.name') }}</div>
+                        <div class="text-xs text-slate-500">
+                            @if(($storeFrs?->telephone ?? '') !== '')
+                                <a href="tel:{{ $storeFrs->telephone }}" class="hover:underline">{{ $storeFrs->telephone }}</a>
+                            @else
+                                Store
+                            @endif
+                            @if(($storeFrs?->google_maps_url ?? '') !== '')
+                                <span class="mx-2 text-slate-300">•</span>
+                                <a href="{{ $storeFrs->google_maps_url }}" target="_blank" class="hover:underline">Localisation</a>
+                            @endif
+                        </div>
+                    </div>
                 </a>
 
-                @if(($client ?? null))
-                    <a href="{{ url('/mes-commandes') }}"
-                       class="hidden sm:inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold border border-slate-200 bg-white hover:bg-slate-50">
-                        <i class="fa-solid fa-receipt text-[var(--store-primary)]"></i>
-                        <span>Mes commandes</span>
-                    </a>
-                    <form method="POST" action="{{ url('/logout') }}">
-                        @csrf
-                        <button type="submit"
-                                class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold border border-slate-200 bg-white hover:bg-slate-50">
-                            <i class="fa-solid fa-right-from-bracket text-red-600"></i>
-                            <span class="hidden sm:inline">Déconnexion</span>
-                        </button>
-                    </form>
-                @else
-                    <a href="{{ url('/login') }}"
-                       class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold border border-slate-200 bg-white hover:bg-slate-50">
-                        <i class="fa-solid fa-user text-[var(--store-primary)]"></i>
-                        <span>Connexion</span>
-                    </a>
-                    <a href="{{ url('/register') }}"
-                       class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-extrabold text-white"
-                       style="background: linear-gradient(135deg, var(--store-primary), #0A3D7A);">
-                        <i class="fa-solid fa-user-plus"></i>
-                        <span class="hidden sm:inline">Créer compte</span>
-                    </a>
-                @endif
-            </div>
-            </div>
-
-            <a href="{{ url('/') }}" class="text-right min-w-0 flex flex-col justify-center sm:hidden">
-                <div class="font-extrabold tracking-wide truncate">{{ $storeFrs?->nom_frs ?? config('app.name') }}</div>
-                <div class="text-xs text-slate-500">
-                    @if(($storeFrs?->telephone ?? '') !== '')
-                        <a href="tel:{{ $storeFrs->telephone }}" class="hover:underline">{{ $storeFrs->telephone }}</a>
-                    @else
-                        Store
-                    @endif
+                <a href="{{ url('/') }}" class="text-right min-w-0 flex flex-col justify-center sm:hidden">
+                    <div class="font-extrabold tracking-wide truncate">{{ $storeFrs?->nom_frs ?? config('app.name') }}</div>
+                    <div class="text-xs text-slate-500 truncate">
+                        @if(($storeFrs?->telephone ?? '') !== '')
+                            <span>{{ $storeFrs->telephone }}</span>
+                        @else
+                            <span>Store</span>
+                        @endif
+                    </div>
                     @if(($storeFrs?->google_maps_url ?? '') !== '')
-                        <span class="mx-2 text-slate-300">•</span>
-                        <a href="{{ $storeFrs->google_maps_url }}" target="_blank" class="hover:underline">Localisation</a>
+                        <div class="text-xs text-slate-500 truncate">
+                            <span>Localisation</span>
+                        </div>
+                    @endif
+                </a>
+
+                <div class="col-span-2 flex items-center gap-2 justify-start sm:col-span-1 sm:justify-end">
+                    <a href="{{ url('/panier') }}"
+                       class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold border border-slate-200 bg-white hover:bg-slate-50">
+                        <i class="fa-solid fa-cart-shopping text-[var(--store-primary)]"></i>
+                        <span>Panier</span>
+                        <span class="ml-1 inline-flex items-center justify-center min-w-[22px] h-5 px-1.5 rounded-full text-xs font-extrabold bg-slate-100 text-slate-700">
+                            {{ $cartCount }}
+                        </span>
+                    </a>
+
+                    @if(($client ?? null))
+                        <a href="{{ url('/mes-commandes') }}"
+                           class="hidden sm:inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold border border-slate-200 bg-white hover:bg-slate-50">
+                            <i class="fa-solid fa-receipt text-[var(--store-primary)]"></i>
+                            <span>Mes commandes</span>
+                        </a>
+                        <form method="POST" action="{{ url('/logout') }}">
+                            @csrf
+                            <button type="submit"
+                                    class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold border border-slate-200 bg-white hover:bg-slate-50">
+                                <i class="fa-solid fa-right-from-bracket text-red-600"></i>
+                                <span class="hidden sm:inline">Déconnexion</span>
+                            </button>
+                        </form>
+                    @else
+                        <a href="{{ url('/login') }}"
+                           class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold border border-slate-200 bg-white hover:bg-slate-50">
+                            <i class="fa-solid fa-user text-[var(--store-primary)]"></i>
+                            <span>Connexion</span>
+                        </a>
+                        <a href="{{ url('/register') }}"
+                           class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-extrabold text-white"
+                           style="background: linear-gradient(135deg, var(--store-primary), #0A3D7A);">
+                            <i class="fa-solid fa-user-plus"></i>
+                            <span class="hidden sm:inline">Créer compte</span>
+                        </a>
                     @endif
                 </div>
-            </a>
+            </div>
         </div>
     </header>
 
