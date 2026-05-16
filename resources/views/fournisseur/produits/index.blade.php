@@ -1,7 +1,9 @@
 @extends('layouts.fournisseur')
 
 @section('content')
-@php($canEdit = (string)session('role', '') === 'fournisseur' || (int)session('is_admin', 0) === 1)
+@php
+    $canEdit = (string)session('role', '') === 'fournisseur' || (int)session('is_admin', 0) === 1;
+@endphp
 <div class="space-y-4">
     @if(($db_error ?? null))
         <div class="rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-red-200">
