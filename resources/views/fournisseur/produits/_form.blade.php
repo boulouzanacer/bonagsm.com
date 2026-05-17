@@ -441,7 +441,6 @@
     <div class="flex items-center justify-between">
         <div class="font-extrabold tracking-wide">Images</div>
         <div class="text-right">
-            <div class="text-xs text-white/60 font-bold">Max 5 images • WebP généré automatiquement</div>
             <div class="text-xs text-white/50">Glisser-déposer pour l’ordre • ⭐ pour image principale</div>
         </div>
     </div>
