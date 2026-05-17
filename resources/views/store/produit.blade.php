@@ -16,9 +16,26 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div class="rounded-2xl border border-slate-200 bg-[var(--store-card)] overflow-hidden">
-            <div class="aspect-[4/3] bg-slate-100">
+            <div class="relative aspect-[4/3] bg-slate-100" id="galleryRoot">
                 @if(count($images) > 0)
-                    <img src="{{ $images[0] }}" alt="" class="w-full h-full object-cover">
+                    <img id="galleryMainImage" src="{{ $images[0] }}" alt="" class="w-full h-full object-cover">
+                    @if(count($images) > 1)
+                        <button type="button"
+                                id="galleryPrevBtn"
+                                class="absolute left-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-xl bg-white/90 border border-slate-200 text-slate-800 hover:bg-white shadow"
+                                aria-label="Photo précédente">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                        <button type="button"
+                                id="galleryNextBtn"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-xl bg-white/90 border border-slate-200 text-slate-800 hover:bg-white shadow"
+                                aria-label="Photo suivante">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                        <div class="absolute bottom-3 right-3 rounded-xl bg-black/55 text-white text-xs font-extrabold px-3 py-1.5">
+                            <span id="galleryCounter">1/{{ count($images) }}</span>
+                        </div>
+                    @endif
                 @else
                     <div class="w-full h-full flex items-center justify-center text-slate-400">
                         <i class="fa-regular fa-image text-4xl"></i>
@@ -26,10 +43,17 @@
                 @endif
             </div>
             @if(count($images) > 1)
-                <div class="p-4 border-t border-slate-200 grid grid-cols-5 gap-2 bg-slate-50">
-                    @foreach($images as $u)
-                        <img src="{{ $u }}" alt="" class="h-14 w-full object-cover rounded-lg border border-slate-200">
-                    @endforeach
+                <div class="p-3 border-t border-slate-200 bg-slate-50 overflow-x-auto">
+                    <div class="flex items-center gap-2 min-w-max">
+                        @foreach($images as $i => $u)
+                            <button type="button"
+                                    class="h-14 w-16 rounded-xl border border-slate-200 bg-white overflow-hidden flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-[var(--store-primary)]"
+                                    data-gallery-thumb="{{ $i }}"
+                                    aria-label="Afficher la photo {{ $i + 1 }}">
+                                <img src="{{ $u }}" alt="" class="h-14 w-16 object-cover">
+                            </button>
+                        @endforeach
+                    </div>
                 </div>
             @endif
         </div>
@@ -130,6 +154,65 @@
         </div>
     </div>
 </div>
+
+@if(count($images) > 1)
+    <script>
+        (function () {
+            const images = @json($images);
+            const root = document.getElementById('galleryRoot');
+            const img = document.getElementById('galleryMainImage');
+            const prev = document.getElementById('galleryPrevBtn');
+            const next = document.getElementById('galleryNextBtn');
+            const counter = document.getElementById('galleryCounter');
+            const thumbs = Array.from(document.querySelectorAll('[data-gallery-thumb]'));
+
+            if (!root || !img || !Array.isArray(images) || images.length < 2) return;
+
+            let index = 0;
+
+            function setActive(i) {
+                const n = images.length;
+                index = ((i % n) + n) % n;
+                img.src = images[index];
+                if (counter) counter.textContent = String(index + 1) + '/' + String(n);
+                thumbs.forEach((btn, idx) => {
+                    if (idx === index) {
+                        btn.classList.add('ring-2', 'ring-[var(--store-primary)]');
+                    } else {
+                        btn.classList.remove('ring-2', 'ring-[var(--store-primary)]');
+                    }
+                });
+            }
+
+            if (prev) prev.addEventListener('click', () => setActive(index - 1));
+            if (next) next.addEventListener('click', () => setActive(index + 1));
+            thumbs.forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const i = Number(btn.getAttribute('data-gallery-thumb'));
+                    if (Number.isFinite(i)) setActive(i);
+                });
+            });
+
+            let startX = null;
+            root.addEventListener('touchstart', (e) => {
+                if (!e.touches || e.touches.length !== 1) return;
+                startX = e.touches[0].clientX;
+            }, { passive: true });
+            root.addEventListener('touchend', (e) => {
+                if (startX === null) return;
+                const x = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientX : null;
+                if (x === null) { startX = null; return; }
+                const dx = x - startX;
+                startX = null;
+                if (Math.abs(dx) < 40) return;
+                if (dx < 0) setActive(index + 1);
+                else setActive(index - 1);
+            }, { passive: true });
+
+            setActive(0);
+        })();
+    </script>
+@endif
 
 @if(($can_show_prices ?? false) || ($client ?? null))
     <script>
