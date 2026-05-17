@@ -55,11 +55,6 @@
                 </button>
             </form>
 
-            <div class="mt-6 text-center">
-                <a href="{{ url('/admin/login') }}" class="text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
-                    Accès Administration
-                </a>
-            </div>
         </div>
     </div>
 </div>
