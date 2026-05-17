@@ -133,7 +133,9 @@
                                     <span class="text-[11px] font-bold px-2.5 py-1 rounded-full {{ $stockBadge[1] }}">{{ $stockBadge[0] }}</span>
                                 </div>
                             </td>
-                            <td class="py-3 px-4 text-right font-extrabold">{{ number_format((float)$p->pv_1, 2, '.', ' ') }}</td>
+                            <td class="py-3 px-4 text-right">
+                                <span class="font-extrabold tabular-nums whitespace-nowrap">{{ number_format((float)$p->pv_1, 2, '.', ' ') }}</span>
+                            </td>
                             <td class="py-3 px-4 text-center">
                                 <span class="text-xs font-bold px-2.5 py-1 rounded-full {{ $actif ? 'bg-sky-500/15 text-sky-200 border border-sky-400/20' : 'bg-red-500/15 text-red-300 border border-red-400/20' }}">
                                     {{ $actif ? 'Actif' : 'Inactif' }}
@@ -142,20 +144,25 @@
                             <td class="py-3 px-4 text-right">
                                 <div class="inline-flex items-center gap-2">
                                     <a href="{{ url('/fournisseur/produits/'.$p->id).'?'.http_build_query(['return' => $returnUrl]) }}"
-                                       class="rounded-xl px-3 py-2 text-xs font-extrabold border border-white/10 hover:bg-white/10">
-                                        Détail
+                                       title="Détail"
+                                       class="h-9 w-9 inline-flex items-center justify-center rounded-xl border border-white/10 hover:bg-white/10">
+                                        <i class="fa-solid fa-eye"></i>
                                     </a>
                                     @if($canEdit)
                                         <a href="{{ url('/fournisseur/produits/'.$p->id.'/edit').'?'.http_build_query(['return' => $returnUrl]) }}"
-                                           class="rounded-xl px-3 py-2 text-xs font-extrabold border border-white/10 hover:bg-white/10">
-                                            Modifier
+                                           title="Modifier"
+                                           class="h-9 w-9 inline-flex items-center justify-center rounded-xl border border-white/10 hover:bg-white/10">
+                                            <i class="fa-solid fa-pen-to-square"></i>
                                         </a>
                                         @if($canManage)
                                             <form method="POST" action="{{ url('/fournisseur/produits/'.$p->id.'/toggle-actif') }}">
                                                 @csrf
                                                 <button type="submit"
-                                                        class="rounded-xl px-3 py-2 text-xs font-extrabold border border-white/10 hover:bg-white/10">
-                                                    {{ $actif ? 'Désactiver' : 'Activer' }}
+                                                        title="{{ $actif ? 'Désactiver' : 'Activer' }}"
+                                                        class="h-9 w-14 inline-flex items-center justify-center rounded-xl border border-white/10 hover:bg-white/10">
+                                                    <span class="inline-flex items-center h-5 w-9 rounded-full {{ $actif ? 'bg-emerald-500/40' : 'bg-white/15' }} px-0.5">
+                                                        <span class="h-4 w-4 rounded-full bg-white {{ $actif ? 'ml-4' : '' }}"></span>
+                                                    </span>
                                                 </button>
                                             </form>
                                             <form method="POST" action="{{ url('/fournisseur/produits/'.$p->id) }}"
@@ -163,8 +170,9 @@
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit"
-                                                        class="rounded-xl px-3 py-2 text-xs font-extrabold border border-red-400/20 bg-red-500/10 text-red-200 hover:bg-red-500/15">
-                                                    Supprimer
+                                                        title="Supprimer"
+                                                        class="h-9 w-9 inline-flex items-center justify-center rounded-xl border border-red-400/20 bg-red-500/10 text-red-200 hover:bg-red-500/15">
+                                                    <i class="fa-solid fa-trash"></i>
                                                 </button>
                                             </form>
                                         @endif
