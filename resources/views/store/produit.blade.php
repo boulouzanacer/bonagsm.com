@@ -16,9 +16,9 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div class="rounded-2xl border border-slate-200 bg-[var(--store-card)] overflow-hidden">
-            <div class="relative aspect-[4/3] bg-slate-100" id="galleryRoot">
+            <div class="relative aspect-[4/3] bg-slate-100 flex items-center justify-center" id="galleryRoot">
                 @if(count($images) > 0)
-                    <img id="galleryMainImage" src="{{ $images[0] }}" alt="" class="w-full h-full object-cover">
+                    <img id="galleryMainImage" src="{{ $images[0] }}" alt="" class="max-w-full max-h-full object-contain">
                     @if(count($images) > 1)
                         <button type="button"
                                 id="galleryPrevBtn"
