@@ -97,9 +97,9 @@
             $selectedId = $oldCategorie !== null ? (int) $oldCategorie : $currentId;
          @endphp
          x-data="{
-            catId: @json($selectedId),
-            subCats: @json($sousCategories ?? []),
-            subId: @json(old('id_sous_categorie', $produit->id_sous_categorie ?? '')),
+            catId: {{ \Illuminate\Support\Js::from($selectedId) }},
+            subCats: {{ \Illuminate\Support\Js::from($sousCategories ?? []) }},
+            subId: {{ \Illuminate\Support\Js::from(old('id_sous_categorie', $produit->id_sous_categorie ?? '')) }},
             get filteredSubCats() {
                 if (!this.catId) return [];
                 return this.subCats.filter(s => s.id_categorie == this.catId);
@@ -542,20 +542,8 @@
         const primaryInput = document.getElementById('primaryImageInput');
         const form = imagesInput ? imagesInput.closest('form') : null;
 
-        function updateEnctype() {
-            if (!form || !imagesInput) return;
-            const hasFiles = imagesInput.files && imagesInput.files.length > 0;
-            if (hasFiles) {
-                form.enctype = 'multipart/form-data';
-            } else {
-                form.removeAttribute('enctype');
-            }
-        }
-
-        if (form && imagesInput) {
-            imagesInput.addEventListener('change', updateEnctype);
-            form.addEventListener('submit', updateEnctype);
-            updateEnctype();
+        if (form) {
+            form.enctype = 'multipart/form-data';
         }
 
         function rebuildOrderInputs() {

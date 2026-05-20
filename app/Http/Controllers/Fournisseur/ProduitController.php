@@ -197,6 +197,10 @@ class ProduitController extends Controller
         $frsId = (int) session('frs_id');
         $isAdmin = (int) session('is_admin', 0) === 1 || (string) session('role', '') === 'fournisseur';
 
+        $request->merge([
+            'reference' => trim((string) $request->input('reference', '')),
+        ]);
+
         $data = $request->validate([
             'reference' => [
                 'required',
@@ -229,7 +233,7 @@ class ProduitController extends Controller
             'actif' => ['nullable', 'boolean'],
             'enable_tier_pricing' => ['nullable', 'boolean'],
             'images' => ['nullable', 'array', 'max:5'],
-            'images.*' => ['file', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'images.*' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'images_order' => ['nullable', 'array'],
             'images_order.*' => ['string'],
             'primary_image' => ['nullable', 'string'],
@@ -380,17 +384,21 @@ class ProduitController extends Controller
             ->where('id_frs', $frsId)
             ->findOrFail($id);
 
+        $request->merge([
+            'reference' => trim((string) $request->input('reference', '')),
+        ]);
+
         $existingCount = ProduitImage::query()->where('id_produit', $produit->id)->count();
 
+        $referenceRules = ['required', 'string', 'max:100'];
+        if ((string) $request->input('reference') !== (string) $produit->reference) {
+            $referenceRules[] = Rule::unique('produit', 'reference')
+                ->where(fn ($q) => $q->where('id_frs', $frsId))
+                ->ignore($produit->id, 'id');
+        }
+
         $data = $request->validate([
-            'reference' => [
-                'required',
-                'string',
-                'max:100',
-                Rule::unique('produit', 'reference')
-                    ->where(fn ($q) => $q->where('id_frs', $frsId))
-                    ->ignore($produit->id),
-            ],
+            'reference' => $referenceRules,
             'designation' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
             'pv_1' => ['required', 'numeric', 'min:0'],
@@ -416,7 +424,7 @@ class ProduitController extends Controller
             'actif' => ['nullable', 'boolean'],
             'enable_tier_pricing' => ['nullable', 'boolean'],
             'images' => ['nullable', 'array', 'max:5'],
-            'images.*' => ['file', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'images.*' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'delete_images' => ['nullable', 'array'],
             'delete_images.*' => ['integer'],
             'images_order' => ['nullable', 'array'],
