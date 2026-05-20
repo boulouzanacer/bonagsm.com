@@ -110,7 +110,7 @@
             <select name="id_categorie"
                     x-model="catId"
                     @change="subId = ''"
-                    class="w-full rounded-2xl border border-white/10 bg-[var(--frs-card)] px-4 py-3 outline-none focus:border-[var(--frs-primary)]"
+                    class="w-full rounded-2xl border border-white/10 bg-[var(--frs-card)] px-4 py-3 outline-none focus:border-[var(--frs-primary)] [&>option]:text-slate-900"
                     required>
                 <option value="">Choisir...</option>
                 @foreach(($categories ?? []) as $c)
@@ -123,7 +123,7 @@
             <label class="block text-sm font-semibold text-white/70 mb-1">Sous-catégorie</label>
             <select name="id_sous_categorie"
                     x-model="subId"
-                    class="w-full rounded-2xl border border-white/10 bg-[var(--frs-card)] px-4 py-3 outline-none focus:border-[var(--frs-primary)]">
+                    class="w-full rounded-2xl border border-white/10 bg-[var(--frs-card)] px-4 py-3 outline-none focus:border-[var(--frs-primary)] [&>option]:text-slate-900">
                 <option value="">Choisir...</option>
                 <template x-for="s in filteredSubCats" :key="s.id">
                     <option :value="s.id" x-text="s.nom" :selected="subId == s.id"></option>
@@ -134,7 +134,7 @@
         <div>
             <label class="block text-sm font-semibold text-white/70 mb-1">Marque</label>
             <select name="id_marque"
-                    class="w-full rounded-2xl border border-white/10 bg-[var(--frs-card)] px-4 py-3 outline-none focus:border-[var(--frs-primary)]">
+                    class="w-full rounded-2xl border border-white/10 bg-[var(--frs-card)] px-4 py-3 outline-none focus:border-[var(--frs-primary)] [&>option]:text-slate-900">
                 <option value="">Choisir...</option>
                 @foreach(($marques ?? []) as $m)
                     <option value="{{ $m->id }}" @selected(old('id_marque', $produit->id_marque ?? '') == $m->id)>{{ $m->nom }}</option>

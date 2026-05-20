@@ -119,7 +119,7 @@ class SousCategorieController extends Controller
             'nom' => trim($data['nom']),
         ]);
 
-        return back()->with('success', 'Sous-catégorie mise à jour.');
+        return redirect()->to('/fournisseur/sous-categories')->with('success', 'Sous-catégorie mise à jour.');
     }
 
     public function destroy(int $id): RedirectResponse

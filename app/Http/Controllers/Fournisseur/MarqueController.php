@@ -95,7 +95,7 @@ class MarqueController extends Controller
             'nom' => trim($data['nom']),
         ]);
 
-        return back()->with('success', 'Marque mise à jour.');
+        return redirect()->to('/fournisseur/marques')->with('success', 'Marque mise à jour.');
     }
 
     public function destroy(int $id): RedirectResponse

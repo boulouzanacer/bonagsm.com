@@ -1,7 +1,18 @@
 @extends('layouts.fournisseur')
 
 @section('content')
-<div class="max-w-2xl mx-auto">
+<div class="max-w-2xl mx-auto space-y-4">
+    @if(session('success'))
+        <div class="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-emerald-200">
+            {{ session('success') }}
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-red-200">
+            {{ session('error') }}
+        </div>
+    @endif
+
     <div class="rounded-2xl border border-white/10 bg-[var(--frs-card)] p-6">
         <form method="POST" action="{{ $marque ? url('/fournisseur/marques/'.$marque->id) : url('/fournisseur/marques') }}" class="space-y-4">
             @csrf
