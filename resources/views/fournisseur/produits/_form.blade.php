@@ -488,6 +488,7 @@
 
     <input type="hidden" name="primary_image" id="primaryImageInput" value="{{ old('primary_image', '') }}">
     <div id="orderInputs"></div>
+    <div id="deleteInputs"></div>
 
     <div id="imageList" class="mt-4 grid grid-cols-2 md:grid-cols-5 gap-3">
         @foreach($images as $img)
@@ -539,6 +540,7 @@
         const imagesInput = document.getElementById('imagesInput');
         const imageList = document.getElementById('imageList');
         const orderInputs = document.getElementById('orderInputs');
+        const deleteInputs = document.getElementById('deleteInputs');
         const primaryInput = document.getElementById('primaryImageInput');
         const form = imagesInput ? imagesInput.closest('form') : null;
 
@@ -548,7 +550,7 @@
 
         function rebuildOrderInputs() {
             orderInputs.innerHTML = '';
-            const items = imageList.querySelectorAll('[data-key]');
+            const items = imageList.querySelectorAll('[data-key]:not([data-deleted="1"])');
             items.forEach(el => {
                 const input = document.createElement('input');
                 input.type = 'hidden';
@@ -574,12 +576,13 @@
         window.__markDeleteExisting = function (btn, id) {
             const card = btn.closest('[data-existing="1"]');
             if (!card) return;
+            card.setAttribute('data-deleted', '1');
             card.style.display = 'none';
             const input = document.createElement('input');
             input.type = 'hidden';
             input.name = 'delete_images[]';
             input.value = id;
-            orderInputs.appendChild(input);
+            (deleteInputs || orderInputs).appendChild(input);
             rebuildOrderInputs();
         }
 
