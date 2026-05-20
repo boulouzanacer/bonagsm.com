@@ -83,10 +83,9 @@
                required>
     </div>
 
-    <div class="md:col-span-2">
-        <label class="block text-sm font-semibold text-white/70 mb-1">Catégorie</label>
-        @php
-            $oldCategorie = old('categorie_id');
+    <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4"
+         @php
+            $oldCategorie = old('id_categorie');
             $currentName = old('categorie', $produit->categorie ?? '');
             $currentId = null;
             foreach (($categories ?? []) as $c) {
@@ -96,17 +95,55 @@
                 }
             }
             $selectedId = $oldCategorie !== null ? (int) $oldCategorie : $currentId;
-        @endphp
-        <select name="categorie_id"
-                class="w-full rounded-2xl border border-white/10 bg-[var(--frs-card)] px-4 py-3 outline-none focus:border-[var(--frs-primary)]"
-                required>
-            <option value="">Choisir...</option>
-            @foreach(($categories ?? []) as $c)
-                <option value="{{ $c->id }}" @selected((int)$selectedId === (int)$c->id)>{{ $c->nom }}</option>
-            @endforeach
-        </select>
+         @endphp
+         x-data="{
+            catId: @json($selectedId),
+            subCats: @json($sousCategories ?? []),
+            subId: @json(old('id_sous_categorie', $produit->id_sous_categorie ?? '')),
+            get filteredSubCats() {
+                if (!this.catId) return [];
+                return this.subCats.filter(s => s.id_categorie == this.catId);
+            }
+         }">
+        <div>
+            <label class="block text-sm font-semibold text-white/70 mb-1">Catégorie</label>
+            <select name="id_categorie"
+                    x-model="catId"
+                    @change="subId = ''"
+                    class="w-full rounded-2xl border border-white/10 bg-[var(--frs-card)] px-4 py-3 outline-none focus:border-[var(--frs-primary)]"
+                    required>
+                <option value="">Choisir...</option>
+                @foreach(($categories ?? []) as $c)
+                    <option value="{{ $c->id }}">{{ $c->nom }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold text-white/70 mb-1">Sous-catégorie</label>
+            <select name="id_sous_categorie"
+                    x-model="subId"
+                    class="w-full rounded-2xl border border-white/10 bg-[var(--frs-card)] px-4 py-3 outline-none focus:border-[var(--frs-primary)]">
+                <option value="">Choisir...</option>
+                <template x-for="s in filteredSubCats" :key="s.id">
+                    <option :value="s.id" x-text="s.nom" :selected="subId == s.id"></option>
+                </template>
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold text-white/70 mb-1">Marque</label>
+            <select name="id_marque"
+                    class="w-full rounded-2xl border border-white/10 bg-[var(--frs-card)] px-4 py-3 outline-none focus:border-[var(--frs-primary)]">
+                <option value="">Choisir...</option>
+                @foreach(($marques ?? []) as $m)
+                    <option value="{{ $m->id }}" @selected(old('id_marque', $produit->id_marque ?? '') == $m->id)>{{ $m->nom }}</option>
+                @endforeach
+            </select>
+        </div>
+
         @if(empty($categories) || (is_countable($categories) && count($categories) === 0))
-            <div class="mt-2 text-xs text-amber-200/90">
+            <div class="md:col-span-3 mt-2 text-xs text-amber-200/90">
                 Ajoutez d’abord des catégories dans <a class="underline" href="{{ url('/fournisseur/categories') }}">Catégories</a>.
             </div>
         @endif

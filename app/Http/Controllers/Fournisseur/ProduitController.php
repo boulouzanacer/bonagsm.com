@@ -85,10 +85,14 @@ class ProduitController extends Controller
     {
         $frsId = (int) session('frs_id');
         $q = trim((string) $request->query('q', ''));
-        $categorie = trim((string) $request->query('categorie', ''));
+        $categorieId = $request->query('id_categorie');
+        $subCatId = $request->query('id_sous_categorie');
+        $marqueId = $request->query('id_marque');
 
         $dbError = null;
         $categories = collect();
+        $sousCategories = collect();
+        $marques = collect();
         $produits = new LengthAwarePaginator(
             [],
             0,
@@ -102,14 +106,27 @@ class ProduitController extends Controller
                 $categories = Categorie::query()
                     ->where('id_frs', $frsId)
                     ->orderBy('nom')
-                    ->pluck('nom')
-                    ->values();
+                    ->get(['id', 'nom']);
+
+                $marques = \App\Models\Marque::query()
+                    ->where('id_frs', $frsId)
+                    ->orderBy('nom')
+                    ->get(['id', 'nom']);
+
+                if ($categorieId) {
+                    $sousCategories = \App\Models\SousCategorie::query()
+                        ->where('id_frs', $frsId)
+                        ->where('id_categorie', $categorieId)
+                        ->orderBy('nom')
+                        ->get(['id', 'nom']);
+                }
             } catch (QueryException $e) {
                 $dbError = 'La base de données n’est pas à jour. Lancez les migrations (php artisan migrate --force).';
             }
 
             try {
                 $produits = Produit::query()
+                    ->with(['category', 'subCategory', 'brand'])
                     ->where('id_frs', $frsId)
                     ->when($q !== '', function ($query) use ($q) {
                         $query->where(function ($sub) use ($q) {
@@ -117,7 +134,9 @@ class ProduitController extends Controller
                                 ->orWhere('reference', 'like', "%{$q}%");
                         });
                     })
-                    ->when($categorie !== '', fn ($query) => $query->where('categorie', $categorie))
+                    ->when($categorieId, fn ($query) => $query->where('id_categorie', $categorieId))
+                    ->when($subCatId, fn ($query) => $query->where('id_sous_categorie', $subCatId))
+                    ->when($marqueId, fn ($query) => $query->where('id_marque', $marqueId))
                     ->orderByDesc('created_at')
                     ->paginate(18)
                     ->withQueryString();
@@ -134,8 +153,12 @@ class ProduitController extends Controller
         return view('fournisseur.produits.index', [
             'title' => 'Mes Produits',
             'q' => $q,
-            'categorie' => $categorie,
             'categories' => $categories,
+            'sousCategories' => $sousCategories,
+            'marques' => $marques,
+            'id_categorie' => $categorieId,
+            'id_sous_categorie' => $subCatId,
+            'id_marque' => $marqueId,
             'produits' => $produits,
             'db_error' => $dbError,
         ]);
@@ -149,11 +172,23 @@ class ProduitController extends Controller
             ->orderBy('nom')
             ->get(['id', 'nom']);
 
+        $sousCategories = \App\Models\SousCategorie::query()
+            ->where('id_frs', $frsId)
+            ->orderBy('nom')
+            ->get(['id', 'id_categorie', 'nom']);
+
+        $marques = \App\Models\Marque::query()
+            ->where('id_frs', $frsId)
+            ->orderBy('nom')
+            ->get(['id', 'nom']);
+
         return view('fournisseur.produits.create', [
             'title' => 'Créer Produit',
             'produit' => null,
             'images' => collect(),
             'categories' => $categories,
+            'sousCategories' => $sousCategories,
+            'marques' => $marques,
         ]);
     }
 
@@ -175,10 +210,20 @@ class ProduitController extends Controller
             'pv_2' => ['required', 'numeric', 'min:0'],
             'pv_3' => ['required', 'numeric', 'min:0'],
             'stock' => ['required', 'integer', 'min:0'],
-            'categorie_id' => [
+            'id_categorie' => [
                 'required',
                 'integer',
                 Rule::exists('categories', 'id')->where(fn ($q) => $q->where('id_frs', $frsId)),
+            ],
+            'id_sous_categorie' => [
+                'nullable',
+                'integer',
+                Rule::exists('sous_categories', 'id')->where(fn ($q) => $q->where('id_frs', $frsId)->where('id_categorie', $request->id_categorie)),
+            ],
+            'id_marque' => [
+                'nullable',
+                'integer',
+                Rule::exists('marques', 'id')->where(fn ($q) => $q->where('id_frs', $frsId)),
             ],
             'abonne_only' => ['nullable', 'boolean'],
             'actif' => ['nullable', 'boolean'],
@@ -194,11 +239,11 @@ class ProduitController extends Controller
 
         $categorieNom = Categorie::query()
             ->where('id_frs', $frsId)
-            ->where('id', (int) $data['categorie_id'])
+            ->where('id', (int) $data['id_categorie'])
             ->value('nom');
 
         if (! $categorieNom) {
-            return back()->withErrors(['categorie_id' => 'Catégorie invalide.'])->withInput();
+            return back()->withErrors(['id_categorie' => 'Catégorie invalide.'])->withInput();
         }
         $data['categorie_nom'] = $categorieNom;
 
@@ -230,6 +275,9 @@ class ProduitController extends Controller
                 'pv_3' => $data['pv_3'],
                 'stock' => $data['stock'],
                 'categorie' => $data['categorie_nom'],
+                'id_categorie' => $data['id_categorie'],
+                'id_sous_categorie' => $data['id_sous_categorie'] ?? null,
+                'id_marque' => $data['id_marque'] ?? null,
                 'abonne_only' => (int) ($data['abonne_only'] ?? 0) === 1 ? 1 : 0,
                 'enable_tier_pricing' => $enableTier ? 1 : 0,
                 'actif' => (int) ($data['actif'] ?? 0) === 1 ? 1 : 0,
@@ -299,6 +347,16 @@ class ProduitController extends Controller
             ->orderBy('nom')
             ->get(['id', 'nom']);
 
+        $sousCategories = \App\Models\SousCategorie::query()
+            ->where('id_frs', $frsId)
+            ->orderBy('nom')
+            ->get(['id', 'id_categorie', 'nom']);
+
+        $marques = \App\Models\Marque::query()
+            ->where('id_frs', $frsId)
+            ->orderBy('nom')
+            ->get(['id', 'nom']);
+
         $images = ProduitImage::query()
             ->where('id_produit', $produit->id)
             ->orderBy('ordre')
@@ -309,6 +367,8 @@ class ProduitController extends Controller
             'produit' => $produit,
             'images' => $images,
             'categories' => $categories,
+            'sousCategories' => $sousCategories,
+            'marques' => $marques,
         ]);
     }
 
@@ -337,10 +397,20 @@ class ProduitController extends Controller
             'pv_2' => ['required', 'numeric', 'min:0'],
             'pv_3' => ['required', 'numeric', 'min:0'],
             'stock' => ['required', 'integer', 'min:0'],
-            'categorie_id' => [
+            'id_categorie' => [
                 'required',
                 'integer',
                 Rule::exists('categories', 'id')->where(fn ($q) => $q->where('id_frs', $frsId)),
+            ],
+            'id_sous_categorie' => [
+                'nullable',
+                'integer',
+                Rule::exists('sous_categories', 'id')->where(fn ($q) => $q->where('id_frs', $frsId)->where('id_categorie', $request->id_categorie)),
+            ],
+            'id_marque' => [
+                'nullable',
+                'integer',
+                Rule::exists('marques', 'id')->where(fn ($q) => $q->where('id_frs', $frsId)),
             ],
             'abonne_only' => ['nullable', 'boolean'],
             'actif' => ['nullable', 'boolean'],
@@ -358,11 +428,11 @@ class ProduitController extends Controller
 
         $categorieNom = Categorie::query()
             ->where('id_frs', $frsId)
-            ->where('id', (int) $data['categorie_id'])
+            ->where('id', (int) $data['id_categorie'])
             ->value('nom');
 
         if (! $categorieNom) {
-            return back()->withErrors(['categorie_id' => 'Catégorie invalide.'])->withInput();
+            return back()->withErrors(['id_categorie' => 'Catégorie invalide.'])->withInput();
         }
         $data['categorie_nom'] = $categorieNom;
 
@@ -393,6 +463,9 @@ class ProduitController extends Controller
                 'pv_3' => $data['pv_3'],
                 'stock' => $data['stock'],
                 'categorie' => $data['categorie_nom'],
+                'id_categorie' => $data['id_categorie'],
+                'id_sous_categorie' => $data['id_sous_categorie'] ?? null,
+                'id_marque' => $data['id_marque'] ?? null,
                 'abonne_only' => (int) ($data['abonne_only'] ?? 0) === 1 ? 1 : 0,
                 'enable_tier_pricing' => $enableTier ? 1 : 0,
                 'actif' => (int) ($data['actif'] ?? 0) === 1 ? 1 : 0,
@@ -497,8 +570,10 @@ class ProduitController extends Controller
             'mapping.pv_3' => ['nullable', 'string', 'max:255'],
             'mapping.stock' => ['nullable', 'string', 'max:255'],
             'mapping.categorie' => ['nullable', 'string', 'max:255'],
+            'mapping.sous_categorie' => ['nullable', 'string', 'max:255'],
+            'mapping.marque' => ['nullable', 'string', 'max:255'],
             'update' => ['nullable', 'array'],
-            'update.*' => ['string', Rule::in(['designation', 'description', 'pv_1', 'pv_2', 'pv_3', 'stock', 'categorie'])],
+            'update.*' => ['string', Rule::in(['designation', 'description', 'pv_1', 'pv_2', 'pv_3', 'stock', 'categorie', 'sous_categorie', 'marque'])],
             'stock_mode' => ['nullable', 'string', Rule::in(['replace', 'add'])],
             'rows' => ['required', 'array', 'min:1', 'max:2000'],
             'rows.*' => ['array'],
@@ -559,6 +634,18 @@ class ProduitController extends Controller
                 ->pluck('id', 'nom')
                 ->all();
 
+            $subCatCache = \App\Models\SousCategorie::query()
+                ->where('id_frs', $frsId)
+                ->get(['id', 'id_categorie', 'nom'])
+                ->groupBy('id_categorie')
+                ->map(fn ($items) => $items->pluck('id', 'nom')->all())
+                ->all();
+
+            $marqueCache = \App\Models\Marque::query()
+                ->where('id_frs', $frsId)
+                ->pluck('id', 'nom')
+                ->all();
+
             foreach ($rows as $i => $row) {
                 if (! is_array($row)) {
                     $skipped++;
@@ -589,19 +676,19 @@ class ProduitController extends Controller
                 $pv3Raw = $get('pv_3');
                 $stockRaw = $get('stock');
                 $catName = $get('categorie');
+                $subCatName = $get('sous_categorie');
+                $marqueName = $get('marque');
 
                 $pv1 = $pv1Raw !== null ? (float) str_replace(',', '.', $pv1Raw) : null;
                 $pv2 = $pv2Raw !== null ? (float) str_replace(',', '.', $pv2Raw) : null;
                 $pv3 = $pv3Raw !== null ? (float) str_replace(',', '.', $pv3Raw) : null;
                 $stockVal = $stockRaw !== null ? (int) round((float) str_replace(',', '.', $stockRaw)) : null;
 
+                // Handle Category
                 $catName = $catName !== null ? mb_substr($catName, 0, 100) : 'Général';
                 if (! array_key_exists($catName, $catCache)) {
                     $slug = Str::slug($catName);
-                    if ($slug === '') {
-                        $slug = Str::slug('categorie-'.$catName);
-                    }
-
+                    if ($slug === '') $slug = Str::slug('categorie-'.$catName);
                     try {
                         $catId = DB::table('categories')->insertGetId([
                             'id_frs' => $frsId,
@@ -612,18 +699,51 @@ class ProduitController extends Controller
                         ]);
                         $catCache[$catName] = $catId;
                     } catch (Throwable $e) {
-                        $id = DB::table('categories')
-                            ->where('id_frs', $frsId)
-                            ->where('nom', $catName)
-                            ->value('id');
-                        if ($id) {
-                            $catCache[$catName] = (int) $id;
-                        } else {
-                            $errors[] = ['row' => $i + 2, 'reference' => $reference, 'message' => 'Impossible de créer la catégorie.'];
-                            $catCache[$catName] = 0;
-                        }
+                        $catCache[$catName] = DB::table('categories')->where('id_frs', $frsId)->where('nom', $catName)->value('id') ?? 0;
                     }
                 }
+                $catId = (int) ($catCache[$catName] ?? 0);
+
+                // Handle Sub-category
+                $subCatId = null;
+                if ($subCatName !== null && $catId > 0) {
+                    $subCatName = mb_substr($subCatName, 0, 100);
+                    if (! isset($subCatCache[$catId])) $subCatCache[$catId] = [];
+                    if (! array_key_exists($subCatName, $subCatCache[$catId])) {
+                        try {
+                            $scId = DB::table('sous_categories')->insertGetId([
+                                'id_frs' => $frsId,
+                                'id_categorie' => $catId,
+                                'nom' => $subCatName,
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ]);
+                            $subCatCache[$catId][$subCatName] = $scId;
+                        } catch (Throwable $e) {
+                            $subCatCache[$catId][$subCatName] = DB::table('sous_categories')->where('id_frs', $frsId)->where('id_categorie', $catId)->where('nom', $subCatName)->value('id') ?? 0;
+                        }
+                    }
+                    $subCatId = (int) ($subCatCache[$catId][$subCatName] ?? null);
+                    if ($subCatId === 0) $subCatId = null;
+                }
+
+                // Handle Marque
+                $marqueName = $marqueName !== null ? mb_substr($marqueName, 0, 100) : 'Standard';
+                if (! array_key_exists($marqueName, $marqueCache)) {
+                    try {
+                        $mId = DB::table('marques')->insertGetId([
+                            'id_frs' => $frsId,
+                            'nom' => $marqueName,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                        $marqueCache[$marqueName] = $mId;
+                    } catch (Throwable $e) {
+                        $marqueCache[$marqueName] = DB::table('marques')->where('id_frs', $frsId)->where('nom', $marqueName)->value('id') ?? 0;
+                    }
+                }
+                $marqueId = (int) ($marqueCache[$marqueName] ?? 0);
+                if ($marqueId === 0) $marqueId = null;
 
                 $prod = $existing->get($reference);
                 if ($prod) {
@@ -650,6 +770,13 @@ class ProduitController extends Controller
                     }
                     if (in_array('categorie', $update, true) && $catName !== null) {
                         $payload['categorie'] = $catName;
+                        $payload['id_categorie'] = $catId > 0 ? $catId : null;
+                    }
+                    if (in_array('sous_categorie', $update, true) && $subCatName !== null) {
+                        $payload['id_sous_categorie'] = $subCatId;
+                    }
+                    if (in_array('marque', $update, true) && $marqueName !== null) {
+                        $payload['id_marque'] = $marqueId;
                     }
                     if (in_array('stock', $update, true) && $stockVal !== null && $stockVal >= 0) {
                         $payload['stock'] = $stockMode === 'add'
@@ -674,6 +801,9 @@ class ProduitController extends Controller
                         'pv_3' => (float) max(0, (float)($pv3 ?? ($pv1 ?? 0))),
                         'stock' => (int) max(0, (int)($stockVal ?? 0)),
                         'categorie' => (string) ($catName ?? 'Général'),
+                        'id_categorie' => $catId > 0 ? $catId : null,
+                        'id_sous_categorie' => $subCatId,
+                        'id_marque' => $marqueId,
                         'abonne_only' => 0,
                         'enable_tier_pricing' => 0,
                         'actif' => 1,

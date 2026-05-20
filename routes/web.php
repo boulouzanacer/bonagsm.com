@@ -6,6 +6,8 @@ use App\Http\Controllers\Auth\FrsAuthController;
 use App\Http\Controllers\Fournisseur\DashboardController as FrsDashboardController;
 use App\Http\Controllers\Fournisseur\ProduitController as FrsProduitController;
 use App\Http\Controllers\Fournisseur\CategorieController as FrsCategorieController;
+use App\Http\Controllers\Fournisseur\SousCategorieController as FrsSousCategorieController;
+use App\Http\Controllers\Fournisseur\MarqueController as FrsMarqueController;
 use App\Http\Controllers\Fournisseur\ClientController as FrsClientController;
 use App\Http\Controllers\Fournisseur\CommandeController as FrsCommandeController;
 use App\Http\Controllers\Fournisseur\FraisLivraisonController as FrsFraisLivraisonController;
@@ -48,12 +50,9 @@ Route::post('/fournisseur/logout', [FrsAuthController::class, 'logout']);
 Route::prefix('fournisseur')->middleware('auth.fournisseur')->group(function () {
     Route::get('/dashboard', [FrsDashboardController::class, 'index']);
 
-    Route::get('/categories', [FrsCategorieController::class, 'index']);
-    Route::get('/categories/create', [FrsCategorieController::class, 'create']);
-    Route::post('/categories', [FrsCategorieController::class, 'store']);
-    Route::get('/categories/{id}/edit', [FrsCategorieController::class, 'edit']);
-    Route::put('/categories/{id}', [FrsCategorieController::class, 'update']);
-    Route::delete('/categories/{id}', [FrsCategorieController::class, 'destroy']);
+    Route::resource('/categories', FrsCategorieController::class)->except(['show']);
+    Route::resource('/sous-categories', FrsSousCategorieController::class)->except(['show']);
+    Route::resource('/marques', FrsMarqueController::class)->except(['show']);
 
     Route::get('/produits', [FrsProduitController::class, 'index']);
     Route::get('/produits/create', [FrsProduitController::class, 'create']);

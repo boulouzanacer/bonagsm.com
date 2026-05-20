@@ -111,6 +111,20 @@
                 <span>Catégories</span>
             </a>
 
+            <a href="{{ url('/fournisseur/sous-categories') }}"
+               class="flex items-center gap-3 rounded-xl px-4 py-3 {{ request()->is('fournisseur/sous-categories*') ? 'bg-white/10' : '' }}"
+               :class="dark ? 'hover:bg-white/10' : 'hover:bg-slate-100'">
+                <i class="fa-solid fa-sitemap w-5 text-[var(--frs-primary)]"></i>
+                <span>Sous-catégories</span>
+            </a>
+
+            <a href="{{ url('/fournisseur/marques') }}"
+               class="flex items-center gap-3 rounded-xl px-4 py-3 {{ request()->is('fournisseur/marques*') ? 'bg-white/10' : '' }}"
+               :class="dark ? 'hover:bg-white/10' : 'hover:bg-slate-100'">
+                <i class="fa-solid fa-copyright w-5 text-[var(--frs-primary)]"></i>
+                <span>Marques</span>
+            </a>
+
             <a href="{{ url('/fournisseur/clients') }}"
                class="flex items-center gap-3 rounded-xl px-4 py-3 {{ request()->is('fournisseur/clients*') ? 'bg-white/10' : '' }}"
                :class="dark ? 'hover:bg-white/10' : 'hover:bg-slate-100'">

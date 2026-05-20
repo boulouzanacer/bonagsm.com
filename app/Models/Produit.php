@@ -27,6 +27,9 @@ class Produit extends Model
         'stock',
         'image_principale',
         'categorie',
+        'id_categorie',
+        'id_sous_categorie',
+        'id_marque',
         'abonne_only',
         'enable_tier_pricing',
         'actif',
@@ -125,6 +128,21 @@ class Produit extends Model
     public function fournisseur(): BelongsTo
     {
         return $this->belongsTo(Fournisseur::class, 'id_frs', 'id');
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Categorie::class, 'id_categorie', 'id');
+    }
+
+    public function subCategory(): BelongsTo
+    {
+        return $this->belongsTo(SousCategorie::class, 'id_sous_categorie', 'id');
+    }
+
+    public function brand(): BelongsTo
+    {
+        return $this->belongsTo(Marque::class, 'id_marque', 'id');
     }
 
     public function images(): HasMany

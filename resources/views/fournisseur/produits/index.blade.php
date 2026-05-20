@@ -16,35 +16,50 @@
     @endif
 
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-        <form id="produitsFilterForm" method="GET" action="{{ url('/fournisseur/produits') }}" class="grid grid-cols-1 md:grid-cols-3 gap-3 w-full lg:w-auto">
-            <div class="md:col-span-2">
+        <form method="GET" action="{{ url('/fournisseur/produits') }}" class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-3 w-full" id="searchForm">
+            <div class="md:col-span-2 lg:col-span-2">
                 <div class="relative">
                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-white/50"></i>
-                    <input id="produitsSearchInput" name="q"
+                    <input name="q"
+                           id="searchInput"
                            value="{{ $q }}"
-                           placeholder="Rechercher désignation ou référence..."
+                           placeholder="Rechercher référence/désignation..."
                            class="w-full rounded-2xl border border-white/10 bg-[var(--frs-card)] pl-11 pr-4 py-3 outline-none focus:border-[var(--frs-primary)]">
                 </div>
             </div>
 
             <div>
-                <select id="produitsCategorieSelect" name="categorie"
-                        class="w-full rounded-2xl border border-white/10 bg-[var(--frs-card)] px-4 py-3 outline-none focus:border-[var(--frs-primary)]">
+                <select name="id_categorie" onchange="this.form.submit()" class="w-full rounded-2xl border border-white/10 bg-[var(--frs-card)] px-4 py-3 outline-none focus:border-[var(--frs-primary)]">
                     <option value="">Toutes catégories</option>
-                    @foreach($categories as $cat)
-                        <option value="{{ $cat }}" @selected($categorie === $cat)>{{ $cat }}</option>
+                    @foreach($categories as $c)
+                        <option value="{{ $c->id }}" @selected((string)$id_categorie === (string)$c->id)>{{ $c->nom }}</option>
                     @endforeach
                 </select>
             </div>
 
-            <div class="md:col-span-3 flex gap-2">
-                <button class="flex-1 rounded-2xl px-4 py-3 font-bold text-white"
-                        style="background: linear-gradient(135deg, var(--frs-primary), #0A3D7A);">
-                    Filtrer
-                </button>
+            <div>
+                <select name="id_sous_categorie" onchange="this.form.submit()" class="w-full rounded-2xl border border-white/10 bg-[var(--frs-card)] px-4 py-3 outline-none focus:border-[var(--frs-primary)]">
+                    <option value="">Toutes sous-cat.</option>
+                    @foreach($sousCategories as $sc)
+                        <option value="{{ $sc->id }}" @selected((string)$id_sous_categorie === (string)$sc->id)>{{ $sc->nom }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <select name="id_marque" onchange="this.form.submit()" class="w-full rounded-2xl border border-white/10 bg-[var(--frs-card)] px-4 py-3 outline-none focus:border-[var(--frs-primary)]">
+                    <option value="">Toutes marques</option>
+                    @foreach($marques as $m)
+                        <option value="{{ $m->id }}" @selected((string)$id_marque === (string)$m->id)>{{ $m->nom }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="flex gap-2">
                 <a href="{{ url('/fournisseur/produits') }}"
-                   class="rounded-2xl px-4 py-3 font-bold border border-white/10 hover:bg-white/10">
-                    Reset
+                   class="flex-1 inline-flex items-center justify-center rounded-2xl px-4 py-3 font-bold border border-white/10 hover:bg-white/10"
+                   title="Réinitialiser">
+                    <i class="fa-solid fa-rotate-left"></i>
                 </a>
             </div>
         </form>
@@ -90,6 +105,7 @@
                         <th class="text-left py-3 px-4 font-semibold">Produit</th>
                         <th class="text-left py-3 px-4 font-semibold">Référence</th>
                         <th class="text-left py-3 px-4 font-semibold">Catégorie</th>
+                        <th class="text-left py-3 px-4 font-semibold">Marque</th>
                         <th class="text-right py-3 px-4 font-semibold">Stock</th>
                         <th class="text-right py-3 px-4 font-semibold">PV 1</th>
                         <th class="text-center py-3 px-4 font-semibold">Statut</th>
@@ -126,7 +142,13 @@
                                 </div>
                             </td>
                             <td class="py-3 px-4 text-white/80 font-semibold">{{ $p->reference }}</td>
-                            <td class="py-3 px-4 text-white/80">{{ $p->categorie ?: '—' }}</td>
+                            <td class="py-3 px-4">
+                                <div class="text-white/80">{{ $p->categorie ?: '—' }}</div>
+                                @if($p->subCategory)
+                                    <div class="text-[10px] text-white/50">{{ $p->subCategory->nom }}</div>
+                                @endif
+                            </td>
+                            <td class="py-3 px-4 text-white/80">{{ $p->brand->nom ?? 'Standard' }}</td>
                             <td class="py-3 px-4 text-right">
                                 <div class="flex flex-col items-end gap-1">
                                     <div class="font-extrabold tabular-nums">{{ $stock }}</div>
@@ -272,6 +294,26 @@
                                         </template>
                                     </select>
                                 </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-white/60 mb-1">Colonne Sous-catégorie</label>
+                                    <select class="w-full rounded-2xl border border-white/10 bg-[var(--frs-card)] px-4 py-3 outline-none focus:border-[var(--frs-primary)]"
+                                            x-model="mapping.sous_categorie">
+                                        <option value="">—</option>
+                                        <template x-for="c in columns" :key="c">
+                                            <option :value="c" x-text="c"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-white/60 mb-1">Colonne Marque</label>
+                                    <select class="w-full rounded-2xl border border-white/10 bg-[var(--frs-card)] px-4 py-3 outline-none focus:border-[var(--frs-primary)]"
+                                            x-model="mapping.marque">
+                                        <option value="">—</option>
+                                        <template x-for="c in columns" :key="c">
+                                            <option :value="c" x-text="c"></option>
+                                        </template>
+                                    </select>
+                                </div>
                                 <div class="md:col-span-3">
                                     <label class="block text-xs font-bold text-white/60 mb-1">Colonne Description</label>
                                     <select class="w-full rounded-2xl border border-white/10 bg-[var(--frs-card)] px-4 py-3 outline-none focus:border-[var(--frs-primary)]"
@@ -353,6 +395,14 @@
                                             <input type="checkbox" class="h-4 w-4" value="categorie" x-model="updateFields">
                                             categorie
                                         </label>
+                                        <label class="flex items-center gap-2 text-sm text-white/70">
+                                            <input type="checkbox" class="h-4 w-4" value="sous_categorie" x-model="updateFields">
+                                            sous_categorie
+                                        </label>
+                                        <label class="flex items-center gap-2 text-sm text-white/70">
+                                            <input type="checkbox" class="h-4 w-4" value="marque" x-model="updateFields">
+                                            marque
+                                        </label>
                                     </div>
                                     <div class="mt-3 flex items-center gap-4">
                                         <label class="flex items-center gap-2 text-sm text-white/70">
@@ -387,6 +437,8 @@
                                             <th class="text-left py-2 px-3">Référence</th>
                                             <th class="text-left py-2 px-3">Désignation</th>
                                             <th class="text-left py-2 px-3">Catégorie</th>
+                                            <th class="text-left py-2 px-3">Sous-Cat.</th>
+                                            <th class="text-left py-2 px-3">Marque</th>
                                             <th class="text-right py-2 px-3">Stock</th>
                                             <th class="text-right py-2 px-3">PV1</th>
                                         </tr>
@@ -397,6 +449,8 @@
                                                 <td class="py-2 px-3 font-semibold" x-text="val(r, mapping.reference)"></td>
                                                 <td class="py-2 px-3" x-text="val(r, mapping.designation)"></td>
                                                 <td class="py-2 px-3" x-text="val(r, mapping.categorie)"></td>
+                                                <td class="py-2 px-3" x-text="val(r, mapping.sous_categorie)"></td>
+                                                <td class="py-2 px-3" x-text="val(r, mapping.marque)"></td>
                                                 <td class="py-2 px-3 text-right" x-text="val(r, mapping.stock)"></td>
                                                 <td class="py-2 px-3 text-right" x-text="val(r, mapping.pv_1)"></td>
                                             </tr>
@@ -478,8 +532,10 @@
                 pv_3: '',
                 stock: '',
                 categorie: '',
+                sous_categorie: '',
+                marque: '',
             },
-            updateFields: ['designation', 'description', 'pv_1', 'pv_2', 'pv_3', 'stock', 'categorie'],
+            updateFields: ['designation', 'description', 'pv_1', 'pv_2', 'pv_3', 'stock', 'categorie', 'sous_categorie', 'marque'],
             stockMode: 'replace',
 
             openImport() {

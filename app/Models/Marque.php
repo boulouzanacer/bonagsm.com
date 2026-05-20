@@ -5,17 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Categorie extends Model
+class Marque extends Model
 {
     use HasFactory;
 
-    protected $table = 'categories';
+    protected $table = 'marques';
 
     protected $fillable = [
         'id_frs',
         'nom',
-        'slug',
     ];
 
     public function fournisseur(): BelongsTo
@@ -23,14 +23,8 @@ class Categorie extends Model
         return $this->belongsTo(Fournisseur::class, 'id_frs', 'id');
     }
 
-    public function sousCategories(): HasMany
-    {
-        return $this->hasMany(SousCategorie::class, 'id_categorie', 'id');
-    }
-
     public function produits(): HasMany
     {
-        return $this->hasMany(Produit::class, 'id_categorie', 'id');
+        return $this->hasMany(Produit::class, 'id_marque', 'id');
     }
 }
-

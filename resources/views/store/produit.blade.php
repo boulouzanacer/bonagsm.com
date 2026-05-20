@@ -59,7 +59,27 @@
         </div>
 
         <div class="rounded-2xl border border-slate-200 bg-[var(--store-card)] p-6">
-            <div class="text-2xl font-extrabold tracking-wide">{{ $produit->designation }}</div>
+            <div class="space-y-4">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="inline-flex text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-lg bg-slate-100 text-slate-500">
+                        {{ $produit->categorie ?: '—' }}
+                    </span>
+                    @if($produit->subCategory)
+                        <span class="inline-flex text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-600">
+                            {{ $produit->subCategory->nom }}
+                        </span>
+                    @endif
+                    @if($produit->brand)
+                        <span class="inline-flex text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-lg bg-amber-50 text-amber-600">
+                            <i class="fa-solid fa-copyright mr-1.5"></i>{{ $produit->brand->nom }}
+                        </span>
+                    @endif
+                </div>
+
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-tight">
+                    {{ $produit->designation }}
+                </h1>
+            </div>
             <div class="mt-1 text-sm text-slate-600">Ref: {{ $produit->reference }}</div>
 
             @php
