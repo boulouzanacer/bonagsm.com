@@ -97,22 +97,26 @@
                         </div>
                     </a>
                     <div class="p-2">
-                        <div class="flex items-start justify-between gap-3">
-                            <div class="min-w-0 flex-1">
-                                <a href="{{ url('/produits/'.$p->id) }}" class="block font-extrabold text-xs sm:text-[13px] leading-snug hover:underline truncate">
-                                    {{ $p->designation }}
-                                </a>
-                                <div class="mt-1 text-[11px] text-slate-500 truncate">Ref: {{ $p->reference }}</div>
-                            </div>
-                            <div class="text-right shrink-0 min-w-[88px]">
-                                <div class="font-extrabold text-xs sm:text-[13px] whitespace-nowrap leading-none">{{ number_format((float)$p->prixUnitairePourQuantite($client ?? null, 1), 2, '.', ' ') }} DA</div>
-                                <div class="hidden sm:block text-[11px] {{ (int)$p->stock > 0 ? 'text-emerald-700' : 'text-red-600' }}">
-                                    {{ (int)$p->stock > 0 ? ('Stock: '.(int)$p->stock) : 'Rupture' }}
+                        <div class="min-w-0">
+                            <a href="{{ url('/produits/'.$p->id) }}" class="block font-extrabold text-xs sm:text-[13px] leading-tight hover:underline truncate" title="{{ $p->designation }}">
+                                {{ $p->designation }}
+                            </a>
+                            <div class="text-[10px] text-slate-400 truncate">Ref: {{ $p->reference }}</div>
+                        </div>
+
+                        <div class="mt-1.5 flex items-center justify-between gap-2">
+                            <div>
+                                <div class="font-extrabold text-xs sm:text-[14px] text-slate-900 whitespace-nowrap">
+                                    {{ number_format((float)$p->prixUnitairePourQuantite($client ?? null, 1), 2, '.', ' ') }} <span class="text-[10px] opacity-70">DA</span>
                                 </div>
                             </div>
+                            <div class="hidden sm:block text-[10px] font-bold {{ (int)$p->stock > 0 ? 'text-emerald-600' : 'text-red-500' }}">
+                                {{ (int)$p->stock > 0 ? 'Stock: '.(int)$p->stock : 'Rupture' }}
+                            </div>
                         </div>
-                        <div class="mt-3 flex items-center justify-between gap-2">
-                            <span class="hidden sm:inline-flex text-[11px] font-bold px-2 py-1 rounded-full border border-slate-200 bg-slate-50 text-slate-600">
+
+                        <div class="mt-2.5 flex items-center justify-between gap-2">
+                            <span class="hidden sm:inline-flex text-[10px] font-bold px-2 py-0.5 rounded-lg border border-slate-100 bg-slate-50 text-slate-500 truncate max-w-[80px]">
                                 {{ $p->categorie ?: '—' }}
                             </span>
                             @php($pixelUnit = (float)$p->prixUnitairePourQuantite($client ?? null, 1))
