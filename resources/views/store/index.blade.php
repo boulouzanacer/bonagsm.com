@@ -77,7 +77,7 @@
             <div class="text-sm text-slate-500">{{ $produits->total() }} produit(s)</div>
         </div>
 
-        <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2">
             @forelse($produits as $p)
                 @php
                     $raw = trim((string)($p->image_principale ?? ''));
