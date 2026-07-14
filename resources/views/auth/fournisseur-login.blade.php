@@ -4,7 +4,7 @@
 <div class="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-slate-100 via-slate-50 to-slate-200 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
     <div class="w-full max-w-md">
         <div class="text-center mb-6 text-slate-900 dark:text-white">
-            <div class="text-3xl font-extrabold tracking-wide">Soltane Dz</div>
+            <div class="text-3xl font-extrabold tracking-wide">Bona GSM</div>
             <div class="text-sm opacity-80 mt-1">Espace Fournisseur</div>
         </div>
 

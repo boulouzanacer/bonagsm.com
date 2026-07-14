@@ -1,4 +1,4 @@
-# Soltane Dz
+# Bona GSM
 
 Monorepo:
 - Backend Laravel: `safesoft-g2d`
