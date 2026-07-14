@@ -79,12 +79,11 @@
            :class="dark ? 'border-white/10' : 'border-slate-200'">
         <div class="h-16 px-5 flex items-center gap-3 border-b"
              :class="dark ? 'border-white/10' : 'border-slate-200'">
-            <div class="h-10 w-10 rounded-xl flex items-center justify-center font-extrabold text-white"
-                 style="background: linear-gradient(135deg, var(--frs-primary), #0A3D7A);">
-                S
-            </div>
+            <img src="https://i.imgur.com/8Z6t8Yq.png"
+                 alt="Bona GSM"
+                 class="h-10 w-10 rounded-xl object-contain bg-white p-1">
             <div class="leading-tight">
-                <div class="font-extrabold tracking-wide">Soltane Dz</div>
+                <div class="font-extrabold tracking-wide">Bona GSM</div>
                 <div class="text-xs" :class="dark ? 'text-white/60' : 'text-slate-500'">Espace Fournisseur</div>
             </div>
         </div>

@@ -16,19 +16,12 @@ class FournisseurSeeder extends Seeder
         $idCommune = (int) (DB::table('commune')->where('ID_WILAYA', $idWilaya)->value('ID_COMMUNE') ?? 1);
 
         $this->upsertFournisseur(
-            nomFrs: 'Fournisseur Test 1',
-            email: 'frs1@safesoft.dz',
-            telephone: '0550000001',
+            nomFrs: 'Bona GSM',
+            email: 'admin@bonagsm.com',
+            telephone: '0550000000',
             idWilaya: $idWilaya,
             idCommune: $idCommune,
-        );
-
-        $this->upsertFournisseur(
-            nomFrs: 'Fournisseur Test 2',
-            email: 'frs2@safesoft.dz',
-            telephone: '0550000002',
-            idWilaya: $idWilaya,
-            idCommune: $idCommune,
+            password: 'Alger2324',
         );
     }
 
@@ -38,10 +31,11 @@ class FournisseurSeeder extends Seeder
         string $telephone,
         int $idWilaya,
         int $idCommune,
+        string $password = 'Password@123',
     ): void {
         $frs = Fournisseur::firstOrNew(['email' => $email]);
         $frs->nom_frs = $nomFrs;
-        $frs->password = Hash::make('Password@123');
+        $frs->password = Hash::make($password);
         $frs->telephone = $telephone;
         $frs->adresse = 'Alger';
         $frs->id_wilaya = $idWilaya;
