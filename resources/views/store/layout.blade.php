@@ -19,11 +19,77 @@
 
     <style>
         :root{
-            --store-primary:#1E6FD9;
-            --store-bg:#F8FAFC;
-            --store-card:#FFFFFF;
+            --store-primary:#0f7a43;
+            --store-primary-dark:#0b5e33;
+            --store-accent:#111827;
+            --store-bg:#f3f7f5;
+            --store-card:#ffffff;
+            --store-border:rgba(15, 23, 42, 0.08);
+            --store-shadow:0 20px 60px rgba(15, 23, 42, 0.08);
         }
         html,body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
+        body{
+            background:
+                radial-gradient(circle at top left, rgba(15,122,67,0.12), transparent 30%),
+                radial-gradient(circle at top right, rgba(17,24,39,0.08), transparent 28%),
+                linear-gradient(180deg, #f8fbfa 0%, var(--store-bg) 45%, #eef4f1 100%);
+        }
+        .store-shell{
+            position:relative;
+        }
+        .store-shell::before{
+            content:"";
+            position:fixed;
+            inset:0;
+            pointer-events:none;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+            background-size:32px 32px;
+            mask-image:linear-gradient(180deg, rgba(0,0,0,0.25), transparent 80%);
+            opacity:.5;
+        }
+        .glass-card{
+            background:rgba(255,255,255,0.82);
+            backdrop-filter:blur(18px);
+            border:1px solid rgba(255,255,255,0.7);
+            box-shadow:var(--store-shadow);
+        }
+        .soft-card{
+            background:linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.92));
+            border:1px solid var(--store-border);
+            box-shadow:var(--store-shadow);
+        }
+        .hero-orb{
+            position:absolute;
+            border-radius:9999px;
+            filter:blur(60px);
+            opacity:.4;
+            pointer-events:none;
+        }
+        .hero-orb-a{background:rgba(15,122,67,0.25);}
+        .hero-orb-b{background:rgba(59,130,246,0.18);}
+        .animate-float{
+            animation:floatY 6s ease-in-out infinite;
+        }
+        .animate-float-delay{
+            animation:floatY 7.5s ease-in-out infinite;
+            animation-delay:-1.5s;
+        }
+        .interactive-lift{
+            transition:transform .24s ease, box-shadow .24s ease, border-color .24s ease, background-color .24s ease;
+        }
+        .interactive-lift:hover{
+            transform:translateY(-3px);
+            box-shadow:0 18px 45px rgba(15, 23, 42, 0.12);
+        }
+        .store-gradient{
+            background:linear-gradient(135deg, var(--store-primary) 0%, var(--store-primary-dark) 55%, #111827 100%);
+        }
+        @keyframes floatY{
+            0%,100%{transform:translateY(0);}
+            50%{transform:translateY(-10px);}
+        }
     </style>
 </head>
 <body class="min-h-screen bg-[var(--store-bg)] text-slate-900 overflow-x-hidden">
@@ -31,24 +97,28 @@
 @php($storeFrs = $boutique ?? \App\Models\Fournisseur::single())
 @php($metaPixelId = trim((string)($storeFrs?->meta_pixel_id ?? '')))
 @php($tiktokPixelId = trim((string)($storeFrs?->tiktok_pixel_id ?? '')))
-<div class="min-h-screen flex flex-col">
-    <header class="sticky top-0 z-40 border-b border-slate-200 bg-white/80 backdrop-blur">
+<div class="store-shell min-h-screen flex flex-col">
+    <div class="hero-orb hero-orb-a h-64 w-64 -top-10 -left-10 animate-float"></div>
+    <div class="hero-orb hero-orb-b h-72 w-72 top-28 right-0 animate-float-delay"></div>
+    <header class="sticky top-0 z-40 border-b border-white/50 bg-white/70 backdrop-blur-xl">
         <div class="max-w-7xl mx-auto px-4 py-3">
             <div class="grid grid-cols-[auto,1fr] items-center gap-3 sm:flex sm:flex-wrap sm:items-center sm:justify-between">
                 <a href="{{ url('/') }}" class="inline-flex items-center gap-3 min-w-0">
                     @if(($storeFrs?->logo_url ?? '') !== '')
                         <img src="{{ $storeFrs->logo_url }}"
                              alt=""
-                             class="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl object-contain border border-slate-200 bg-white p-1 flex-shrink-0">
+                             class="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl object-contain border border-white/80 bg-white p-1.5 flex-shrink-0 shadow-lg shadow-slate-200/80">
                     @else
-                        <div class="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl flex items-center justify-center font-extrabold text-white flex-shrink-0"
-                             style="background: linear-gradient(135deg, var(--store-primary), #0A3D7A);">
+                        <div class="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl flex items-center justify-center font-extrabold text-white flex-shrink-0 store-gradient shadow-lg shadow-emerald-900/20">
                             {{ strtoupper(substr((string)($storeFrs?->nom_frs ?? 'S'), 0, 1)) }}
                         </div>
                     @endif
 
                     <div class="leading-tight min-w-0 hidden sm:block">
-                        <div class="font-extrabold tracking-wide truncate">{{ $storeFrs?->nom_frs ?? config('app.name') }}</div>
+                        <div class="flex items-center gap-2">
+                            <div class="font-extrabold tracking-wide truncate">{{ $storeFrs?->nom_frs ?? config('app.name') }}</div>
+                            <span class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.2em] text-emerald-700">Store</span>
+                        </div>
                         <div class="text-xs text-slate-500">
                             @if(($storeFrs?->telephone ?? '') !== '')
                                 <a href="tel:{{ $storeFrs->telephone }}" class="hover:underline">{{ $storeFrs->telephone }}</a>
@@ -81,37 +151,36 @@
 
                 <div class="col-span-2 flex items-center gap-2 justify-start sm:col-span-1 sm:justify-end">
                     <a href="{{ url('/panier') }}"
-                       class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold border border-slate-200 bg-white hover:bg-slate-50">
+                       class="interactive-lift inline-flex items-center gap-2 rounded-2xl px-3.5 py-2.5 text-sm font-semibold border border-white/70 bg-white/90 hover:bg-white shadow-sm">
                         <i class="fa-solid fa-cart-shopping text-[var(--store-primary)]"></i>
                         <span>Panier</span>
-                        <span class="ml-1 inline-flex items-center justify-center min-w-[22px] h-5 px-1.5 rounded-full text-xs font-extrabold bg-slate-100 text-slate-700">
+                        <span class="ml-1 inline-flex items-center justify-center min-w-[22px] h-5 px-1.5 rounded-full text-xs font-extrabold bg-emerald-50 text-emerald-700">
                             {{ $cartCount }}
                         </span>
                     </a>
 
                     @if(($client ?? null))
                         <a href="{{ url('/mes-commandes') }}"
-                           class="hidden sm:inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold border border-slate-200 bg-white hover:bg-slate-50">
+                           class="interactive-lift hidden sm:inline-flex items-center gap-2 rounded-2xl px-3.5 py-2.5 text-sm font-semibold border border-white/70 bg-white/90 hover:bg-white shadow-sm">
                             <i class="fa-solid fa-receipt text-[var(--store-primary)]"></i>
                             <span>Mes commandes</span>
                         </a>
                         <form method="POST" action="{{ url('/logout') }}">
                             @csrf
                             <button type="submit"
-                                    class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold border border-slate-200 bg-white hover:bg-slate-50">
+                                    class="interactive-lift inline-flex items-center gap-2 rounded-2xl px-3.5 py-2.5 text-sm font-semibold border border-white/70 bg-white/90 hover:bg-white shadow-sm">
                                 <i class="fa-solid fa-right-from-bracket text-red-600"></i>
                                 <span class="hidden sm:inline">Déconnexion</span>
                             </button>
                         </form>
                     @else
                         <a href="{{ url('/login') }}"
-                           class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold border border-slate-200 bg-white hover:bg-slate-50">
+                           class="interactive-lift inline-flex items-center gap-2 rounded-2xl px-3.5 py-2.5 text-sm font-semibold border border-white/70 bg-white/90 hover:bg-white shadow-sm">
                             <i class="fa-solid fa-user text-[var(--store-primary)]"></i>
                             <span>Connexion</span>
                         </a>
                         <a href="{{ url('/register') }}"
-                           class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-extrabold text-white"
-                           style="background: linear-gradient(135deg, var(--store-primary), #0A3D7A);">
+                           class="interactive-lift inline-flex items-center gap-2 rounded-2xl px-3.5 py-2.5 text-sm font-extrabold text-white store-gradient shadow-lg shadow-emerald-950/20">
                             <i class="fa-solid fa-user-plus"></i>
                             <span class="hidden sm:inline">Créer compte</span>
                         </a>
@@ -122,19 +191,19 @@
     </header>
 
     <main class="flex-1">
-        <div class="max-w-7xl mx-auto px-4 py-6">
+        <div class="max-w-7xl mx-auto px-4 py-6 sm:py-8">
             @if(session('success'))
-                <div class="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-800">
+                <div class="mb-4 rounded-2xl border border-emerald-200/80 bg-emerald-50/90 px-4 py-3 text-emerald-800 shadow-sm">
                     {{ session('success') }}
                 </div>
             @endif
             @if(session('info'))
-                <div class="mb-4 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sky-800">
+                <div class="mb-4 rounded-2xl border border-sky-200/80 bg-sky-50/90 px-4 py-3 text-sky-800 shadow-sm">
                     {{ session('info') }}
                 </div>
             @endif
             @if(session('error'))
-                <div class="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-red-800">
+                <div class="mb-4 rounded-2xl border border-red-200/80 bg-red-50/90 px-4 py-3 text-red-800 shadow-sm">
                     {{ session('error') }}
                 </div>
             @endif
@@ -143,9 +212,16 @@
         </div>
     </main>
 
-    <footer class="border-t border-slate-200 bg-white">
+    <footer class="border-t border-white/60 bg-white/70 backdrop-blur-xl">
         <div class="max-w-7xl mx-auto px-4 py-6 text-sm text-slate-500">
-            © {{ date('Y') }} {{ config('app.name') }}
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>© {{ date('Y') }} {{ config('app.name') }}</div>
+                <div class="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.2em] text-slate-400">
+                    <span>Responsive</span>
+                    <span>Secure Checkout</span>
+                    <span>Modern UI</span>
+                </div>
+            </div>
         </div>
     </footer>
 </div>
@@ -153,7 +229,7 @@
 @if($metaPixelId !== '')
     <script>
         !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
-        fbq('init', @json($metaPixelId));
+        fbq('init', '{{ addslashes($metaPixelId) }}');
         fbq('track', 'PageView');
     </script>
     <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id={{ urlencode($metaPixelId) }}&ev=PageView&noscript=1"/></noscript>
@@ -161,7 +237,7 @@
 
 @if($tiktokPixelId !== '')
     <script>
-        !function (w, d, t) { w.TiktokAnalyticsObject=t; var ttq=w[t]=w[t]||[]; ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie"]; ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}; for(var i=0;i<ttq.methods.length;i++) ttq.setAndDefer(ttq,ttq.methods[i]); ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++) ttq.setAndDefer(e,ttq.methods[n]); return e}; ttq.load=function(e,n){var i="https://analytics.tiktok.com/i18n/pixel/events.js"; ttq._i=ttq._i||{}; ttq._i[e]=[]; ttq._i[e]._u=i; ttq._t=ttq._t||{}; ttq._t[e]=+new Date; ttq._o=ttq._o||{}; ttq._o[e]=n||{}; var o=d.createElement("script"); o.type="text/javascript"; o.async=!0; o.src=i+"?sdkid="+e+"&lib="+t; var a=d.getElementsByTagName("script")[0]; a.parentNode.insertBefore(o,a)}; ttq.load(@json($tiktokPixelId)); ttq.page(); }(window, document, 'ttq');
+        !function (w, d, t) { w.TiktokAnalyticsObject=t; var ttq=w[t]=w[t]||[]; ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie"]; ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}; for(var i=0;i<ttq.methods.length;i++) ttq.setAndDefer(ttq,ttq.methods[i]); ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++) ttq.setAndDefer(e,ttq.methods[n]); return e}; ttq.load=function(e,n){var i="https://analytics.tiktok.com/i18n/pixel/events.js"; ttq._i=ttq._i||{}; ttq._i[e]=[]; ttq._i[e]._u=i; ttq._t=ttq._t||{}; ttq._t[e]=+new Date; ttq._o=ttq._o||{}; ttq._o[e]=n||{}; var o=d.createElement("script"); o.type="text/javascript"; o.async=!0; o.src=i+"?sdkid="+e+"&lib="+t; var a=d.getElementsByTagName("script")[0]; a.parentNode.insertBefore(o,a)}; ttq.load('{{ addslashes($tiktokPixelId) }}'); ttq.page(); }(window, document, 'ttq');
     </script>
 @endif
 

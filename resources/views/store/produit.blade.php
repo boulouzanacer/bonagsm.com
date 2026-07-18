@@ -1,38 +1,38 @@
 @extends('store.layout')
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-6 sm:space-y-8">
     <div class="flex items-center justify-between">
-        <a href="{{ url('/') }}" class="text-sm text-slate-500 hover:text-slate-900">
+        <a href="{{ url('/') }}" class="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/80 px-4 py-2 text-sm text-slate-500 shadow-sm transition hover:-translate-y-0.5 hover:text-slate-900">
             <i class="fa-solid fa-arrow-left-long mr-2"></i>
             Retour
         </a>
         <a href="{{ url('/panier') }}"
-           class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold border border-slate-200 bg-white hover:bg-slate-50">
+           class="interactive-lift inline-flex items-center gap-2 rounded-2xl px-3.5 py-2.5 text-sm font-semibold border border-white/70 bg-white/90 hover:bg-white shadow-sm">
             <i class="fa-solid fa-cart-shopping text-[var(--store-primary)]"></i>
             <span>Panier</span>
         </a>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div class="rounded-2xl border border-slate-200 bg-[var(--store-card)] overflow-hidden">
-            <div class="relative aspect-[4/3] bg-slate-100 flex items-center justify-center" id="galleryRoot">
+    <div class="grid grid-cols-1 lg:grid-cols-[1.05fr,0.95fr] gap-4 lg:gap-6">
+        <div class="soft-card rounded-[28px] overflow-hidden">
+            <div class="relative aspect-[4/3] bg-gradient-to-br from-slate-100 via-white to-emerald-50 flex items-center justify-center" id="galleryRoot">
                 @if(count($images) > 0)
-                    <img id="galleryMainImage" src="{{ $images[0] }}" alt="" class="max-w-full max-h-full object-contain">
+                    <img id="galleryMainImage" src="{{ $images[0] }}" alt="" class="max-w-full max-h-full object-contain transition duration-500">
                     @if(count($images) > 1)
                         <button type="button"
                                 id="galleryPrevBtn"
-                                class="absolute left-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-xl bg-white/90 border border-slate-200 text-slate-800 hover:bg-white shadow"
+                                class="interactive-lift absolute left-3 top-1/2 -translate-y-1/2 h-11 w-11 rounded-2xl bg-white/90 border border-white text-slate-800 hover:bg-white shadow"
                                 aria-label="Photo précédente">
                             <i class="fa-solid fa-chevron-left"></i>
                         </button>
                         <button type="button"
                                 id="galleryNextBtn"
-                                class="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-xl bg-white/90 border border-slate-200 text-slate-800 hover:bg-white shadow"
+                                class="interactive-lift absolute right-3 top-1/2 -translate-y-1/2 h-11 w-11 rounded-2xl bg-white/90 border border-white text-slate-800 hover:bg-white shadow"
                                 aria-label="Photo suivante">
                             <i class="fa-solid fa-chevron-right"></i>
                         </button>
-                        <div class="absolute bottom-3 right-3 rounded-xl bg-black/55 text-white text-xs font-extrabold px-3 py-1.5">
+                        <div class="absolute bottom-3 right-3 rounded-2xl bg-slate-950/60 text-white text-xs font-extrabold px-3 py-1.5 backdrop-blur">
                             <span id="galleryCounter">1/{{ count($images) }}</span>
                         </div>
                     @endif
@@ -43,11 +43,11 @@
                 @endif
             </div>
             @if(count($images) > 1)
-                <div class="p-3 border-t border-slate-200 bg-slate-50 overflow-x-auto">
+                <div class="p-3 border-t border-slate-200 bg-slate-50/80 overflow-x-auto">
                     <div class="flex items-center gap-2 min-w-max">
                         @foreach($images as $i => $u)
                             <button type="button"
-                                    class="h-14 w-16 rounded-xl border border-slate-200 bg-white overflow-hidden flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-[var(--store-primary)]"
+                                    class="interactive-lift h-14 w-16 rounded-2xl border border-slate-200 bg-white overflow-hidden flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-[var(--store-primary)]"
                                     data-gallery-thumb="{{ $i }}"
                                     aria-label="Afficher la photo {{ $i + 1 }}">
                                 <img src="{{ $u }}" alt="" class="h-14 w-16 object-cover">
@@ -58,29 +58,29 @@
             @endif
         </div>
 
-        <div class="rounded-2xl border border-slate-200 bg-[var(--store-card)] p-6">
+        <div class="soft-card rounded-[28px] p-6 sm:p-7">
             <div class="space-y-4">
                 <div class="flex flex-wrap items-center gap-2">
-                    <span class="inline-flex text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-lg bg-slate-100 text-slate-500">
+                    <span class="inline-flex text-[11px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full bg-slate-100 text-slate-500">
                         {{ $produit->categorie ?: '—' }}
                     </span>
                     @if($produit->subCategory)
-                        <span class="inline-flex text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-600">
+                        <span class="inline-flex text-[11px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full bg-indigo-50 text-indigo-600">
                             {{ $produit->subCategory->nom }}
                         </span>
                     @endif
                     @if($produit->brand)
-                        <span class="inline-flex text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-lg bg-amber-50 text-amber-600">
+                        <span class="inline-flex text-[11px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full bg-amber-50 text-amber-600">
                             <i class="fa-solid fa-copyright mr-1.5"></i>{{ $produit->brand->nom }}
                         </span>
                     @endif
                 </div>
 
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-tight">
+                <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 leading-tight">
                     {{ $produit->designation }}
                 </h1>
             </div>
-            <div class="mt-1 text-sm text-slate-600">Ref: {{ $produit->reference }}</div>
+            <div class="mt-1 text-sm text-slate-500">Ref: {{ $produit->reference }}</div>
 
             @php
                 $initialQty = (int) ($initialQty ?? 1);
@@ -98,19 +98,22 @@
                 $tierEnabled = (bool) ($tierEnabled ?? ($produit->isTierPricingEnabled() && count($tiers) > 0));
             @endphp
 
-            <div class="mt-4 flex items-center justify-between gap-3">
+            <div class="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-[24px] border border-slate-200/80 bg-gradient-to-r from-slate-50 to-white p-4">
                 @if(($can_show_prices ?? false) || ($client ?? null))
-                    <div class="text-2xl font-extrabold">
-                        <span id="unitPrice">{{ number_format($initialUnit, 2, '.', ' ') }}</span> DA
+                    <div>
+                        <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Prix unitaire</div>
+                        <div class="text-2xl font-extrabold">
+                            <span id="unitPrice">{{ number_format($initialUnit, 2, '.', ' ') }}</span> DA
+                        </div>
                     </div>
                 @else
                     <div class="text-sm font-extrabold text-slate-500">
                         Connectez-vous pour voir le prix
                     </div>
                 @endif
-                <span class="text-xs font-bold px-2.5 py-1 rounded-full border border-slate-200 bg-slate-50 text-slate-600">
+                <div class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
                     {{ $produit->categorie ?: '—' }}
-                </span>
+                </div>
             </div>
             @if(($can_show_prices ?? false) || ($client ?? null))
                 <div class="mt-1 text-xs text-slate-500">
@@ -118,20 +121,20 @@
                 </div>
             @endif
 
-            <div class="mt-2 text-sm {{ (int)$produit->stock > 0 ? 'text-emerald-700' : 'text-red-600' }}">
+            <div class="mt-3 inline-flex items-center rounded-full px-3 py-1.5 text-sm font-semibold {{ (int)$produit->stock > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600' }}">
                 {{ (int)$produit->stock > 0 ? ('Stock disponible: '.(int)$produit->stock) : 'Rupture de stock' }}
             </div>
 
-            <div class="mt-5 text-sm text-slate-700 leading-relaxed">
+            <div class="mt-5 text-sm leading-7 text-slate-700">
                 {{ trim((string)$produit->description) !== '' ? $produit->description : '—' }}
             </div>
 
             @if($tierEnabled && (($can_show_prices ?? false) || ($client ?? null)))
-                <div class="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <div class="mt-6 rounded-[24px] border border-slate-200 bg-slate-50/90 p-4">
                     <div class="font-extrabold tracking-wide">Tarifs par quantité</div>
                     <div class="mt-3 space-y-2 text-sm">
                         @foreach($tiers as $t)
-                            <div class="flex items-center justify-between gap-3">
+                            <div class="flex items-center justify-between gap-3 rounded-2xl bg-white px-3 py-2.5 shadow-sm">
                                 <div class="text-slate-600">
                                     @if($t['quantity_max'] === null)
                                         {{ (int)$t['quantity_min'] }}+ pièces
@@ -150,21 +153,23 @@
                 <form method="POST"
                       action="{{ url('/panier/add') }}"
                       id="addToCartForm"
-                      class="flex items-center gap-2"
+                      class="flex flex-col gap-3 sm:flex-row sm:items-center"
                       data-pixel-product-id="{{ $produit->id }}"
                       data-pixel-price="{{ (($can_show_prices ?? false) || ($client ?? null)) ? (float)$produit->prixUnitairePourQuantite($client ?? null, 1) : 0 }}">
                     @csrf
                     <input type="hidden" name="produit_id" value="{{ $produit->id }}">
-                    <input type="number"
-                           name="qty"
-                           id="qtyInput"
-                           min="1"
-                           max="{{ max(1, (int)$produit->stock) }}"
-                           value="1"
-                           class="w-24 rounded-xl border border-slate-200 bg-white px-3 py-2 outline-none focus:border-[var(--store-primary)]">
+                    <div class="inline-flex items-center rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
+                        <span class="mr-3 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Qté</span>
+                        <input type="number"
+                               name="qty"
+                               id="qtyInput"
+                               min="1"
+                               max="{{ max(1, (int)$produit->stock) }}"
+                               value="1"
+                               class="w-20 bg-transparent text-base font-bold outline-none focus:border-[var(--store-primary)]">
+                    </div>
                     <button type="submit"
-                            class="flex-1 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-extrabold text-white disabled:opacity-40"
-                            style="background: linear-gradient(135deg, var(--store-primary), #0A3D7A);"
+                            class="interactive-lift flex-1 inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-extrabold text-white disabled:opacity-40 store-gradient shadow-lg shadow-emerald-950/15"
                             @disabled((int)$produit->stock <= 0)>
                         <i class="fa-solid fa-cart-plus"></i>
                         Ajouter au panier
@@ -178,7 +183,7 @@
 @if(count($images) > 1)
     <script>
         (function () {
-            const images = @json($images);
+            const images = JSON.parse('{{ addslashes(json_encode($images)) }}');
             const root = document.getElementById('galleryRoot');
             const img = document.getElementById('galleryMainImage');
             const prev = document.getElementById('galleryPrevBtn');
@@ -244,9 +249,9 @@
 
             if (!qtyInput || !unitEl || !totalEl) return;
 
-            const enableTier = @json($tierEnabled);
-            const tiers = @json($tiers);
-            const baseUnit = Number(@json($initialUnit));
+            const enableTier = '{{ (int) $tierEnabled }}' === '1';
+            const tiers = JSON.parse('{{ addslashes(json_encode($tiers)) }}');
+            const baseUnit = Number('{{ $initialUnit }}');
 
             function matchTier(qty) {
                 if (!enableTier) return null;

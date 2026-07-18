@@ -24,12 +24,13 @@
 
     <style>
         :root{
-            --frs-primary:#1E6FD9;
-            --frs-bg:#1A1A2E;
-            --frs-card:#252543;
+            --frs-primary:#0f7a43;
+            --frs-primary-dark:#0b5e33;
+            --frs-bg:#09111f;
+            --frs-card:#101b2d;
         }
         html:not(.dark){
-            --frs-bg:#F8FAFC;
+            --frs-bg:#eef4f1;
             --frs-card:#FFFFFF;
         }
         html:not(.dark) .text-white\/80{color:rgb(30 41 59 / 1);}
@@ -48,6 +49,11 @@
         html:not(.dark) .text-sky-200{color:rgb(3 105 161 / 1);}
         html:not(.dark) .text-violet-200{color:rgb(109 40 217 / 1);}
         html,body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
+        body{
+            background:
+                radial-gradient(circle at top left, rgba(15,122,67,0.16), transparent 28%),
+                radial-gradient(circle at top right, rgba(59,130,246,0.10), transparent 24%);
+        }
     </style>
 
     <script>
@@ -75,13 +81,13 @@
 @php($frsUser = (string) session('role', '') === 'frs_user' ? \App\Models\FrsUser::find((int) session('frs_user_id')) : null)
 @php($isAdmin = (int) session('is_admin', 0) === 1 || (string) session('role', '') === 'fournisseur')
 <div class="flex min-h-screen">
-    <aside class="fixed inset-y-0 left-0 w-[240px] border-r bg-[var(--frs-bg)]"
+    <aside class="fixed inset-y-0 left-0 w-[240px] border-r bg-[color:rgba(9,17,31,0.92)] backdrop-blur-xl"
            :class="dark ? 'border-white/10' : 'border-slate-200'">
         <div class="h-16 px-5 flex items-center gap-3 border-b"
              :class="dark ? 'border-white/10' : 'border-slate-200'">
             <img src="https://i.imgur.com/8Z6t8Yq.png"
                  alt="Bona GSM"
-                 class="h-10 w-10 rounded-xl object-contain bg-white p-1">
+                 class="h-10 w-10 rounded-xl object-contain bg-white p-1 shadow-lg shadow-emerald-950/20">
             <div class="leading-tight">
                 <div class="font-extrabold tracking-wide">Bona GSM</div>
                 <div class="text-xs" :class="dark ? 'text-white/60' : 'text-slate-500'">Espace Fournisseur</div>
@@ -90,56 +96,56 @@
 
         <nav class="px-3 py-4 space-y-1 text-sm" :class="dark ? 'text-slate-100' : 'text-slate-900'">
             <a href="{{ url('/fournisseur/dashboard') }}"
-               class="flex items-center gap-3 rounded-xl px-4 py-3 {{ request()->is('fournisseur/dashboard') ? 'bg-white/10' : '' }}"
+               class="flex items-center gap-3 rounded-2xl px-4 py-3 {{ request()->is('fournisseur/dashboard') ? 'bg-white/10 shadow-lg shadow-black/10' : '' }}"
                :class="dark ? 'hover:bg-white/10' : 'hover:bg-slate-100'">
                 <i class="fa-solid fa-chart-line w-5 text-[var(--frs-primary)]"></i>
                 <span>Mon Dashboard</span>
             </a>
 
             <a href="{{ url('/fournisseur/produits') }}"
-               class="flex items-center gap-3 rounded-xl px-4 py-3 {{ request()->is('fournisseur/produits*') ? 'bg-white/10' : '' }}"
+               class="flex items-center gap-3 rounded-2xl px-4 py-3 {{ request()->is('fournisseur/produits*') ? 'bg-white/10 shadow-lg shadow-black/10' : '' }}"
                :class="dark ? 'hover:bg-white/10' : 'hover:bg-slate-100'">
                 <i class="fa-solid fa-boxes-stacked w-5 text-[var(--frs-primary)]"></i>
                 <span>Mes Produits</span>
             </a>
 
             <a href="{{ url('/fournisseur/categories') }}"
-               class="flex items-center gap-3 rounded-xl px-4 py-3 {{ request()->is('fournisseur/categories*') ? 'bg-white/10' : '' }}"
+               class="flex items-center gap-3 rounded-2xl px-4 py-3 {{ request()->is('fournisseur/categories*') ? 'bg-white/10 shadow-lg shadow-black/10' : '' }}"
                :class="dark ? 'hover:bg-white/10' : 'hover:bg-slate-100'">
                 <i class="fa-solid fa-layer-group w-5 text-[var(--frs-primary)]"></i>
                 <span>Catégories</span>
             </a>
 
             <a href="{{ url('/fournisseur/sous-categories') }}"
-               class="flex items-center gap-3 rounded-xl px-4 py-3 {{ request()->is('fournisseur/sous-categories*') ? 'bg-white/10' : '' }}"
+               class="flex items-center gap-3 rounded-2xl px-4 py-3 {{ request()->is('fournisseur/sous-categories*') ? 'bg-white/10 shadow-lg shadow-black/10' : '' }}"
                :class="dark ? 'hover:bg-white/10' : 'hover:bg-slate-100'">
                 <i class="fa-solid fa-sitemap w-5 text-[var(--frs-primary)]"></i>
                 <span>Sous-catégories</span>
             </a>
 
             <a href="{{ url('/fournisseur/marques') }}"
-               class="flex items-center gap-3 rounded-xl px-4 py-3 {{ request()->is('fournisseur/marques*') ? 'bg-white/10' : '' }}"
+               class="flex items-center gap-3 rounded-2xl px-4 py-3 {{ request()->is('fournisseur/marques*') ? 'bg-white/10 shadow-lg shadow-black/10' : '' }}"
                :class="dark ? 'hover:bg-white/10' : 'hover:bg-slate-100'">
                 <i class="fa-solid fa-copyright w-5 text-[var(--frs-primary)]"></i>
                 <span>Marques</span>
             </a>
 
             <a href="{{ url('/fournisseur/clients') }}"
-               class="flex items-center gap-3 rounded-xl px-4 py-3 {{ request()->is('fournisseur/clients*') ? 'bg-white/10' : '' }}"
+               class="flex items-center gap-3 rounded-2xl px-4 py-3 {{ request()->is('fournisseur/clients*') ? 'bg-white/10 shadow-lg shadow-black/10' : '' }}"
                :class="dark ? 'hover:bg-white/10' : 'hover:bg-slate-100'">
                 <i class="fa-solid fa-users w-5 text-[var(--frs-primary)]"></i>
                 <span>Mes Clients</span>
             </a>
 
             <a href="{{ url('/fournisseur/commandes') }}"
-               class="flex items-center gap-3 rounded-xl px-4 py-3 {{ request()->is('fournisseur/commandes*') ? 'bg-white/10' : '' }}"
+               class="flex items-center gap-3 rounded-2xl px-4 py-3 {{ request()->is('fournisseur/commandes*') ? 'bg-white/10 shadow-lg shadow-black/10' : '' }}"
                :class="dark ? 'hover:bg-white/10' : 'hover:bg-slate-100'">
                 <i class="fa-solid fa-cart-shopping w-5 text-[var(--frs-primary)]"></i>
                 <span>Mes Commandes</span>
             </a>
 
             <a href="{{ url('/fournisseur/frais-livraison') }}"
-               class="flex items-center gap-3 rounded-xl px-4 py-3 {{ request()->is('fournisseur/frais-livraison') ? 'bg-white/10' : '' }}"
+               class="flex items-center gap-3 rounded-2xl px-4 py-3 {{ request()->is('fournisseur/frais-livraison') ? 'bg-white/10 shadow-lg shadow-black/10' : '' }}"
                :class="dark ? 'hover:bg-white/10' : 'hover:bg-slate-100'">
                 <i class="fa-solid fa-truck-fast w-5 text-[var(--frs-primary)]"></i>
                 <span>Frais de livraison</span>
@@ -147,21 +153,21 @@
 
             @if($isAdmin)
                 <a href="{{ url('/fournisseur/profil') }}"
-                   class="flex items-center gap-3 rounded-xl px-4 py-3 {{ request()->is('fournisseur/profil') ? 'bg-white/10' : '' }}"
+                   class="flex items-center gap-3 rounded-2xl px-4 py-3 {{ request()->is('fournisseur/profil') ? 'bg-white/10 shadow-lg shadow-black/10' : '' }}"
                    :class="dark ? 'hover:bg-white/10' : 'hover:bg-slate-100'">
                     <i class="fa-solid fa-user w-5 text-[var(--frs-primary)]"></i>
                     <span>Paramètres Fournisseur</span>
                 </a>
 
                 <a href="{{ url('/fournisseur/parametres-site') }}"
-                   class="flex items-center gap-3 rounded-xl px-4 py-3 {{ request()->is('fournisseur/parametres-site') ? 'bg-white/10' : '' }}"
+                   class="flex items-center gap-3 rounded-2xl px-4 py-3 {{ request()->is('fournisseur/parametres-site') ? 'bg-white/10 shadow-lg shadow-black/10' : '' }}"
                    :class="dark ? 'hover:bg-white/10' : 'hover:bg-slate-100'">
                     <i class="fa-solid fa-sliders w-5 text-[var(--frs-primary)]"></i>
                     <span>Paramètres Site Web</span>
                 </a>
 
                 <a href="{{ url('/fournisseur/utilisateurs') }}"
-                   class="flex items-center gap-3 rounded-xl px-4 py-3 {{ request()->is('fournisseur/utilisateurs*') ? 'bg-white/10' : '' }}"
+                   class="flex items-center gap-3 rounded-2xl px-4 py-3 {{ request()->is('fournisseur/utilisateurs*') ? 'bg-white/10 shadow-lg shadow-black/10' : '' }}"
                    :class="dark ? 'hover:bg-white/10' : 'hover:bg-slate-100'">
                     <i class="fa-solid fa-user-gear w-5 text-[var(--frs-primary)]"></i>
                     <span>Gestion Utilisateurs</span>
@@ -171,7 +177,7 @@
             <form method="POST" action="{{ url('/fournisseur/logout') }}" class="pt-2">
                 @csrf
                 <button type="submit"
-                        class="w-full flex items-center gap-3 rounded-xl px-4 py-3 hover:bg-white/10 text-left">
+                        class="w-full flex items-center gap-3 rounded-2xl px-4 py-3 hover:bg-white/10 text-left">
                     <i class="fa-solid fa-right-from-bracket w-5 text-red-300"></i>
                     <span>Déconnexion</span>
                 </button>
@@ -180,8 +186,8 @@
     </aside>
 
     <div class="flex-1 ml-[240px]">
-        <header class="sticky top-0 z-40 h-16 flex items-center justify-between px-6 border-b border-white/10 backdrop-blur"
-                :class="dark ? 'bg-[color:rgba(26,26,46,0.85)]' : 'bg-white/80 border-slate-200'">
+        <header class="sticky top-0 z-40 h-16 flex items-center justify-between px-6 border-b border-white/10 backdrop-blur-xl"
+                :class="dark ? 'bg-[color:rgba(9,17,31,0.72)]' : 'bg-white/80 border-slate-200'">
             <div class="font-extrabold tracking-wide text-lg">
                 {{ $title ?? 'Espace Fournisseur' }}
             </div>
