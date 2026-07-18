@@ -1,22 +1,25 @@
 @extends('store.layout')
 
 @section('content')
-<div class="space-y-6">
-    <div class="flex items-center justify-between">
+<div class="space-y-6 sm:space-y-8">
+    <section class="soft-card rounded-[28px] p-5 sm:p-6">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-            <div class="text-2xl font-extrabold tracking-wide">Mes commandes</div>
-            <div class="mt-1 text-sm text-slate-600">Historique des commandes</div>
+            <div class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.2em] text-emerald-700">Historique</div>
+            <div class="mt-3 text-2xl font-extrabold tracking-tight sm:text-3xl">Mes commandes</div>
+            <div class="mt-2 text-sm text-slate-600">Suivez votre historique et l’état de chaque commande.</div>
         </div>
-        <a href="{{ url('/') }}" class="text-sm text-slate-500 hover:text-slate-900">
+        <a href="{{ url('/') }}" class="interactive-lift inline-flex items-center gap-2 rounded-2xl border border-white/70 bg-white px-4 py-2.5 text-sm text-slate-500 shadow-sm hover:text-slate-900">
             <i class="fa-solid fa-store mr-2"></i>
             Retour store
         </a>
     </div>
+    </section>
 
-    <div class="rounded-2xl border border-slate-200 bg-[var(--store-card)] overflow-hidden">
+    <div class="soft-card rounded-[28px] overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full text-sm">
-                <thead class="text-slate-500">
+                <thead class="bg-slate-50/80 text-slate-500">
                     <tr>
                         <th class="text-left py-3 px-4 font-semibold">#</th>
                         <th class="text-left py-3 px-4 font-semibold">Date</th>
@@ -39,7 +42,7 @@
                                 default => 'bg-slate-50 text-slate-600 border border-slate-200'
                             };
                         @endphp
-                        <tr class="hover:bg-slate-50">
+                        <tr class="hover:bg-slate-50/80 transition">
                             <td class="py-3 px-4 font-semibold">#{{ $c->id }}</td>
                             <td class="py-3 px-4 text-slate-700">{{ \Illuminate\Support\Carbon::parse($c->date_cmd)->format('d/m/Y H:i') }}</td>
                             <td class="py-3 px-4 text-slate-700">{{ $c->frs_nom ?? '—' }}</td>
@@ -49,8 +52,7 @@
                             <td class="py-3 px-4 text-right font-bold">{{ number_format((float)$c->montant_total, 2, '.', ' ') }} DA</td>
                             <td class="py-3 px-4 text-right">
                                 <a href="{{ url('/mes-commandes/'.$c->id) }}"
-                                   class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-extrabold text-white"
-                                   style="background: linear-gradient(135deg, var(--store-primary), #0A3D7A);">
+                                   class="interactive-lift inline-flex items-center gap-2 rounded-2xl px-3.5 py-2 text-xs font-extrabold text-white store-gradient shadow-sm">
                                     Détail
                                     <i class="fa-solid fa-arrow-right-long"></i>
                                 </a>
@@ -58,7 +60,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="py-10 text-center text-slate-600">Aucune commande</td>
+                            <td colspan="6" class="py-12 text-center text-slate-600">Aucune commande</td>
                         </tr>
                     @endforelse
                 </tbody>
