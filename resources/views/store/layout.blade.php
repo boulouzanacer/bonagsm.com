@@ -121,6 +121,13 @@
         html[dir="rtl"] .table-align-end{
             text-align:left;
         }
+        html[dir="rtl"] .rtl-flip{
+            transform:scaleX(-1);
+        }
+        html[dir="rtl"] .qty-label{
+            margin-right:0;
+            margin-left:.75rem;
+        }
         html[dir="rtl"] .force-ltr{
             direction:ltr;
             unicode-bidi:isolate;
@@ -228,7 +235,7 @@
                             @csrf
                             <button type="submit"
                                     class="interactive-lift inline-flex items-center gap-2 rounded-2xl px-3.5 py-2.5 text-sm font-semibold border border-white/70 bg-white/90 hover:bg-white shadow-sm">
-                                <i class="fa-solid fa-right-from-bracket text-red-600"></i>
+                                <i class="rtl-flip fa-solid fa-right-from-bracket text-red-600"></i>
                                 <span class="hidden sm:inline">{{ __('Déconnexion') }}</span>
                             </button>
                         </form>

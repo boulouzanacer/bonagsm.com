@@ -34,7 +34,7 @@
             <button type="submit"
                     class="w-full inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-extrabold text-white"
                     style="background: linear-gradient(135deg, var(--store-primary), #0A3D7A);">
-                <i class="fa-solid fa-right-to-bracket"></i>
+                <i class="rtl-flip fa-solid fa-right-to-bracket"></i>
                 {{ __('Se connecter') }}
             </button>
         </form>

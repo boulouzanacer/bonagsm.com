@@ -23,6 +23,33 @@
     <style>
         html,body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
         html[dir="rtl"], html[dir="rtl"] body{font-family:Tajawal,Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
+        html[dir="rtl"] .app-theme-toggle{
+            right:auto;
+            left:1rem;
+        }
+        html[dir="rtl"] .app-locale-switcher{
+            left:auto;
+            right:1rem;
+        }
+        html[dir="rtl"] .rtl-list-pad{
+            padding-left:0;
+            padding-right:1.25rem;
+        }
+        html[dir="rtl"] ul.list-disc.pl-5{
+            padding-left:0;
+            padding-right:1.25rem;
+        }
+        html[dir="rtl"] .password-toggle-input{
+            padding-right:1rem;
+            padding-left:3rem;
+        }
+        html[dir="rtl"] .password-toggle-btn{
+            right:auto;
+            left:0;
+        }
+        html[dir="rtl"] .rtl-flip{
+            transform:scaleX(-1);
+        }
         html[dir="rtl"] .force-ltr{
             direction:ltr;
             unicode-bidi:isolate;
@@ -57,13 +84,13 @@
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
     <button type="button"
-            class="fixed top-4 right-4 z-50 inline-flex items-center gap-2 rounded-xl bg-white/80 px-4 py-2 text-sm font-semibold shadow-lg backdrop-blur hover:bg-white dark:bg-slate-900/70 dark:hover:bg-slate-900"
+            class="app-theme-toggle fixed top-4 right-4 z-50 inline-flex items-center gap-2 rounded-xl bg-white/80 px-4 py-2 text-sm font-semibold shadow-lg backdrop-blur hover:bg-white dark:bg-slate-900/70 dark:hover:bg-slate-900"
             @click="toggle()">
         <i class="fa-solid" :class="dark ? 'fa-sun' : 'fa-moon'"></i>
         <span x-text="dark ? @js(__('Clair')) : @js(__('Sombre'))"></span>
     </button>
 
-    <div class="fixed top-4 left-4 z-50 inline-flex items-center rounded-xl bg-white/80 p-1 text-sm font-bold shadow-lg backdrop-blur dark:bg-slate-900/70">
+    <div class="app-locale-switcher fixed top-4 left-4 z-50 inline-flex items-center rounded-xl bg-white/80 p-1 text-sm font-bold shadow-lg backdrop-blur dark:bg-slate-900/70">
         <a href="{{ url('/locale/fr') }}"
            class="rounded-lg px-3 py-1.5 transition {{ app()->getLocale() === 'fr' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 dark:text-slate-200' }}">
             FR

@@ -62,7 +62,7 @@
                                 <a href="{{ url('/mes-commandes/'.$c->id) }}"
                                    class="interactive-lift inline-flex items-center gap-2 rounded-2xl px-3.5 py-2 text-xs font-extrabold text-white store-gradient shadow-sm">
                                     {{ __('Détail') }}
-                                    <i class="fa-solid fa-arrow-right-long"></i>
+                                    <i class="rtl-flip fa-solid fa-arrow-right-long"></i>
                                 </a>
                             </td>
                         </tr>

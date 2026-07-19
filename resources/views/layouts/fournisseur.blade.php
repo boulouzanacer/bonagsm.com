@@ -68,6 +68,20 @@
             right:auto;
             left:0;
         }
+        html[dir="rtl"] .rtl-text-start{
+            text-align:right;
+        }
+        html[dir="rtl"] .rtl-list-pad{
+            padding-left:0;
+            padding-right:1.25rem;
+        }
+        html[dir="rtl"] ul.list-disc.pl-5{
+            padding-left:0;
+            padding-right:1.25rem;
+        }
+        html[dir="rtl"] .rtl-flip{
+            transform:scaleX(-1);
+        }
         html[dir="rtl"] .force-ltr{
             direction:ltr;
             unicode-bidi:isolate;
@@ -198,9 +212,9 @@
             <form method="POST" action="{{ url('/fournisseur/logout') }}" class="pt-2">
                 @csrf
                 <button type="submit"
-                        class="w-full flex items-center gap-3 rounded-2xl px-4 py-3 text-left"
+                        class="w-full flex items-center gap-3 rounded-2xl px-4 py-3 text-left rtl-text-start"
                         :class="dark ? 'text-slate-100 hover:bg-white/10' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'">
-                    <i class="fa-solid fa-right-from-bracket w-5 text-red-300"></i>
+                    <i class="rtl-flip fa-solid fa-right-from-bracket w-5 text-red-300"></i>
                     <span>{{ __('Déconnexion') }}</span>
                 </button>
             </form>
@@ -250,7 +264,7 @@
                                 {{ strtoupper(substr($frsUser?->nom ?? $frs?->nom_frs ?? 'F', 0, 1)) }}
                             </div>
                         @endif
-                        <div class="text-left leading-tight hidden sm:block max-w-[180px]">
+                        <div class="text-left rtl-text-start leading-tight hidden sm:block max-w-[180px]">
                             <div class="text-sm font-bold truncate">
                                 {{ $frsUser ? trim(($frsUser->prenom ?? '').' '.($frsUser->nom ?? '')) : ($frs?->nom_frs ?? __('Fournisseur')) }}
                             </div>
@@ -291,7 +305,7 @@
                         <form method="POST" action="{{ url('/fournisseur/logout') }}">
                             @csrf
                             <button type="submit"
-                                    class="w-full text-left px-4 py-3 text-sm hover:bg-white/10"
+                                    class="w-full text-left rtl-text-start px-4 py-3 text-sm hover:bg-white/10"
                                     :class="dark ? '' : 'hover:bg-slate-100'">
                                 {{ __('Déconnexion') }}
                             </button>

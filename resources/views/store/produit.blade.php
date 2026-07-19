@@ -4,7 +4,7 @@
 <div class="space-y-6 sm:space-y-8">
     <div class="flex items-center justify-between">
         <a href="{{ url('/') }}" class="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/80 px-4 py-2 text-sm text-slate-500 shadow-sm transition hover:-translate-y-0.5 hover:text-slate-900">
-            <i class="fa-solid fa-arrow-left-long"></i>
+            <i class="rtl-flip fa-solid fa-arrow-left-long"></i>
             {{ __('Retour') }}
         </a>
         <a href="{{ url('/panier') }}"
@@ -160,7 +160,7 @@
                         @csrf
                         <input type="hidden" name="produit_id" value="{{ $produit->id }}">
                         <div class="inline-flex items-center rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
-                            <span class="mr-3 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">{{ __('Qté') }}</span>
+                            <span class="qty-label mr-3 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">{{ __('Qté') }}</span>
                             <input type="number"
                                    name="qty"
                                    id="qtyInput"

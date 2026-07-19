@@ -8,7 +8,7 @@
             <div class="mt-1 text-sm text-slate-500">{{ __('Retrouvez vos produits sauvegardés et ajoutez-les rapidement au panier.') }}</div>
         </div>
         <a href="{{ url('/') }}" class="inline-flex items-center gap-2 rounded-2xl border border-white/70 bg-white/90 px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-white">
-            <i class="fa-solid fa-arrow-left-long text-[var(--store-primary)]"></i>
+            <i class="rtl-flip fa-solid fa-arrow-left-long text-[var(--store-primary)]"></i>
             {{ __('Retour au catalogue') }}
         </a>
     </div>

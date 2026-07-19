@@ -87,7 +87,7 @@
                                     @csrf
                                     <input type="hidden" name="produit_id" value="{{ $p->id }}">
                                     <div class="inline-flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm sm:w-auto sm:justify-start">
-                                        <span class="mr-3 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">{{ __('Qté') }}</span>
+                                        <span class="qty-label mr-3 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">{{ __('Qté') }}</span>
                                         <input type="number"
                                                name="qty"
                                                min="1"

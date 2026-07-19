@@ -14,7 +14,7 @@
         <div class="rounded-[32px] p-8 shadow-2xl bg-white/90 backdrop-blur border border-white/70 dark:bg-slate-900/90 dark:border-slate-800">
             @if($errors->any())
                 <div class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-200">
-                    <ul class="list-disc pl-5 space-y-1">
+                    <ul class="rtl-list-pad list-disc pl-5 space-y-1">
                         @foreach($errors->all() as $error)
                             <li>{{ $error }}</li>
                         @endforeach
@@ -42,9 +42,9 @@
                                :type="show ? 'text' : 'password'"
                                required
                                autocomplete="current-password"
-                               class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 pr-12 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-emerald-900/30" />
+                               class="password-toggle-input w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 pr-12 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-emerald-900/30" />
                         <button type="button"
-                                class="absolute inset-y-0 right-0 px-4 text-slate-500 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-100"
+                                class="password-toggle-btn absolute inset-y-0 right-0 px-4 text-slate-500 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-100"
                                 @click="show = !show">
                             <i class="fa-solid" :class="show ? 'fa-eye-slash' : 'fa-eye'"></i>
                         </button>

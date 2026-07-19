@@ -6,7 +6,7 @@
         <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
             <div>
                 <a href="{{ url('/') }}" class="text-sm text-slate-500 hover:text-slate-900 inline-flex items-center gap-2">
-                    <i class="fa-solid fa-arrow-left-long"></i>
+                    <i class="rtl-flip fa-solid fa-arrow-left-long"></i>
                     {{ __('Retour au store') }}
                 </a>
                 <div class="mt-3 flex items-start gap-4">
