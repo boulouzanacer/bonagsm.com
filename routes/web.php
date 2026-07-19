@@ -34,6 +34,10 @@ Route::post('/panier/update', [StoreController::class, 'panierUpdate']);
 Route::post('/panier/remove', [StoreController::class, 'panierRemove']);
 Route::post('/panier/clear', [StoreController::class, 'panierClear']);
 
+Route::get('/wishlist', [StoreController::class, 'wishlist']);
+Route::post('/wishlist/add', [StoreController::class, 'wishlistAdd']);
+Route::post('/wishlist/remove', [StoreController::class, 'wishlistRemove']);
+
 Route::get('/checkout', [StoreController::class, 'checkout']);
 Route::post('/checkout', [StoreController::class, 'checkoutStore']);
 

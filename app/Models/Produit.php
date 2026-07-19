@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -153,5 +154,11 @@ class Produit extends Model
     public function quantityPrices(): HasMany
     {
         return $this->hasMany(ProduitQuantityPrice::class, 'id_produit', 'id')->orderBy('quantity_min');
+    }
+
+    public function wishedByClients(): BelongsToMany
+    {
+        return $this->belongsToMany(Client::class, 'client_wishlist', 'id_produit', 'id_client')
+            ->withTimestamps();
     }
 }

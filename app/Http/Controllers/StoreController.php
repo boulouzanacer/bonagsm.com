@@ -78,6 +78,30 @@ class StoreController extends Controller
         return Client::query()->find((int) session('client_id'));
     }
 
+    private function wishlistProductIds(?Client $client): array
+    {
+        if (! $client) {
+            return [];
+        }
+
+        return DB::table('client_wishlist')
+            ->where('id_client', (int) $client->id)
+            ->pluck('id_produit')
+            ->map(fn ($v) => (int) $v)
+            ->all();
+    }
+
+    private function wishlistCount(?Client $client): int
+    {
+        if (! $client) {
+            return 0;
+        }
+
+        return (int) DB::table('client_wishlist')
+            ->where('id_client', (int) $client->id)
+            ->count();
+    }
+
     private function tarifForClient(?Client $client): int
     {
         if (! $client || (string) $client->type_client !== 'abonne') {
@@ -254,6 +278,8 @@ class StoreController extends Controller
             'cart_total' => $cartSummary['total'],
             'cart_count' => count($cartSummary['items']),
             'can_show_prices' => $canShowPrices,
+            'wishlist_ids' => $this->wishlistProductIds($client),
+            'wishlist_count' => $this->wishlistCount($client),
         ]);
     }
 
@@ -327,6 +353,8 @@ class StoreController extends Controller
             'cart_total' => $cartSummary['total'],
             'cart_count' => count($cartSummary['items']),
             'can_show_prices' => $canShowPrices,
+            'is_favorite' => in_array((int) $p->id, $this->wishlistProductIds($client), true),
+            'wishlist_count' => $this->wishlistCount($client),
         ]);
     }
 
@@ -344,7 +372,90 @@ class StoreController extends Controller
             'total' => $summary['total'],
             'boutique' => $boutique,
             'can_show_prices' => $canShowPrices,
+            'wishlist_count' => $this->wishlistCount($client),
         ]);
+    }
+
+    public function wishlist(): RedirectResponse|View
+    {
+        $client = $this->currentClient();
+        if (! $client) {
+            session(['url.intended' => url('/wishlist')]);
+            return redirect()->to('/login')->with('error', 'Connectez-vous pour voir vos favoris.');
+        }
+
+        $boutique = $this->singleFournisseur();
+        $canShowPrices = $this->canShowPrices($client, $boutique);
+        $fournisseurId = (int) ($boutique?->id ?? 0);
+
+        $produits = $client->wishlistProduits()
+            ->whereNull('produit.deleted_at')
+            ->where('produit.actif', 1)
+            ->when((string) $client->type_client !== 'abonne', fn ($q) => $q->where('produit.abonne_only', 0))
+            ->when($fournisseurId > 0, fn ($q) => $q->where('produit.id_frs', $fournisseurId))
+            ->with(['fournisseur:id,nom_frs,actif,is_visible,deleted_at', 'quantityPrices'])
+            ->select('produit.*')
+            ->paginate(18);
+
+        $cartSummary = $this->cartSummary();
+        $wishlistIds = $this->wishlistProductIds($client);
+
+        return view('store.wishlist', [
+            'title' => 'Mes favoris',
+            'client' => $client,
+            'boutique' => $boutique,
+            'produits' => $produits,
+            'cart_total' => $cartSummary['total'],
+            'cart_count' => count($cartSummary['items']),
+            'can_show_prices' => $canShowPrices,
+            'wishlist_ids' => $wishlistIds,
+            'wishlist_count' => count($wishlistIds),
+        ]);
+    }
+
+    public function wishlistAdd(Request $request): RedirectResponse
+    {
+        $client = $this->currentClient();
+        if (! $client) {
+            session(['url.intended' => url()->previous()]);
+            return redirect()->to('/login')->with('error', 'Connectez-vous pour enregistrer vos favoris.');
+        }
+
+        $data = $request->validate([
+            'produit_id' => ['required', 'integer', 'min:1'],
+        ]);
+
+        $singleFrsId = (int) ($this->singleFournisseur()?->id ?? 0);
+        $p = Produit::query()
+            ->whereNull('deleted_at')
+            ->where('actif', 1)
+            ->when($singleFrsId > 0, fn ($q) => $q->where('id_frs', $singleFrsId))
+            ->findOrFail((int) $data['produit_id']);
+
+        if ((string) $client->type_client !== 'abonne' && (int) ($p->abonne_only ?? 0) === 1) {
+            return back()->with('error', 'Produit réservé aux abonnés.');
+        }
+
+        $client->wishlistProduits()->syncWithoutDetaching([(int) $p->id]);
+
+        return back()->with('success', 'Produit ajouté aux favoris.');
+    }
+
+    public function wishlistRemove(Request $request): RedirectResponse
+    {
+        $client = $this->currentClient();
+        if (! $client) {
+            session(['url.intended' => url('/wishlist')]);
+            return redirect()->to('/login')->with('error', 'Connectez-vous pour gérer vos favoris.');
+        }
+
+        $data = $request->validate([
+            'produit_id' => ['required', 'integer', 'min:1'],
+        ]);
+
+        $client->wishlistProduits()->detach([(int) $data['produit_id']]);
+
+        return back()->with('success', 'Produit retiré des favoris.');
     }
 
     public function panierAdd(Request $request): RedirectResponse
@@ -523,6 +634,7 @@ class StoreController extends Controller
                 'shipping_fee' => $shippingFee,
                 'total_with_shipping' => (float) $summary['total'] + $shippingFee,
                 'pixel_contents' => $pixelContents,
+                'wishlist_count' => $this->wishlistCount($client),
             ]);
         } catch (QueryException $e) {
             report($e);
@@ -712,6 +824,7 @@ class StoreController extends Controller
             'title' => 'Mes commandes',
             'client' => $client,
             'commandes' => $commandes,
+            'wishlist_count' => $this->wishlistCount($client),
         ]);
     }
 
@@ -752,6 +865,7 @@ class StoreController extends Controller
             'client' => $client,
             'commande' => $commande,
             'lignes' => $lignes,
+            'wishlist_count' => $this->wishlistCount($client),
         ]);
     }
 }

@@ -97,6 +97,7 @@
 @php($storeFrs = $boutique ?? \App\Models\Fournisseur::single())
 @php($metaPixelId = trim((string)($storeFrs?->meta_pixel_id ?? '')))
 @php($tiktokPixelId = trim((string)($storeFrs?->tiktok_pixel_id ?? '')))
+@php($wishlistCount = (int)($wishlist_count ?? 0))
 <div class="store-shell min-h-screen flex flex-col">
     <div class="hero-orb hero-orb-a h-64 w-64 -top-10 -left-10 animate-float"></div>
     <div class="hero-orb hero-orb-b h-72 w-72 top-28 right-0 animate-float-delay"></div>
@@ -150,6 +151,15 @@
                 </a>
 
                 <div class="col-span-2 flex items-center gap-2 justify-start sm:col-span-1 sm:justify-end">
+                    <a href="{{ url('/wishlist') }}"
+                       class="interactive-lift inline-flex items-center gap-2 rounded-2xl px-3.5 py-2.5 text-sm font-semibold border border-white/70 bg-white/90 hover:bg-white shadow-sm">
+                        <i class="fa-regular fa-heart text-[var(--store-primary)]"></i>
+                        <span class="hidden sm:inline">Favoris</span>
+                        <span class="ml-1 inline-flex items-center justify-center min-w-[22px] h-5 px-1.5 rounded-full text-xs font-extrabold bg-emerald-50 text-emerald-700">
+                            {{ $wishlistCount }}
+                        </span>
+                    </a>
+
                     <a href="{{ url('/panier') }}"
                        class="interactive-lift inline-flex items-center gap-2 rounded-2xl px-3.5 py-2.5 text-sm font-semibold border border-white/70 bg-white/90 hover:bg-white shadow-sm">
                         <i class="fa-solid fa-cart-shopping text-[var(--store-primary)]"></i>

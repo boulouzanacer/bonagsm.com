@@ -86,10 +86,20 @@
             @forelse($produits as $p)
                 @php
                     $img = \App\Services\ImageProduitService::publicUrl($p->image_principale ?? '');
+                    $isFavorite = in_array((int) $p->id, $wishlist_ids ?? [], true);
                 @endphp
                 <div class="interactive-lift soft-card group rounded-[24px] overflow-hidden">
                     <a href="{{ url('/produits/'.$p->id) }}" class="block">
                         <div class="relative aspect-[1/1] overflow-hidden bg-gradient-to-br from-slate-100 via-white to-emerald-50">
+                            <form method="POST" action="{{ url($isFavorite ? '/wishlist/remove' : '/wishlist/add') }}" class="absolute right-3 top-3 z-10">
+                                @csrf
+                                <input type="hidden" name="produit_id" value="{{ $p->id }}">
+                                <button type="submit"
+                                        aria-label="{{ $isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris' }}"
+                                        class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/80 bg-white/90 text-sm shadow-sm transition hover:scale-105 {{ $isFavorite ? 'text-rose-500' : 'text-slate-500 hover:text-[var(--store-primary)]' }}">
+                                    <i class="{{ $isFavorite ? 'fa-solid' : 'fa-regular' }} fa-heart"></i>
+                                </button>
+                            </form>
                             @if($img !== '')
                                 <img src="{{ $img }}" alt="" class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
                             @else

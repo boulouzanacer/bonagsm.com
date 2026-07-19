@@ -150,31 +150,43 @@
             @endif
 
             <div class="mt-6">
-                <form method="POST"
-                      action="{{ url('/panier/add') }}"
-                      id="addToCartForm"
-                      class="flex flex-col gap-3 sm:flex-row sm:items-center"
-                      data-pixel-product-id="{{ $produit->id }}"
-                      data-pixel-price="{{ (($can_show_prices ?? false) || ($client ?? null)) ? (float)$produit->prixUnitairePourQuantite($client ?? null, 1) : 0 }}">
-                    @csrf
-                    <input type="hidden" name="produit_id" value="{{ $produit->id }}">
-                    <div class="inline-flex items-center rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
-                        <span class="mr-3 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Qté</span>
-                        <input type="number"
-                               name="qty"
-                               id="qtyInput"
-                               min="1"
-                               max="{{ max(1, (int)$produit->stock) }}"
-                               value="1"
-                               class="w-20 bg-transparent text-base font-bold outline-none focus:border-[var(--store-primary)]">
-                    </div>
-                    <button type="submit"
-                            class="interactive-lift flex-1 inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-extrabold text-white disabled:opacity-40 store-gradient shadow-lg shadow-emerald-950/15"
-                            @disabled((int)$produit->stock <= 0)>
-                        <i class="fa-solid fa-cart-plus"></i>
-                        Ajouter au panier
-                    </button>
-                </form>
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <form method="POST"
+                          action="{{ url('/panier/add') }}"
+                          id="addToCartForm"
+                          class="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center"
+                          data-pixel-product-id="{{ $produit->id }}"
+                          data-pixel-price="{{ (($can_show_prices ?? false) || ($client ?? null)) ? (float)$produit->prixUnitairePourQuantite($client ?? null, 1) : 0 }}">
+                        @csrf
+                        <input type="hidden" name="produit_id" value="{{ $produit->id }}">
+                        <div class="inline-flex items-center rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
+                            <span class="mr-3 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Qté</span>
+                            <input type="number"
+                                   name="qty"
+                                   id="qtyInput"
+                                   min="1"
+                                   max="{{ max(1, (int)$produit->stock) }}"
+                                   value="1"
+                                   class="w-20 bg-transparent text-base font-bold outline-none focus:border-[var(--store-primary)]">
+                        </div>
+                        <button type="submit"
+                                class="interactive-lift flex-1 inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-extrabold text-white disabled:opacity-40 store-gradient shadow-lg shadow-emerald-950/15"
+                                @disabled((int)$produit->stock <= 0)>
+                            <i class="fa-solid fa-cart-plus"></i>
+                            Ajouter au panier
+                        </button>
+                    </form>
+
+                    <form method="POST" action="{{ url(($is_favorite ?? false) ? '/wishlist/remove' : '/wishlist/add') }}">
+                        @csrf
+                        <input type="hidden" name="produit_id" value="{{ $produit->id }}">
+                        <button type="submit"
+                                class="interactive-lift inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-extrabold text-slate-700 shadow-sm hover:bg-slate-50 sm:w-auto">
+                            <i class="{{ ($is_favorite ?? false) ? 'fa-solid text-rose-500' : 'fa-regular text-[var(--store-primary)]' }} fa-heart"></i>
+                            {{ ($is_favorite ?? false) ? 'Retirer des favoris' : 'Ajouter aux favoris' }}
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
