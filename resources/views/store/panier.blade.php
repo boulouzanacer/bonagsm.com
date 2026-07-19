@@ -68,7 +68,7 @@
                                             {{ __('Stock: :stock', ['stock' => (int) $p->stock]) }}
                                         </span>
                                         @if(($can_show_prices ?? false) || ($client ?? null))
-                                            <span class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-700">
+                                            <span class="force-ltr inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-700">
                                                 {{ number_format((float)$it['prix_unitaire'], 2, '.', ' ') }} DA / u
                                             </span>
                                         @else
@@ -116,7 +116,7 @@
                                 <div class="flex items-center justify-between gap-3">
                                     <div class="text-xs uppercase tracking-[0.2em] text-slate-400">{{ __('Total ligne') }}</div>
                                     @if(($can_show_prices ?? false) || ($client ?? null))
-                                        <div class="text-lg font-extrabold text-slate-900">{{ number_format((float)$it['line_total'], 2, '.', ' ') }} DA</div>
+                                        <div class="force-ltr text-lg font-extrabold text-slate-900">{{ number_format((float)$it['line_total'], 2, '.', ' ') }} DA</div>
                                     @else
                                         <div class="text-sm font-extrabold text-slate-500">—</div>
                                     @endif
@@ -133,7 +133,7 @@
                 <div class="mt-5 flex items-center justify-between text-slate-600">
                     <span>{{ __('Total') }}</span>
                     @if(($can_show_prices ?? false) || ($client ?? null))
-                        <span class="font-extrabold text-slate-900 text-xl">{{ number_format((float)$total, 2, '.', ' ') }} DA</span>
+                        <span class="force-ltr font-extrabold text-slate-900 text-xl">{{ number_format((float)$total, 2, '.', ' ') }} DA</span>
                     @else
                         <span class="font-extrabold text-slate-500">{{ __('Connectez-vous') }}</span>
                     @endif

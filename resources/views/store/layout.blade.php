@@ -121,6 +121,13 @@
         html[dir="rtl"] .table-align-end{
             text-align:left;
         }
+        html[dir="rtl"] .force-ltr{
+            direction:ltr;
+            unicode-bidi:isolate;
+        }
+        html[dir="rtl"] input.force-ltr{
+            text-align:left;
+        }
     </style>
 </head>
 <body class="min-h-screen bg-[var(--store-bg)] text-slate-900 overflow-x-hidden">
@@ -153,7 +160,7 @@
                         </div>
                         <div class="text-xs text-slate-500">
                             @if(($storeFrs?->telephone ?? '') !== '')
-                                <a href="tel:{{ $storeFrs->telephone }}" class="hover:underline">{{ $storeFrs->telephone }}</a>
+                                <a href="tel:{{ $storeFrs->telephone }}" class="hover:underline force-ltr">{{ $storeFrs->telephone }}</a>
                             @else
                                 {{ __('Store') }}
                             @endif
@@ -169,7 +176,7 @@
                     <div class="font-extrabold tracking-wide truncate">{{ $storeFrs?->nom_frs ?? config('app.name') }}</div>
                     <div class="text-xs text-slate-500 truncate">
                         @if(($storeFrs?->telephone ?? '') !== '')
-                            <span>{{ $storeFrs->telephone }}</span>
+                            <span class="force-ltr">{{ $storeFrs->telephone }}</span>
                         @else
                             <span>{{ __('Store') }}</span>
                         @endif

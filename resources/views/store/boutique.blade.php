@@ -23,7 +23,7 @@
                     <div class="min-w-0">
                         <div class="text-2xl font-extrabold tracking-wide truncate">{{ $boutique->nom_frs }}</div>
                         <div class="mt-1 text-sm text-slate-600">{{ $boutique->adresse ?? '—' }}</div>
-                        <div class="mt-1 text-sm text-slate-600">{{ $boutique->telephone ?? '—' }}</div>
+                        <div class="force-ltr mt-1 text-sm text-slate-600">{{ $boutique->telephone ?? '—' }}</div>
                         @if(($boutique->latitude ?? null) && ($boutique->longitude ?? null))
                             <a href="https://www.google.com/maps?q={{ $boutique->latitude }},{{ $boutique->longitude }}"
                                target="_blank"
@@ -69,7 +69,7 @@
     <div class="space-y-3">
         <div class="flex items-center justify-between">
             <div class="text-lg font-extrabold tracking-wide">{{ __('Produits') }}</div>
-            <div class="text-sm text-slate-500">{{ $produits->total() }} {{ __('produit(s)') }}</div>
+            <div class="force-ltr text-sm text-slate-500">{{ $produits->total() }} {{ __('produit(s)') }}</div>
         </div>
 
         <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2">
@@ -99,7 +99,7 @@
 
                         <div class="mt-1.5 flex items-center justify-between gap-2">
                             <div>
-                                <div class="font-extrabold text-xs sm:text-[14px] text-slate-900 whitespace-nowrap">
+                                <div class="force-ltr font-extrabold text-xs sm:text-[14px] text-slate-900 whitespace-nowrap">
                                     {{ number_format((float)$p->prixUnitairePourQuantite($client ?? null, 1), 2, '.', ' ') }} <span class="text-[10px] opacity-70">DA</span>
                                 </div>
                             </div>

@@ -109,7 +109,7 @@
                             <div class="font-bold truncate">{{ $p->designation }}</div>
                             <div class="text-slate-500">x{{ (int)$it['qty'] }}</div>
                         </div>
-                        <div class="font-extrabold">{{ number_format((float)$it['line_total'], 2, '.', ' ') }} DA</div>
+                        <div class="force-ltr font-extrabold">{{ number_format((float)$it['line_total'], 2, '.', ' ') }} DA</div>
                     </div>
                 @endforeach
             </div>
@@ -117,20 +117,20 @@
             <div class="mt-4 pt-4 border-t border-slate-200 space-y-3">
                 <div class="flex items-center justify-between text-slate-600">
                     <span>{{ __('Sous-total') }}</span>
-                    <span class="font-extrabold text-slate-900" id="subtotalEl">{{ number_format((float)$total, 2, '.', ' ') }} DA</span>
+                    <span class="force-ltr font-extrabold text-slate-900" id="subtotalEl">{{ number_format((float)$total, 2, '.', ' ') }} DA</span>
                 </div>
 
                 @if(($shipping_enabled ?? false))
                     <div class="flex items-center justify-between text-slate-600">
                         <span>{{ __('Frais de livraison') }}</span>
-                        <span class="font-extrabold text-slate-900" id="shippingFeeEl">{{ number_format((float)($shipping_fee ?? 0), 2, '.', ' ') }} DA</span>
+                        <span class="force-ltr font-extrabold text-slate-900" id="shippingFeeEl">{{ number_format((float)($shipping_fee ?? 0), 2, '.', ' ') }} DA</span>
                     </div>
                     <div class="text-[11px] text-slate-500" id="shippingMotifEl"></div>
                 @endif
 
                 <div class="flex items-center justify-between">
                     <span class="text-slate-600">{{ __('Total') }}</span>
-                    <span class="font-extrabold text-slate-900 text-xl" id="totalEl">{{ number_format((float)($total_with_shipping ?? $total), 2, '.', ' ') }} DA</span>
+                    <span class="force-ltr font-extrabold text-slate-900 text-xl" id="totalEl">{{ number_format((float)($total_with_shipping ?? $total), 2, '.', ' ') }} DA</span>
                 </div>
             </div>
 

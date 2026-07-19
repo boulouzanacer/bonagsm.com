@@ -40,7 +40,7 @@
         </div>
         <div class="rounded-2xl border border-white/10 bg-[var(--frs-card)] p-5">
             <div class="text-sm text-white/60">{{ __('Téléphone') }}</div>
-            <div class="font-extrabold mt-1">{{ $client->telephone ?? '-' }}</div>
+            <div class="force-ltr font-extrabold mt-1">{{ $client->telephone ?? '-' }}</div>
         </div>
         <div class="rounded-2xl border border-white/10 bg-[var(--frs-card)] p-5">
             <div class="text-sm text-white/60">{{ __('Type') }}</div>

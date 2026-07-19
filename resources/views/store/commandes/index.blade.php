@@ -57,7 +57,7 @@
                             <td class="py-3 px-4">
                                 <span class="text-xs font-bold px-2.5 py-1 rounded-full {{ $badge }}">{{ $statutLabel }}</span>
                             </td>
-                            <td class="table-align-end py-3 px-4 text-right font-bold">{{ number_format((float)$c->montant_total, 2, '.', ' ') }} DA</td>
+                            <td class="table-align-end py-3 px-4 text-right font-bold force-ltr">{{ number_format((float)$c->montant_total, 2, '.', ' ') }} DA</td>
                             <td class="table-align-end py-3 px-4 text-right">
                                 <a href="{{ url('/mes-commandes/'.$c->id) }}"
                                    class="interactive-lift inline-flex items-center gap-2 rounded-2xl px-3.5 py-2 text-xs font-extrabold text-white store-gradient shadow-sm">

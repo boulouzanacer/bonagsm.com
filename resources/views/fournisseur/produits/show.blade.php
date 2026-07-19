@@ -74,19 +74,19 @@
                 </div>
                 <div class="flex items-center justify-between gap-3">
                     <div class="text-sm text-white/60">{{ __('Stock') }}</div>
-                    <div class="font-extrabold">{{ (int)$produit->stock }}</div>
+                    <div class="force-ltr font-extrabold">{{ (int)$produit->stock }}</div>
                 </div>
                 <div class="flex items-center justify-between gap-3">
                     <div class="text-sm text-white/60">{{ __('PV 1') }}</div>
-                    <div class="font-extrabold">{{ number_format((float)$produit->pv_1, 2, '.', ' ') }}</div>
+                    <div class="force-ltr font-extrabold">{{ number_format((float)$produit->pv_1, 2, '.', ' ') }}</div>
                 </div>
                 <div class="flex items-center justify-between gap-3">
                     <div class="text-sm text-white/60">{{ __('PV 2') }}</div>
-                    <div class="font-extrabold">{{ number_format((float)$produit->pv_2, 2, '.', ' ') }}</div>
+                    <div class="force-ltr font-extrabold">{{ number_format((float)$produit->pv_2, 2, '.', ' ') }}</div>
                 </div>
                 <div class="flex items-center justify-between gap-3">
                     <div class="text-sm text-white/60">{{ __('PV 3') }}</div>
-                    <div class="font-extrabold">{{ number_format((float)$produit->pv_3, 2, '.', ' ') }}</div>
+                    <div class="force-ltr font-extrabold">{{ number_format((float)$produit->pv_3, 2, '.', ' ') }}</div>
                 </div>
 
                 <div class="pt-2">
@@ -121,7 +121,7 @@
                                     {{ (int)$t['quantity_min'] }}-{{ (int)$t['quantity_max'] }} {{ __('pièces') }}
                                 @endif
                             </div>
-                            <div class="font-extrabold">{{ number_format((float)$t['price'], 2, '.', ' ') }} DA</div>
+                            <div class="force-ltr font-extrabold">{{ number_format((float)$t['price'], 2, '.', ' ') }} DA</div>
                         </div>
                     @endforeach
                 </div>

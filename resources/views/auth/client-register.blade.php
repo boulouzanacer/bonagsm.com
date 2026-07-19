@@ -83,7 +83,7 @@
                         <label class="block text-sm font-semibold text-slate-700 mb-1">{{ __('Téléphone') }}</label>
                         <input name="telephone"
                                value="{{ old('telephone') }}"
-                               class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none focus:border-[var(--store-primary)]"
+                               class="force-ltr w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none focus:border-[var(--store-primary)]"
                                required>
                         @error('telephone')
                             <div class="mt-1 text-xs text-red-700">{{ $message }}</div>

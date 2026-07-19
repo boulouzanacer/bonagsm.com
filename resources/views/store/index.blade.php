@@ -24,7 +24,7 @@
                     <div class="rounded-2xl border border-emerald-100 bg-emerald-50/60 px-4 py-3">
                         <div class="text-sm font-medium text-slate-500">{{ __('Total') }}</div>
                         @if(($can_show_prices ?? false) || ($client ?? null))
-                            <div class="mt-1 text-[1.35rem] font-extrabold tracking-tight text-slate-900">{{ number_format((float)$cart_total, 2, '.', ' ') }} DA</div>
+                            <div class="force-ltr mt-1 text-[1.35rem] font-extrabold tracking-tight text-slate-900">{{ number_format((float)$cart_total, 2, '.', ' ') }} DA</div>
                         @else
                             <div class="mt-1 text-[1.35rem] font-extrabold tracking-tight text-[var(--store-primary)]">{{ __('Connectez-vous') }}</div>
                         @endif
@@ -78,7 +78,7 @@
             </div>
             <div class="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/80 px-3 py-2 text-sm text-slate-500 shadow-sm">
                 <i class="fa-solid fa-box-open text-[var(--store-primary)]"></i>
-                <span>{{ $produits->total() }} {{ __('produit(s)') }}</span>
+                <span class="force-ltr">{{ $produits->total() }} {{ __('produit(s)') }}</span>
             </div>
         </div>
 
@@ -123,7 +123,7 @@
                         <div class="mt-3 flex items-center justify-between gap-2">
                             <div>
                                 @if(($can_show_prices ?? false) || ($client ?? null))
-                                    <div class="font-extrabold text-base text-slate-900 whitespace-nowrap">
+                                    <div class="force-ltr font-extrabold text-base text-slate-900 whitespace-nowrap">
                                         {{ number_format((float)$p->prixUnitairePourQuantite($client ?? null, 1), 2, '.', ' ') }} <span class="text-[10px] opacity-70">DA</span>
                                     </div>
                                 @else

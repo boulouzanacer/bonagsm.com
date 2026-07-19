@@ -102,7 +102,7 @@
                 @if(($can_show_prices ?? false) || ($client ?? null))
                     <div>
                         <div class="text-xs uppercase tracking-[0.2em] text-slate-400">{{ __('Prix unitaire') }}</div>
-                        <div class="text-2xl font-extrabold">
+                        <div class="force-ltr text-2xl font-extrabold">
                             <span id="unitPrice">{{ number_format($initialUnit, 2, '.', ' ') }}</span> DA
                         </div>
                     </div>
@@ -117,7 +117,7 @@
             </div>
             @if(($can_show_prices ?? false) || ($client ?? null))
                 <div class="mt-1 text-xs text-slate-500">
-                    {{ __('Total:') }} <span class="font-bold text-slate-700"><span id="totalPrice">{{ number_format($initialUnit * $initialQty, 2, '.', ' ') }}</span> DA</span>
+                    {{ __('Total:') }} <span class="force-ltr font-bold text-slate-700"><span id="totalPrice">{{ number_format($initialUnit * $initialQty, 2, '.', ' ') }}</span> DA</span>
                 </div>
             @endif
 
@@ -142,7 +142,7 @@
                                         {{ (int)$t['quantity_min'] }}-{{ (int)$t['quantity_max'] }} {{ __('pièces') }}
                                     @endif
                                 </div>
-                                <div class="font-extrabold">{{ number_format((float)$t['price'], 2, '.', ' ') }} DA</div>
+                                <div class="force-ltr font-extrabold">{{ number_format((float)$t['price'], 2, '.', ' ') }} DA</div>
                             </div>
                         @endforeach
                     </div>

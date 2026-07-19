@@ -46,7 +46,7 @@
                                 </span>
                             </td>
                             <td class="py-3 px-4 text-white/80">{{ $c->email }}</td>
-                            <td class="py-3 px-4 text-white/80">{{ $c->telephone }}</td>
+                            <td class="py-3 px-4 text-white/80 force-ltr">{{ $c->telephone }}</td>
                             <td class="py-3 px-4 text-white/80">{{ $c->commune_nom ?? '-' }}</td>
                             <td class="table-align-end py-3 px-4 text-right font-extrabold">{{ (int)$c->nb_commandes }}</td>
                         </tr>

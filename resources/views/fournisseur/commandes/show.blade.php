@@ -91,17 +91,17 @@
                     }
                     $frais = (float) ($commande->frais_livraison ?? 0);
                 @endphp
-                <span class="text-sm font-extrabold">{{ number_format((float)$commande->montant_total, 2, '.', ' ') }}</span>
+                <span class="force-ltr text-sm font-extrabold">{{ number_format((float)$commande->montant_total, 2, '.', ' ') }}</span>
             </div>
             <div class="mt-3 space-y-1 text-xs text-white/70">
                 <div class="flex items-center justify-between">
                     <span>{{ __('Sous-total') }}</span>
-                    <span class="font-extrabold">{{ number_format($sousTotal, 2, '.', ' ') }}</span>
+                    <span class="force-ltr font-extrabold">{{ number_format($sousTotal, 2, '.', ' ') }}</span>
                 </div>
                 @if($frais > 0)
                     <div class="flex items-center justify-between">
                         <span>{{ __('Frais livraison') }}</span>
-                        <span class="font-extrabold">{{ number_format($frais, 2, '.', ' ') }}</span>
+                        <span class="force-ltr font-extrabold">{{ number_format($frais, 2, '.', ' ') }}</span>
                     </div>
                     <div class="flex items-center justify-between">
                         <span>{{ __('Motif') }}</span>
@@ -175,20 +175,20 @@
                                     <div class="font-extrabold">{{ (int)$l->quantite }}</div>
                                 @endif
                             </td>
-                            <td class="py-3 px-4 text-right font-extrabold">{{ number_format((float)$l->prix_unitaire, 2, '.', ' ') }}</td>
-                            <td class="py-3 px-4 text-right font-extrabold">{{ number_format((float)$l->sous_total, 2, '.', ' ') }}</td>
+                            <td class="py-3 px-4 text-right font-extrabold force-ltr">{{ number_format((float)$l->prix_unitaire, 2, '.', ' ') }}</td>
+                            <td class="py-3 px-4 text-right font-extrabold force-ltr">{{ number_format((float)$l->sous_total, 2, '.', ' ') }}</td>
                         </tr>
                     @endforeach
                 </tbody>
                 <tfoot>
                     <tr class="border-t border-white/10">
                         <td colspan="3" class="table-align-end py-3 px-4 text-right font-extrabold">{{ __('Sous-total') }}</td>
-                        <td class="table-align-end py-3 px-4 text-right font-extrabold">{{ number_format($sousTotal, 2, '.', ' ') }}</td>
+                        <td class="table-align-end py-3 px-4 text-right font-extrabold force-ltr">{{ number_format($sousTotal, 2, '.', ' ') }}</td>
                     </tr>
                     @if($frais > 0)
                         <tr class="border-t border-white/10">
                             <td colspan="3" class="table-align-end py-3 px-4 text-right font-extrabold">{{ __('Frais de livraison') }}</td>
-                            <td class="table-align-end py-3 px-4 text-right font-extrabold">{{ number_format($frais, 2, '.', ' ') }}</td>
+                            <td class="table-align-end py-3 px-4 text-right font-extrabold force-ltr">{{ number_format($frais, 2, '.', ' ') }}</td>
                         </tr>
                         <tr class="border-t border-white/10">
                             <td colspan="3" class="table-align-end py-3 px-4 text-right font-extrabold">{{ __('Motif') }}</td>
@@ -197,7 +197,7 @@
                     @endif
                     <tr class="border-t border-white/10">
                         <td colspan="3" class="table-align-end py-4 px-4 text-right font-extrabold">{{ __('Total') }}</td>
-                        <td class="table-align-end py-4 px-4 text-right font-extrabold">{{ number_format((float)$commande->montant_total, 2, '.', ' ') }}</td>
+                        <td class="table-align-end py-4 px-4 text-right font-extrabold force-ltr">{{ number_format((float)$commande->montant_total, 2, '.', ' ') }}</td>
                     </tr>
                 </tfoot>
             </table>

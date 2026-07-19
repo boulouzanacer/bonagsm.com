@@ -68,6 +68,13 @@
             right:auto;
             left:0;
         }
+        html[dir="rtl"] .force-ltr{
+            direction:ltr;
+            unicode-bidi:isolate;
+        }
+        html[dir="rtl"] input.force-ltr{
+            text-align:left;
+        }
     </style>
 
     <script>

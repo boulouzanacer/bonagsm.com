@@ -80,7 +80,7 @@
                                            step="0.01"
                                            min="0"
                                            value="{{ old('fees.'.$w->ID_WILAYA, $fee) }}"
-                                           class="w-40 text-right rounded-2xl border border-white/10 bg-black/20 px-4 py-2 outline-none focus:border-[var(--frs-primary)]"
+                                           class="force-ltr w-40 text-right rounded-2xl border border-white/10 bg-black/20 px-4 py-2 outline-none focus:border-[var(--frs-primary)]"
                                            {{ $canEdit ? '' : 'disabled' }}>
                                 </td>
                             </tr>

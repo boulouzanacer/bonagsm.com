@@ -65,8 +65,8 @@
                                     <div class="mt-1 text-sm text-slate-600">{{ __('Ref:') }} {{ $l->produit_reference ?? '—' }}</div>
                                 </div>
                                 <div class="table-align-end text-right">
-                                    <div class="font-extrabold">{{ number_format((float)$l->sous_total, 2, '.', ' ') }} DA</div>
-                                    <div class="text-xs text-slate-500">{{ (int)$l->quantite }} × {{ number_format((float)$l->prix_unitaire, 2, '.', ' ') }} DA</div>
+                                    <div class="force-ltr font-extrabold">{{ number_format((float)$l->sous_total, 2, '.', ' ') }} DA</div>
+                                    <div class="force-ltr text-xs text-slate-500">{{ (int)$l->quantite }} × {{ number_format((float)$l->prix_unitaire, 2, '.', ' ') }} DA</div>
                                 </div>
                             </div>
                         </div>
@@ -100,12 +100,12 @@
                 <div class="mt-4 space-y-3">
                     <div class="flex items-center justify-between text-slate-600">
                         <span>{{ __('Sous-total') }}</span>
-                        <span class="font-extrabold text-slate-900">{{ number_format($sousTotal, 2, '.', ' ') }} DA</span>
+                        <span class="force-ltr font-extrabold text-slate-900">{{ number_format($sousTotal, 2, '.', ' ') }} DA</span>
                     </div>
                     @if($frais > 0)
                         <div class="flex items-center justify-between text-slate-600">
                             <span>{{ __('Frais de livraison') }}</span>
-                            <span class="font-extrabold text-slate-900">{{ number_format($frais, 2, '.', ' ') }} DA</span>
+                            <span class="force-ltr font-extrabold text-slate-900">{{ number_format($frais, 2, '.', ' ') }} DA</span>
                         </div>
                         <div class="text-[11px] text-slate-500">
                             {{ __('Motif: Livraison vers :id - :name', ['id' => (int)($commande->id_wilaya ?? 0), 'name' => $commande->wilaya_nom ?? '—']) }}
@@ -113,7 +113,7 @@
                     @endif
                     <div class="flex items-center justify-between text-slate-600">
                         <span>{{ __('Total') }}</span>
-                        <span class="font-extrabold text-slate-900 text-xl">{{ number_format((float)$commande->montant_total, 2, '.', ' ') }} DA</span>
+                        <span class="force-ltr font-extrabold text-slate-900 text-xl">{{ number_format((float)$commande->montant_total, 2, '.', ' ') }} DA</span>
                     </div>
                 </div>
             </div>

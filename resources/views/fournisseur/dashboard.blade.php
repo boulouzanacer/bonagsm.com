@@ -128,7 +128,7 @@
                             <td class="py-3 pr-4">
                                 <span class="text-xs font-bold px-2.5 py-1 rounded-full {{ $badge }}">{{ $statutLabel }}</span>
                             </td>
-                            <td class="table-align-end py-3 text-right font-bold">{{ number_format((float)$c->montant_total, 2, '.', ' ') }}</td>
+                            <td class="table-align-end py-3 text-right font-bold force-ltr">{{ number_format((float)$c->montant_total, 2, '.', ' ') }}</td>
                         </tr>
                     @empty
                         <tr>

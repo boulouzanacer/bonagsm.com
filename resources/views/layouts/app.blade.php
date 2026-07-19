@@ -23,6 +23,13 @@
     <style>
         html,body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
         html[dir="rtl"], html[dir="rtl"] body{font-family:Tajawal,Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
+        html[dir="rtl"] .force-ltr{
+            direction:ltr;
+            unicode-bidi:isolate;
+        }
+        html[dir="rtl"] input.force-ltr{
+            text-align:left;
+        }
     </style>
     <script>
         function themeSwitcher() {

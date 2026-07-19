@@ -50,7 +50,7 @@
                         <div class="mt-3 flex items-center justify-between gap-2">
                             <div>
                                 @if(($can_show_prices ?? false) || ($client ?? null))
-                                    <div class="font-extrabold text-base text-slate-900 whitespace-nowrap">
+                                    <div class="force-ltr font-extrabold text-base text-slate-900 whitespace-nowrap">
                                         {{ number_format((float)$p->prixUnitairePourQuantite($client ?? null, 1), 2, '.', ' ') }} <span class="text-[10px] opacity-70">DA</span>
                                     </div>
                                 @else

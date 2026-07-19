@@ -38,7 +38,7 @@
                     <label class="block text-sm font-semibold text-white/70 mb-1">{{ __('Téléphone') }}</label>
                     <input name="telephone"
                            value="{{ old('telephone', $frs->telephone) }}"
-                           class="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--frs-primary)]">
+                           class="force-ltr w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--frs-primary)]">
                 </div>
 
                 <div class="md:col-span-2">
