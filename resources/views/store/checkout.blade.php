@@ -107,7 +107,7 @@
                     <div class="flex items-start justify-between gap-3 rounded-2xl bg-slate-50 px-4 py-3 text-sm">
                         <div class="min-w-0">
                             <div class="font-bold truncate">{{ $p->designation }}</div>
-                            <div class="text-slate-500">x{{ (int)$it['qty'] }}</div>
+                            <div class="force-ltr text-slate-500">x{{ (int)$it['qty'] }}</div>
                         </div>
                         <div class="force-ltr font-extrabold">{{ number_format((float)$it['line_total'], 2, '.', ' ') }} DA</div>
                     </div>

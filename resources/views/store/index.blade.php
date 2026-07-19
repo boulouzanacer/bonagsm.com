@@ -130,7 +130,7 @@
                                     <div class="text-[11px] font-bold text-slate-400 whitespace-nowrap">{{ __('Connectez-vous') }}</div>
                                 @endif
                             </div>
-                            <div class="text-[11px] font-bold {{ (int)$p->stock > 0 ? 'text-emerald-600' : 'text-red-500' }}">
+                            <div class="force-ltr text-[11px] font-bold {{ (int)$p->stock > 0 ? 'text-emerald-600' : 'text-red-500' }}">
                                 {{ (int)$p->stock > 0 ? __('Stock: :stock', ['stock' => (int) $p->stock]) : __('Rupture') }}
                             </div>
                         </div>

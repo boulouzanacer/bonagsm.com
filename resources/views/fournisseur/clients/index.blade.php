@@ -42,13 +42,13 @@
                             <td class="py-3 px-4 text-white/80">{{ $c->prenom }} {{ $c->nom }}</td>
                             <td class="py-3 px-4 text-center">
                                 <span class="inline-flex items-center justify-center min-w-9 px-3 py-1 rounded-full text-xs font-extrabold bg-white/10 border border-white/10">
-                                    {{ (int)($c->tarif ?? 1) }}
+                                    <span class="force-ltr">{{ (int)($c->tarif ?? 1) }}</span>
                                 </span>
                             </td>
                             <td class="py-3 px-4 text-white/80 force-ltr">{{ $c->email }}</td>
                             <td class="py-3 px-4 text-white/80 force-ltr">{{ $c->telephone }}</td>
                             <td class="py-3 px-4 text-white/80">{{ $c->commune_nom ?? '-' }}</td>
-                            <td class="table-align-end py-3 px-4 text-right font-extrabold">{{ (int)$c->nb_commandes }}</td>
+                            <td class="table-align-end py-3 px-4 text-right font-extrabold force-ltr">{{ (int)$c->nb_commandes }}</td>
                         </tr>
                     @empty
                         <tr>

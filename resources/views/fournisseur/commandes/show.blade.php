@@ -5,7 +5,7 @@
     <div class="flex items-center justify-between">
         <div>
             <div class="text-2xl font-extrabold tracking-wide">{{ __('Commande') }} #{{ $commande->id }}</div>
-            <div class="text-sm text-white/60">{{ \Illuminate\Support\Carbon::parse($commande->date_cmd)->format('d/m/Y H:i') }}</div>
+            <div class="text-sm text-white/60 force-ltr">{{ \Illuminate\Support\Carbon::parse($commande->date_cmd)->format('d/m/Y H:i') }}</div>
         </div>
         <a href="{{ url('/fournisseur/commandes') }}"
            class="rounded-2xl px-4 py-3 font-bold border border-white/10 hover:bg-white/10">
@@ -105,7 +105,7 @@
                     </div>
                     <div class="flex items-center justify-between">
                         <span>{{ __('Motif') }}</span>
-                        <span class="font-extrabold">{{ __('Wilaya') }} {{ (int)($commande->id_wilaya ?? 0) }} - {{ $commande->wilaya_nom ?? '—' }}</span>
+                        <span class="force-ltr font-extrabold">{{ __('Wilaya') }} {{ (int)($commande->id_wilaya ?? 0) }} - {{ $commande->wilaya_nom ?? '—' }}</span>
                     </div>
                 @endif
             </div>
@@ -135,7 +135,7 @@
     <div class="rounded-2xl border border-white/10 bg-[var(--frs-card)] overflow-hidden">
         <div class="flex items-center justify-between px-5 py-4">
             <div class="font-extrabold tracking-wide">{{ __('Produits commandés') }}</div>
-            <div class="text-sm text-white/60">{{ $lignes->count() }} {{ __('lignes') }}</div>
+            <div class="text-sm text-white/60 force-ltr">{{ $lignes->count() }} {{ __('lignes') }}</div>
         </div>
 
         <div class="overflow-x-auto">
@@ -164,7 +164,7 @@
                                                name="quantite"
                                                min="1"
                                                value="{{ (int)$l->quantite }}"
-                                               class="w-20 text-right rounded-xl border border-white/10 bg-black/20 px-3 py-2 outline-none focus:border-[var(--frs-primary)]">
+                                               class="force-ltr w-20 text-right rounded-xl border border-white/10 bg-black/20 px-3 py-2 outline-none focus:border-[var(--frs-primary)]">
                                         <button type="submit"
                                                 class="rounded-xl px-3 py-2 text-xs font-extrabold text-white"
                                                 style="background: linear-gradient(135deg, var(--frs-primary), #0A3D7A);">
@@ -172,7 +172,7 @@
                                         </button>
                                     </form>
                                 @else
-                                    <div class="font-extrabold">{{ (int)$l->quantite }}</div>
+                                    <div class="force-ltr font-extrabold">{{ (int)$l->quantite }}</div>
                                 @endif
                             </td>
                             <td class="py-3 px-4 text-right font-extrabold force-ltr">{{ number_format((float)$l->prix_unitaire, 2, '.', ' ') }}</td>
@@ -192,7 +192,7 @@
                         </tr>
                         <tr class="border-t border-white/10">
                             <td colspan="3" class="table-align-end py-3 px-4 text-right font-extrabold">{{ __('Motif') }}</td>
-                            <td class="table-align-end py-3 px-4 text-right font-extrabold">{{ __('Wilaya') }} {{ (int)($commande->id_wilaya ?? 0) }} - {{ $commande->wilaya_nom ?? '—' }}</td>
+                            <td class="table-align-end py-3 px-4 text-right font-extrabold force-ltr">{{ __('Wilaya') }} {{ (int)($commande->id_wilaya ?? 0) }} - {{ $commande->wilaya_nom ?? '—' }}</td>
                         </tr>
                     @endif
                     <tr class="border-t border-white/10">

@@ -109,16 +109,16 @@
             <div class="rounded-2xl border border-white/10 bg-black/20 p-4">
                 <div class="flex items-center justify-between gap-3">
                     <div class="font-extrabold tracking-wide">{{ __('Tarifs par quantité') }}</div>
-                    <div class="text-xs text-white/50">{{ count($tiers) }} {{ __('palier(s)') }}</div>
+                    <div class="force-ltr text-xs text-white/50">{{ count($tiers) }} {{ __('palier(s)') }}</div>
                 </div>
                 <div class="mt-3 space-y-2 text-sm">
                     @foreach($tiers as $t)
                         <div class="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-[var(--frs-card)] px-4 py-3">
                             <div class="text-white/70">
                                 @if($t['quantity_max'] === null)
-                                    {{ (int)$t['quantity_min'] }}+ {{ __('pièces') }}
+                                    <span class="force-ltr">{{ (int)$t['quantity_min'] }}+ {{ __('pièces') }}</span>
                                 @else
-                                    {{ (int)$t['quantity_min'] }}-{{ (int)$t['quantity_max'] }} {{ __('pièces') }}
+                                    <span class="force-ltr">{{ (int)$t['quantity_min'] }}-{{ (int)$t['quantity_max'] }} {{ __('pièces') }}</span>
                                 @endif
                             </div>
                             <div class="force-ltr font-extrabold">{{ number_format((float)$t['price'], 2, '.', ' ') }} DA</div>

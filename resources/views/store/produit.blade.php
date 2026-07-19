@@ -121,7 +121,7 @@
                 </div>
             @endif
 
-            <div class="mt-3 inline-flex items-center rounded-full px-3 py-1.5 text-sm font-semibold {{ (int)$produit->stock > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600' }}">
+            <div class="force-ltr mt-3 inline-flex items-center rounded-full px-3 py-1.5 text-sm font-semibold {{ (int)$produit->stock > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600' }}">
                 {{ (int)$produit->stock > 0 ? __('Stock disponible: :stock', ['stock' => (int) $produit->stock]) : __('Rupture de stock') }}
             </div>
 
@@ -137,9 +137,9 @@
                             <div class="flex items-center justify-between gap-3 rounded-2xl bg-white px-3 py-2.5 shadow-sm">
                                 <div class="text-slate-600">
                                     @if($t['quantity_max'] === null)
-                                        {{ (int)$t['quantity_min'] }}+ {{ __('pièces') }}
+                                        <span class="force-ltr">{{ (int)$t['quantity_min'] }}+ {{ __('pièces') }}</span>
                                     @else
-                                        {{ (int)$t['quantity_min'] }}-{{ (int)$t['quantity_max'] }} {{ __('pièces') }}
+                                        <span class="force-ltr">{{ (int)$t['quantity_min'] }}-{{ (int)$t['quantity_max'] }} {{ __('pièces') }}</span>
                                     @endif
                                 </div>
                                 <div class="force-ltr font-extrabold">{{ number_format((float)$t['price'], 2, '.', ' ') }} DA</div>
@@ -167,7 +167,7 @@
                                    min="1"
                                    max="{{ max(1, (int)$produit->stock) }}"
                                    value="1"
-                                   class="w-20 bg-transparent text-base font-bold outline-none focus:border-[var(--store-primary)]">
+                                   class="force-ltr w-20 bg-transparent text-base font-bold outline-none focus:border-[var(--store-primary)]">
                         </div>
                         <button type="submit"
                                 class="interactive-lift flex-1 inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-extrabold text-white disabled:opacity-40 store-gradient shadow-lg shadow-emerald-950/15"

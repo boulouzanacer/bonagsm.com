@@ -10,7 +10,7 @@
             <div class="mt-2 text-sm text-slate-600">
                 {{ __('Boutique:') }} <span class="font-semibold text-slate-900">{{ $commande->frs_nom ?? '—' }}</span>
                 <span class="mx-2 text-slate-300">•</span>
-                {{ \Illuminate\Support\Carbon::parse($commande->date_cmd)->format('d/m/Y H:i') }}
+                <span class="force-ltr">{{ \Illuminate\Support\Carbon::parse($commande->date_cmd)->format('d/m/Y H:i') }}</span>
             </div>
         </div>
         <a href="{{ url('/mes-commandes') }}" class="interactive-lift inline-flex items-center gap-2 rounded-2xl border border-white/70 bg-white px-4 py-2.5 text-sm text-slate-500 shadow-sm hover:text-slate-900">

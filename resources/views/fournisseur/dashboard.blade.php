@@ -123,7 +123,7 @@
                         @endphp
                         <tr class="hover:bg-white/5">
                             <td class="py-3 pr-4 font-semibold">#{{ $c->id }}</td>
-                            <td class="py-3 pr-4 text-white/80">{{ \Illuminate\Support\Carbon::parse($c->date_cmd)->format('d/m/Y H:i') }}</td>
+                            <td class="py-3 pr-4 text-white/80 force-ltr">{{ \Illuminate\Support\Carbon::parse($c->date_cmd)->format('d/m/Y H:i') }}</td>
                             <td class="py-3 pr-4 text-white/80">{{ trim(($c->client_prenom ?? '').' '.($c->client_nom ?? '')) }}</td>
                             <td class="py-3 pr-4">
                                 <span class="text-xs font-bold px-2.5 py-1 rounded-full {{ $badge }}">{{ $statutLabel }}</span>
@@ -161,7 +161,7 @@
                         <div class="force-ltr text-xs text-white/60 truncate">{{ $p->reference }}</div>
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-xs font-bold px-2.5 py-1 rounded-full {{ $badge }}">{{ $label }} ({{ $stock }})</span>
+                        <span class="force-ltr text-xs font-bold px-2.5 py-1 rounded-full {{ $badge }}">{{ $label }} ({{ $stock }})</span>
                     </div>
                 </div>
             @empty

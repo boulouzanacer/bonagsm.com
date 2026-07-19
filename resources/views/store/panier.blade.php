@@ -93,7 +93,7 @@
                                                min="1"
                                                max="{{ max(1, (int)$p->stock) }}"
                                                value="{{ (int)$it['qty'] }}"
-                                               class="w-20 bg-transparent text-right sm:text-left text-base font-bold outline-none focus:border-[var(--store-primary)]">
+                                               class="force-ltr w-20 bg-transparent text-right sm:text-left text-base font-bold outline-none focus:border-[var(--store-primary)]">
                                     </div>
                                     <button type="submit"
                                             class="interactive-lift w-full rounded-2xl px-4 py-2.5 text-sm font-bold border border-slate-200 bg-white hover:bg-slate-50 shadow-sm sm:w-auto">

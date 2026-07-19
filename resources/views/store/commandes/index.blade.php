@@ -52,7 +52,7 @@
                         @endphp
                         <tr class="hover:bg-slate-50/80 transition">
                             <td class="py-3 px-4 font-semibold">#{{ $c->id }}</td>
-                            <td class="py-3 px-4 text-slate-700">{{ \Illuminate\Support\Carbon::parse($c->date_cmd)->format('d/m/Y H:i') }}</td>
+                            <td class="py-3 px-4 text-slate-700 force-ltr">{{ \Illuminate\Support\Carbon::parse($c->date_cmd)->format('d/m/Y H:i') }}</td>
                             <td class="py-3 px-4 text-slate-700">{{ $c->frs_nom ?? '—' }}</td>
                             <td class="py-3 px-4">
                                 <span class="text-xs font-bold px-2.5 py-1 rounded-full {{ $badge }}">{{ $statutLabel }}</span>

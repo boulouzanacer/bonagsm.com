@@ -112,11 +112,11 @@
                         @endphp
                         <tr class="hover:bg-white/5">
                             <td class="py-3 px-4 font-semibold">#{{ $c->id }}</td>
-                            <td class="py-3 px-4 text-white/80">{{ \Illuminate\Support\Carbon::parse($c->date_cmd)->format('d/m/Y H:i') }}</td>
+                            <td class="py-3 px-4 text-white/80 force-ltr">{{ \Illuminate\Support\Carbon::parse($c->date_cmd)->format('d/m/Y H:i') }}</td>
                             <td class="py-3 px-4">
                                 <span class="text-xs font-bold px-2.5 py-1 rounded-full {{ $badge }}">{{ $statutLabel }}</span>
                             </td>
-                            <td class="table-align-end py-3 px-4 text-right font-extrabold">{{ number_format((float)$c->montant_total, 2, '.', ' ') }}</td>
+                            <td class="table-align-end py-3 px-4 text-right font-extrabold force-ltr">{{ number_format((float)$c->montant_total, 2, '.', ' ') }}</td>
                             <td class="table-align-end py-3 px-4 text-right">
                                 <a href="{{ url('/fournisseur/commandes/'.$c->id) }}"
                                    class="rounded-xl px-3 py-2 text-xs font-bold border border-white/10 hover:bg-white/10">
