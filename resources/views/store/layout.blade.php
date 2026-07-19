@@ -150,7 +150,7 @@
                     @endif
                 </a>
 
-                <div class="col-span-2 flex items-center gap-2 justify-start sm:col-span-1 sm:justify-end">
+                <div class="col-span-2 flex items-center gap-2 justify-end sm:col-span-1 sm:justify-end">
                     <a href="{{ url('/wishlist') }}"
                        class="interactive-lift inline-flex items-center gap-2 rounded-2xl px-3.5 py-2.5 text-sm font-semibold border border-white/70 bg-white/90 hover:bg-white shadow-sm">
                         <i class="fa-regular fa-heart text-[var(--store-primary)]"></i>

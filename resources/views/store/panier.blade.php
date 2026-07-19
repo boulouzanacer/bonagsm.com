@@ -44,9 +44,9 @@
             <div class="lg:col-span-2 space-y-3">
                 @foreach($items as $it)
                     @php($p = $it['produit'])
-                    <div class="soft-card interactive-lift rounded-[28px] p-4 sm:p-5">
+                    <div class="soft-card interactive-lift rounded-[28px] p-3 sm:p-5">
                         <div class="flex items-start gap-3 sm:gap-4">
-                            <a href="{{ url('/produits/'.$p->id) }}" class="h-24 w-24 rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 flex-shrink-0 sm:h-20 sm:w-28">
+                            <a href="{{ url('/produits/'.$p->id) }}" class="h-20 w-20 rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 flex-shrink-0 sm:h-20 sm:w-28">
                                 @if(($it['image'] ?? '') !== '')
                                     <img src="{{ $it['image'] }}" alt="" class="w-full h-full object-cover">
                                 @else
@@ -81,44 +81,47 @@
                             </div>
                         </div>
 
-                        <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50/80 p-3">
-                            <div class="flex items-center justify-between gap-3">
-                                <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Total ligne</div>
-                                @if(($can_show_prices ?? false) || ($client ?? null))
-                                    <div class="text-lg font-extrabold text-slate-900">{{ number_format((float)$it['line_total'], 2, '.', ' ') }} DA</div>
-                                @else
-                                    <div class="text-sm font-extrabold text-slate-500">—</div>
-                                @endif
+                        <div class="mt-3 flex flex-col gap-3">
+                            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                <form method="POST" action="{{ url('/panier/update') }}" class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                                    @csrf
+                                    <input type="hidden" name="produit_id" value="{{ $p->id }}">
+                                    <div class="inline-flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm sm:w-auto sm:justify-start">
+                                        <span class="mr-3 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Qté</span>
+                                        <input type="number"
+                                               name="qty"
+                                               min="1"
+                                               max="{{ max(1, (int)$p->stock) }}"
+                                               value="{{ (int)$it['qty'] }}"
+                                               class="w-20 bg-transparent text-right sm:text-left text-base font-bold outline-none focus:border-[var(--store-primary)]">
+                                    </div>
+                                    <button type="submit"
+                                            class="interactive-lift w-full rounded-2xl px-4 py-2.5 text-sm font-bold border border-slate-200 bg-white hover:bg-slate-50 shadow-sm sm:w-auto">
+                                        Mettre à jour
+                                    </button>
+                                </form>
+
+                                <form method="POST" action="{{ url('/panier/remove') }}">
+                                @csrf
+                                <input type="hidden" name="produit_id" value="{{ $p->id }}">
+                                    <button type="submit"
+                                            aria-label="Supprimer"
+                                            class="interactive-lift inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 shadow-sm">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </form>
                             </div>
-                        </div>
 
-                        <div class="mt-4 flex flex-col gap-3">
-                            <form method="POST" action="{{ url('/panier/update') }}" class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                @csrf
-                                <input type="hidden" name="produit_id" value="{{ $p->id }}">
-                                <div class="inline-flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm sm:w-auto sm:justify-start">
-                                    <span class="mr-3 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Qté</span>
-                                    <input type="number"
-                                           name="qty"
-                                           min="1"
-                                           max="{{ max(1, (int)$p->stock) }}"
-                                           value="{{ (int)$it['qty'] }}"
-                                           class="w-20 bg-transparent text-right sm:text-left text-base font-bold outline-none focus:border-[var(--store-primary)]">
+                            <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-3">
+                                <div class="flex items-center justify-between gap-3">
+                                    <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Total ligne</div>
+                                    @if(($can_show_prices ?? false) || ($client ?? null))
+                                        <div class="text-lg font-extrabold text-slate-900">{{ number_format((float)$it['line_total'], 2, '.', ' ') }} DA</div>
+                                    @else
+                                        <div class="text-sm font-extrabold text-slate-500">—</div>
+                                    @endif
                                 </div>
-                                <button type="submit"
-                                        class="interactive-lift w-full rounded-2xl px-4 py-2.5 text-sm font-bold border border-slate-200 bg-white hover:bg-slate-50 shadow-sm sm:w-auto">
-                                    Mettre à jour
-                                </button>
-                            </form>
-
-                            <form method="POST" action="{{ url('/panier/remove') }}">
-                                @csrf
-                                <input type="hidden" name="produit_id" value="{{ $p->id }}">
-                                <button type="submit"
-                                        class="interactive-lift w-full rounded-2xl px-4 py-2.5 text-sm font-bold border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 shadow-sm sm:w-auto">
-                                    Supprimer
-                                </button>
-                            </form>
+                            </div>
                         </div>
                     </div>
                 @endforeach
