@@ -11,7 +11,7 @@
                         @if(($client ?? null))
                             Parcourez vos produits, retrouvez vos tarifs et ajoutez rapidement au panier.
                         @else
-                            Parcourez le catalogue et ajoutez au panier avec une interface claire et fluide.
+                            Parcourez le catalogue et ajoutez au panier.
                         @endif
                     </div>
                 </div>

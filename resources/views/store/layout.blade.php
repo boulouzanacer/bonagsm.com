@@ -163,7 +163,7 @@
                     <a href="{{ url('/panier') }}"
                        class="interactive-lift inline-flex items-center gap-2 rounded-2xl px-3.5 py-2.5 text-sm font-semibold border border-white/70 bg-white/90 hover:bg-white shadow-sm">
                         <i class="fa-solid fa-cart-shopping text-[var(--store-primary)]"></i>
-                        <span>Panier</span>
+                        <span class="hidden sm:inline">Panier</span>
                         <span class="ml-1 inline-flex items-center justify-center min-w-[22px] h-5 px-1.5 rounded-full text-xs font-extrabold bg-emerald-50 text-emerald-700">
                             {{ $cartCount }}
                         </span>
@@ -187,7 +187,7 @@
                         <a href="{{ url('/login') }}"
                            class="interactive-lift inline-flex items-center gap-2 rounded-2xl px-3.5 py-2.5 text-sm font-semibold border border-white/70 bg-white/90 hover:bg-white shadow-sm">
                             <i class="fa-solid fa-user text-[var(--store-primary)]"></i>
-                            <span>Connexion</span>
+                            <span class="hidden sm:inline">Connexion</span>
                         </a>
                         <a href="{{ url('/register') }}"
                            class="interactive-lift inline-flex items-center gap-2 rounded-2xl px-3.5 py-2.5 text-sm font-extrabold text-white store-gradient shadow-lg shadow-emerald-950/20">
