@@ -2,60 +2,79 @@
 
 @section('content')
 <div class="space-y-6 sm:space-y-8">
-    <section class="relative overflow-hidden rounded-[28px] border border-white/60 p-5 sm:p-8 text-white shadow-2xl shadow-emerald-950/10 store-gradient">
-        <div class="absolute -top-16 -right-10 h-48 w-48 rounded-full bg-white/10 blur-3xl"></div>
-        <div class="absolute -bottom-16 left-10 h-40 w-40 rounded-full bg-emerald-300/20 blur-3xl"></div>
-        <div class="relative grid gap-6 lg:grid-cols-[1.4fr,0.9fr] lg:items-center">
-            <div>
-                <div class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.25em] text-emerald-50">BonaGsm Store</div>
-                <div class="mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">Une boutique moderne, rapide et fluide sur tous les écrans.</div>
-                <div class="mt-3 max-w-2xl text-sm leading-6 text-white/80 sm:text-base">
+    <section class="relative overflow-hidden rounded-[28px] border border-slate-200/80 bg-white p-5 sm:p-8 shadow-[0_24px_70px_rgba(15,23,42,0.08)]">
+        <div class="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-emerald-500 via-emerald-600 to-slate-900"></div>
+        <div class="absolute right-0 top-0 h-40 w-40 rounded-full bg-emerald-100/70 blur-3xl"></div>
+        <div class="relative grid gap-6 lg:grid-cols-[1.45fr,0.85fr] lg:items-start">
+            <div class="pl-2 sm:pl-4">
+                <div class="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.25em] text-emerald-700">BonaGsm Store</div>
+                <div class="mt-4 max-w-3xl text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl lg:text-[3.2rem] lg:leading-[1.05]">
+                    Une boutique plus claire, fluide et professionnelle.
+                </div>
+                <div class="mt-4 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
                     @if(($client ?? null))
-                        Bienvenue {{ $client->prenom }} {{ $client->nom }}. Retrouvez vos produits, vos tarifs et vos commandes dans une interface plus claire et plus confortable.
+                        Bienvenue {{ $client->prenom }} {{ $client->nom }}. Retrouvez vos produits, vos tarifs et vos commandes dans une interface plus lisible, plus légère et plus confortable.
                     @else
-                        Parcourez le catalogue, découvrez les nouveautés et ajoutez vos produits au panier avec une expérience simple, premium et responsive.
+                        Parcourez le catalogue, trouvez rapidement vos produits et gérez votre panier dans une interface simple, élégante et agréable sur tous les écrans.
                     @endif
                 </div>
-                <div class="mt-5 flex flex-wrap gap-3">
-                    <div class="rounded-2xl bg-white/10 px-4 py-3 backdrop-blur">
-                        <div class="text-[11px] uppercase tracking-[0.2em] text-white/60">Catalogue</div>
-                        <div class="mt-1 text-xl font-extrabold">{{ $produits->total() }}</div>
+                <div class="mt-6 grid gap-3 sm:grid-cols-3">
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3">
+                        <div class="text-[11px] uppercase tracking-[0.2em] text-slate-400">Catalogue</div>
+                        <div class="mt-1 text-xl font-extrabold text-slate-900">{{ $produits->total() }}</div>
                     </div>
-                    <div class="rounded-2xl bg-white/10 px-4 py-3 backdrop-blur">
-                        <div class="text-[11px] uppercase tracking-[0.2em] text-white/60">Panier</div>
-                        <div class="mt-1 text-xl font-extrabold">{{ $cart_count }} produit(s)</div>
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3">
+                        <div class="text-[11px] uppercase tracking-[0.2em] text-slate-400">Panier</div>
+                        <div class="mt-1 text-xl font-extrabold text-slate-900">{{ $cart_count }} produit(s)</div>
                     </div>
-                    <div class="rounded-2xl bg-white/10 px-4 py-3 backdrop-blur">
-                        <div class="text-[11px] uppercase tracking-[0.2em] text-white/60">Accès</div>
-                        <div class="mt-1 text-xl font-extrabold">{{ ($client ?? null) ? 'Client' : 'Invité' }}</div>
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3">
+                        <div class="text-[11px] uppercase tracking-[0.2em] text-slate-400">Accès</div>
+                        <div class="mt-1 text-xl font-extrabold text-slate-900">{{ ($client ?? null) ? 'Client' : 'Invité' }}</div>
                     </div>
                 </div>
             </div>
-            <div class="rounded-[28px] border border-white/15 bg-white/10 p-5 backdrop-blur-xl">
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="rounded-2xl bg-white/10 p-4">
-                        <div class="text-[11px] uppercase tracking-[0.2em] text-white/60">Panier</div>
-                        <div class="mt-2 font-extrabold">{{ $cart_count }} produit(s)</div>
+            <div class="soft-card rounded-[24px] p-5 sm:p-6">
+                <div class="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">Resume rapide</div>
+                <div class="mt-4 space-y-3">
+                    <div class="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                        <div>
+                            <div class="text-[11px] uppercase tracking-[0.2em] text-slate-400">Panier</div>
+                            <div class="mt-1 text-sm font-semibold text-slate-500">Articles selectionnes</div>
+                        </div>
+                        <div class="text-lg font-extrabold text-slate-900">{{ $cart_count }}</div>
                     </div>
-                    <div class="rounded-2xl bg-white/10 p-4">
-                        <div class="text-[11px] uppercase tracking-[0.2em] text-white/60">Prix</div>
+                    <div class="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                        <div>
+                            <div class="text-[11px] uppercase tracking-[0.2em] text-slate-400">Total</div>
+                            <div class="mt-1 text-sm font-semibold text-slate-500">Montant du panier</div>
+                        </div>
                         @if(($can_show_prices ?? false) || ($client ?? null))
-                            <div class="mt-2 font-extrabold">{{ number_format((float)$cart_total, 2, '.', ' ') }} DA</div>
+                            <div class="text-lg font-extrabold text-slate-900">{{ number_format((float)$cart_total, 2, '.', ' ') }} DA</div>
                         @else
-                            <div class="mt-2 font-extrabold text-white/80">Connectez-vous</div>
+                            <div class="text-sm font-extrabold text-emerald-700">Connexion requise</div>
                         @endif
                     </div>
-                    <div class="col-span-2 rounded-2xl border border-white/15 bg-slate-950/20 p-4">
-                        <div class="text-sm font-semibold text-white/70">Navigation rapide</div>
-                        <div class="mt-3 flex flex-wrap gap-2">
-                            <a href="{{ url('/panier') }}" class="rounded-xl bg-white px-3 py-2 text-xs font-extrabold text-slate-900 transition hover:-translate-y-0.5">Voir le panier</a>
-                            @if(($client ?? null))
-                                <a href="{{ url('/mes-commandes') }}" class="rounded-xl border border-white/20 px-3 py-2 text-xs font-extrabold text-white transition hover:bg-white/10">Mes commandes</a>
-                            @else
-                                <a href="{{ url('/login') }}" class="rounded-xl border border-white/20 px-3 py-2 text-xs font-extrabold text-white transition hover:bg-white/10">Connexion</a>
-                            @endif
+                    <div class="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                        <div>
+                            <div class="text-[11px] uppercase tracking-[0.2em] text-slate-400">Compte</div>
+                            <div class="mt-1 text-sm font-semibold text-slate-500">Statut actuel</div>
                         </div>
+                        <div class="text-sm font-extrabold text-slate-900">{{ ($client ?? null) ? 'Connecte' : 'Invite' }}</div>
                     </div>
+                </div>
+                <div class="mt-5 flex flex-wrap gap-2">
+                    <a href="{{ url('/panier') }}" class="inline-flex items-center justify-center rounded-2xl bg-emerald-600 px-4 py-2.5 text-sm font-extrabold text-white transition hover:bg-emerald-700">
+                        Voir le panier
+                    </a>
+                    @if(($client ?? null))
+                        <a href="{{ url('/mes-commandes') }}" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-extrabold text-slate-700 transition hover:bg-slate-50">
+                            Mes commandes
+                        </a>
+                    @else
+                        <a href="{{ url('/login') }}" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-extrabold text-slate-700 transition hover:bg-slate-50">
+                            Connexion
+                        </a>
+                    @endif
                 </div>
             </div>
         </div>
