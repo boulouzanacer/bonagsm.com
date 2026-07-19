@@ -128,6 +128,18 @@
             margin-right:0;
             margin-left:.75rem;
         }
+        html[dir="rtl"] .card-favorite-float{
+            right:auto;
+            left:.75rem;
+        }
+        html[dir="rtl"] .card-badge-float{
+            left:auto;
+            right:.75rem;
+        }
+        html[dir="rtl"] .inline-icon-gap{
+            margin-right:0;
+            margin-left:.375rem;
+        }
         html[dir="rtl"] .force-ltr{
             direction:ltr;
             unicode-bidi:isolate;

@@ -23,7 +23,7 @@
                 <div class="interactive-lift soft-card group rounded-[24px] overflow-hidden">
                     <a href="{{ url('/produits/'.$p->id) }}" class="block">
                         <div class="relative aspect-[1/1] overflow-hidden bg-gradient-to-br from-slate-100 via-white to-emerald-50">
-                            <form method="POST" action="{{ url('/wishlist/remove') }}" class="absolute right-3 top-3 z-10">
+                            <form method="POST" action="{{ url('/wishlist/remove') }}" class="card-favorite-float absolute right-3 top-3 z-10">
                                 @csrf
                                 <input type="hidden" name="produit_id" value="{{ $p->id }}">
                                 <button type="submit"

@@ -82,6 +82,10 @@
         html[dir="rtl"] .rtl-flip{
             transform:scaleX(-1);
         }
+        html[dir="rtl"] .switch-thumb-active{
+            margin-left:0;
+            margin-right:1rem;
+        }
         html[dir="rtl"] .force-ltr{
             direction:ltr;
             unicode-bidi:isolate;

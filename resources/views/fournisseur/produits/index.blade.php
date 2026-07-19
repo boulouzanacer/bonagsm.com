@@ -184,7 +184,7 @@
                                                         title="{{ $actif ? __('Désactiver') : __('Activer') }}"
                                                         class="h-9 w-14 inline-flex items-center justify-center rounded-xl border border-white/10 hover:bg-white/10">
                                                     <span class="inline-flex items-center h-5 w-9 rounded-full {{ $actif ? 'bg-emerald-500/40' : 'bg-white/15' }} px-0.5">
-                                                        <span class="h-4 w-4 rounded-full bg-white {{ $actif ? 'ml-4' : '' }}"></span>
+                                                        <span class="h-4 w-4 rounded-full bg-white {{ $actif ? 'ml-4 switch-thumb-active' : '' }}"></span>
                                                     </span>
                                                 </button>
                                             </form>
@@ -219,8 +219,8 @@
 
     <div x-show="importOpen" x-transition class="fixed inset-0 z-50">
         <div class="absolute inset-0 bg-black/60" @click="closeImport()"></div>
-        <div class="absolute inset-0 flex items-start justify-center p-4 overflow-auto">
-            <div class="w-full max-w-5xl rounded-2xl border border-white/10 bg-[var(--frs-card)] shadow-2xl overflow-hidden">
+            <div class="absolute inset-0 flex items-start justify-center p-4 overflow-auto">
+            <div class="w-full max-w-5xl rounded-2xl border border-white/10 bg-[var(--frs-card)] shadow-2xl overflow-hidden rtl-text-start">
                 <div class="p-5 border-b border-white/10 flex items-center justify-between gap-3">
                     <div>
                         <div class="text-lg font-extrabold tracking-wide">{{ __('Importer des produits') }}</div>
@@ -241,9 +241,9 @@
                         <div class="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-emerald-200">
                             <div class="font-extrabold" x-text="importResult.message"></div>
                             <div class="text-sm mt-1">
-                                {{ __('Créés') }}: <span class="font-extrabold" x-text="importResult.created"></span> •
-                                {{ __('Mis à jour') }}: <span class="font-extrabold" x-text="importResult.updated"></span> •
-                                {{ __('Ignorés') }}: <span class="font-extrabold" x-text="importResult.skipped"></span>
+                                {{ __('Créés') }}: <span class="force-ltr font-extrabold" x-text="importResult.created"></span> •
+                                {{ __('Mis à jour') }}: <span class="force-ltr font-extrabold" x-text="importResult.updated"></span> •
+                                {{ __('Ignorés') }}: <span class="force-ltr font-extrabold" x-text="importResult.skipped"></span>
                             </div>
                         </div>
                     </template>
@@ -256,7 +256,7 @@
                                     @click="pickFile()">
                                 {{ __('Choisir fichier') }}
                             </button>
-                            <div class="text-sm text-white/70" x-text="fileName || @js(__('Aucun fichier sélectionné'))"></div>
+                            <div class="force-ltr text-sm text-white/70" x-text="fileName || @js(__('Aucun fichier sélectionné'))"></div>
                         </div>
                         <div class="text-xs text-white/60">
                             {{ __('Clé de comparaison: Référence (obligatoire)') }}
@@ -420,7 +420,7 @@
 
                             <div class="flex items-center justify-between gap-3">
                                 <div class="text-sm text-white/60">
-                                    {{ __('Lignes détectées:') }} <span class="font-extrabold text-white" x-text="rows.length"></span>
+                                    {{ __('Lignes détectées:') }} <span class="force-ltr font-extrabold text-white" x-text="rows.length"></span>
                                 </div>
                                 <button type="button"
                                         class="rounded-2xl px-6 py-3 font-extrabold text-white disabled:opacity-50"
@@ -435,13 +435,13 @@
                                 <table class="min-w-full text-xs">
                                     <thead class="text-white/60">
                                         <tr>
-                                            <th class="text-left py-2 px-3">{{ __('Référence') }}</th>
-                                            <th class="text-left py-2 px-3">{{ __('Désignation') }}</th>
-                                            <th class="text-left py-2 px-3">{{ __('Catégorie') }}</th>
-                                            <th class="text-left py-2 px-3">{{ __('Sous-Cat.') }}</th>
-                                            <th class="text-left py-2 px-3">{{ __('Marque') }}</th>
-                                            <th class="text-right py-2 px-3">{{ __('Stock') }}</th>
-                                            <th class="text-right py-2 px-3">{{ __('PV1') }}</th>
+                                            <th class="table-align-start text-left py-2 px-3">{{ __('Référence') }}</th>
+                                            <th class="table-align-start text-left py-2 px-3">{{ __('Désignation') }}</th>
+                                            <th class="table-align-start text-left py-2 px-3">{{ __('Catégorie') }}</th>
+                                            <th class="table-align-start text-left py-2 px-3">{{ __('Sous-Cat.') }}</th>
+                                            <th class="table-align-start text-left py-2 px-3">{{ __('Marque') }}</th>
+                                            <th class="table-align-end text-right py-2 px-3">{{ __('Stock') }}</th>
+                                            <th class="table-align-end text-right py-2 px-3">{{ __('PV1') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-white/10">
@@ -452,8 +452,8 @@
                                                 <td class="py-2 px-3" x-text="val(r, mapping.categorie)"></td>
                                                 <td class="py-2 px-3" x-text="val(r, mapping.sous_categorie)"></td>
                                                 <td class="py-2 px-3" x-text="val(r, mapping.marque)"></td>
-                                                <td class="py-2 px-3 text-right" x-text="val(r, mapping.stock)"></td>
-                                                <td class="py-2 px-3 text-right" x-text="val(r, mapping.pv_1)"></td>
+                                                <td class="table-align-end py-2 px-3 text-right force-ltr" x-text="val(r, mapping.stock)"></td>
+                                                <td class="table-align-end py-2 px-3 text-right force-ltr" x-text="val(r, mapping.pv_1)"></td>
                                             </tr>
                                         </template>
                                     </tbody>

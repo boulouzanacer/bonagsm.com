@@ -74,7 +74,7 @@
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <div class="text-lg font-extrabold tracking-wide text-slate-900">{{ __('Produits') }}</div>
-                <div class="text-sm text-slate-500">{{ __('Catalogue optimisé pour mobile, tablette et desktop.') }}</div>
+               
             </div>
             <div class="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/80 px-3 py-2 text-sm text-slate-500 shadow-sm">
                 <i class="fa-solid fa-box-open text-[var(--store-primary)]"></i>
@@ -91,7 +91,7 @@
                 <div class="interactive-lift soft-card group rounded-[24px] overflow-hidden">
                     <a href="{{ url('/produits/'.$p->id) }}" class="block">
                         <div class="relative aspect-[1/1] overflow-hidden bg-gradient-to-br from-slate-100 via-white to-emerald-50">
-                            <form method="POST" action="{{ url($isFavorite ? '/wishlist/remove' : '/wishlist/add') }}" class="absolute right-3 top-3 z-10">
+                            <form method="POST" action="{{ url($isFavorite ? '/wishlist/remove' : '/wishlist/add') }}" class="card-favorite-float absolute right-3 top-3 z-10">
                                 @csrf
                                 <input type="hidden" name="produit_id" value="{{ $p->id }}">
                                 <button type="submit"
@@ -107,7 +107,7 @@
                                     <i class="fa-regular fa-image text-2xl"></i>
                                 </div>
                             @endif
-                            <div class="absolute left-3 top-3 inline-flex items-center rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-bold text-slate-600 shadow-sm">
+                            <div class="card-badge-float absolute left-3 top-3 inline-flex items-center rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-bold text-slate-600 shadow-sm">
                                 {{ $p->categorie ?: __('Produit') }}
                             </div>
                         </div>

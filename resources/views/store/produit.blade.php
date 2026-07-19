@@ -71,7 +71,7 @@
                     @endif
                     @if($produit->brand)
                         <span class="inline-flex text-[11px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full bg-amber-50 text-amber-600">
-                            <i class="fa-solid fa-copyright mr-1.5"></i>{{ $produit->brand->nom }}
+                            <i class="inline-icon-gap fa-solid fa-copyright mr-1.5"></i>{{ $produit->brand->nom }}
                         </span>
                     @endif
                 </div>
