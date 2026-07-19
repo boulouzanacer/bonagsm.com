@@ -75,14 +75,7 @@
         <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2">
             @forelse($produits as $p)
                 @php
-                    $raw = trim((string)($p->image_principale ?? ''));
-                    $img = '';
-                    if ($raw !== '') {
-                        $lower = strtolower($raw);
-                        if (str_starts_with($lower, 'http://') || str_starts_with($lower, 'https://')) $img = $raw;
-                        elseif (str_starts_with($raw, '/')) $img = url($raw);
-                        else $img = url('/'.$raw);
-                    }
+                    $img = \App\Services\ImageProduitService::publicUrl($p->image_principale ?? '');
                 @endphp
                 <div class="rounded-xl border border-slate-200 bg-[var(--store-card)] overflow-hidden">
                     <a href="{{ url('/produits/'.$p->id) }}" class="block">

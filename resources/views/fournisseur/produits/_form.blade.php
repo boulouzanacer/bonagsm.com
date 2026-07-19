@@ -495,7 +495,7 @@
             <div class="relative rounded-2xl border border-white/10 bg-[var(--frs-card)] overflow-hidden group"
                  data-key="existing:{{ $img->id }}"
                  data-existing="1">
-                <img src="{{ $img->url_thumbnail }}" class="h-28 w-full object-cover" alt="">
+                <img src="{{ \App\Services\ImageProduitService::publicUrl($img->url_thumbnail) }}" class="h-28 w-full object-cover" alt="">
 
                 <button type="button"
                         class="absolute top-2 left-2 h-9 w-9 rounded-xl bg-black/50 text-white/90 hover:bg-black/70 flex items-center justify-center"

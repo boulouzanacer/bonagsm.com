@@ -9,6 +9,7 @@ use App\Models\Categorie;
 use App\Models\Client;
 use App\Models\Fournisseur;
 use App\Models\Produit;
+use App\Services\ImageProduitService;
 use App\Traits\ApiResponseTrait;
 
 class ProduitController extends Controller
@@ -69,7 +70,7 @@ class ProduitController extends Controller
                 'pv_3' => (float) $p->pv_3,
                 'prix' => (float) $p->prixUnitairePourQuantite($client instanceof Client ? $client : null, 1),
                 'stock' => (int) $p->stock,
-                'image_principale' => $p->image_principale,
+                'image_principale' => ImageProduitService::publicUrl($p->image_principale),
                 'categorie' => $p->categorie,
                 'abonne_only' => (int) ($p->abonne_only ?? 0),
                 'enable_tier_pricing' => $p->isTierPricingEnabled(),
@@ -82,8 +83,8 @@ class ProduitController extends Controller
                 'images' => $p->images->map(fn ($img) => [
                     'id' => $img->id,
                     'filename' => $img->filename,
-                    'url_principale' => $img->url_principale,
-                    'url_thumbnail' => $img->url_thumbnail,
+                    'url_principale' => ImageProduitService::publicUrl($img->url_principale),
+                    'url_thumbnail' => ImageProduitService::publicUrl($img->url_thumbnail),
                     'ordre' => (int) $img->ordre,
                 ])->values(),
             ];
@@ -138,7 +139,7 @@ class ProduitController extends Controller
             'pv_3' => (float) $p->pv_3,
             'prix' => (float) $p->prixUnitairePourQuantite($client instanceof Client ? $client : null, 1),
             'stock' => (int) $p->stock,
-            'image_principale' => $p->image_principale,
+            'image_principale' => ImageProduitService::publicUrl($p->image_principale),
             'categorie' => $p->categorie,
             'abonne_only' => (int) ($p->abonne_only ?? 0),
             'enable_tier_pricing' => $p->isTierPricingEnabled(),
@@ -151,8 +152,8 @@ class ProduitController extends Controller
             'images' => $p->images->map(fn ($img) => [
                 'id' => $img->id,
                 'filename' => $img->filename,
-                'url_principale' => $img->url_principale,
-                'url_thumbnail' => $img->url_thumbnail,
+                'url_principale' => ImageProduitService::publicUrl($img->url_principale),
+                'url_thumbnail' => ImageProduitService::publicUrl($img->url_thumbnail),
                 'ordre' => (int) $img->ordre,
             ])->values(),
         ], 'Détail produit');

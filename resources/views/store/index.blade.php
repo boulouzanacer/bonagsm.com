@@ -135,14 +135,7 @@
         <div class="grid grid-cols-1 min-[420px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4">
             @forelse($produits as $p)
                 @php
-                    $raw = trim((string)($p->image_principale ?? ''));
-                    $img = '';
-                    if ($raw !== '') {
-                        $lower = strtolower($raw);
-                        if (str_starts_with($lower, 'http://') || str_starts_with($lower, 'https://')) $img = $raw;
-                        elseif (str_starts_with($raw, '/')) $img = url($raw);
-                        else $img = url('/'.$raw);
-                    }
+                    $img = \App\Services\ImageProduitService::publicUrl($p->image_principale ?? '');
                 @endphp
                 <div class="interactive-lift soft-card group rounded-[24px] overflow-hidden">
                     <a href="{{ url('/produits/'.$p->id) }}" class="block">

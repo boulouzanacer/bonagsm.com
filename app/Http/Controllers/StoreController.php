@@ -10,6 +10,7 @@ use App\Models\Categorie;
 use App\Models\Fournisseur;
 use App\Models\Produit;
 use App\Models\Wilaya;
+use App\Services\ImageProduitService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
@@ -93,25 +94,7 @@ class StoreController extends Controller
 
     private function resolveUrl(?string $raw): string
     {
-        $v = trim((string) $raw);
-        if ($v === '') {
-            return '';
-        }
-
-        $lower = strtolower($v);
-        if (str_starts_with($lower, 'http://') || str_starts_with($lower, 'https://')) {
-            return $v;
-        }
-
-        if (str_starts_with($v, '//')) {
-            return request()->getScheme().':'.$v;
-        }
-
-        if (str_starts_with($v, '/')) {
-            return url($v);
-        }
-
-        return url('/'.$v);
+        return ImageProduitService::publicUrl($raw);
     }
 
     private function cart(): array

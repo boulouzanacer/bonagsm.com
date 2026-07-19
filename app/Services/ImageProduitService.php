@@ -11,6 +11,33 @@ use Intervention\Image\ImageManager;
 
 class ImageProduitService
 {
+    public static function publicUrl(?string $raw): string
+    {
+        $v = trim((string) $raw);
+        if ($v === '') {
+            return '';
+        }
+
+        $lower = strtolower($v);
+        if (str_starts_with($lower, 'http://') || str_starts_with($lower, 'https://')) {
+            $path = (string) parse_url($v, PHP_URL_PATH);
+            if ($path !== '' && str_starts_with($path, '/storage/')) {
+                return url($path);
+            }
+            return $v;
+        }
+
+        if (str_starts_with($v, '//')) {
+            return request()->getScheme().':'.$v;
+        }
+
+        if (str_starts_with($v, '/')) {
+            return url($v);
+        }
+
+        return Storage::url($v);
+    }
+
     public function storeUploadedImages(Produit $produit, int $frsId, array $uploadedFiles, ?array $orders = null, ?string $primaryKey = null): void
     {
         $manager = null;
@@ -55,20 +82,19 @@ class ImageProduitService
                     $ext = 'jpg';
                 }
                 $base = Str::uuid()->toString().'_'.now()->timestamp.'.'.$ext;
-                $path = $file->storeAs($dir, $base, 'public');
+                $principalPath = $file->storeAs($dir, $base, 'public');
                 $thumb = $base;
-                $principalUrl = Storage::url($path);
-                $thumbUrl = $principalUrl;
+                $thumbPath = $principalPath;
             } else {
-                $principalUrl = Storage::url("{$dir}/{$base}");
-                $thumbUrl = Storage::url("{$dir}/{$thumb}");
+                $principalPath = "{$dir}/{$base}";
+                $thumbPath = "{$dir}/{$thumb}";
             }
 
             $record = ProduitImage::create([
                 'id_produit' => $produit->id,
                 'filename' => $base,
-                'url_principale' => $principalUrl,
-                'url_thumbnail' => $thumbUrl,
+                'url_principale' => $principalPath,
+                'url_thumbnail' => $thumbPath,
                 'ordre' => 0,
             ]);
 
@@ -130,8 +156,8 @@ class ImageProduitService
             ->get();
 
         foreach ($images as $img) {
-            $principalPath = $this->stripPublicUrlToPublicDiskPath($img->url_principale, $dir);
-            $thumbPath = $this->stripPublicUrlToPublicDiskPath($img->url_thumbnail, $dir);
+            $principalPath = $this->normalizeToPublicDiskPath($img->url_principale, $dir);
+            $thumbPath = $this->normalizeToPublicDiskPath($img->url_thumbnail, $dir);
 
             if ($principalPath) {
                 Storage::disk('public')->delete($principalPath);
@@ -166,15 +192,25 @@ class ImageProduitService
         }
     }
 
-    private function stripPublicUrlToPublicDiskPath(string $url, string $dir): ?string
+    private function normalizeToPublicDiskPath(?string $raw, string $dir): ?string
     {
-        $needle = '/storage/';
-        $pos = strpos($url, $needle);
-        if ($pos === false) {
+        $value = trim((string) $raw);
+        if ($value === '') {
             return null;
         }
 
-        $relative = substr($url, $pos + strlen($needle));
+        $lower = strtolower($value);
+        if (str_starts_with($lower, 'http://') || str_starts_with($lower, 'https://') || str_starts_with($value, '//')) {
+            $value = (string) parse_url($value, PHP_URL_PATH);
+        }
+
+        $needle = '/storage/';
+        if (str_starts_with($value, $needle)) {
+            $relative = ltrim(substr($value, strlen($needle)), '/');
+        } else {
+            $relative = ltrim($value, '/');
+        }
+
         if (! str_starts_with($relative, $dir.'/')) {
             return null;
         }

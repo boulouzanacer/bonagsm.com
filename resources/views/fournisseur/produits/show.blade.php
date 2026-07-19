@@ -44,7 +44,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="rounded-2xl border border-white/10 bg-black/20 overflow-hidden">
                 @php
-                    $main = trim((string) ($produit->image_principale ?? ''));
+                    $main = \App\Services\ImageProduitService::publicUrl($produit->image_principale ?? '');
                 @endphp
                 <div class="h-56 bg-black/20">
                     @if($main !== '')
@@ -58,7 +58,7 @@
                 @if(isset($images) && count($images) > 0)
                     <div class="p-3 border-t border-white/10 grid grid-cols-5 gap-2">
                         @foreach($images as $img)
-                            @php($u = trim((string)($img->url_principale ?? '')))
+                            @php($u = \App\Services\ImageProduitService::publicUrl($img->url_principale ?? ''))
                             @if($u !== '')
                                 <img src="{{ $u }}" alt="" class="h-12 w-full object-cover rounded-xl border border-white/10">
                             @endif

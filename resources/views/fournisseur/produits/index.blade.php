@@ -127,8 +127,9 @@
                             <td class="py-3 px-4">
                                 <div class="flex items-center gap-3 min-w-0">
                                     <div class="h-10 w-12 rounded-xl overflow-hidden border border-white/10 bg-black/20 flex-shrink-0">
-                                        @if(($p->image_principale ?? '') !== '')
-                                            <img src="{{ $p->image_principale }}" alt="" class="h-10 w-12 object-cover">
+                                        @php($productImage = \App\Services\ImageProduitService::publicUrl($p->image_principale ?? ''))
+                                        @if($productImage !== '')
+                                            <img src="{{ $productImage }}" alt="" class="h-10 w-12 object-cover">
                                         @else
                                             <div class="h-10 w-12 flex items-center justify-center text-white/40">
                                                 <i class="fa-solid fa-image"></i>
