@@ -89,6 +89,6 @@ class ClientController extends Controller
 
         $client->update(['tarif' => (int) $data['tarif']]);
 
-        return back()->with('success', 'Tarif mis à jour.');
+        return back()->with('success', __('Tarif mis à jour.'));
     }
 }

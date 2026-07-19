@@ -9,15 +9,14 @@
             <div class="flex flex-col sm:flex-row gap-2">
                 <button class="flex-1 rounded-2xl px-4 py-3 font-extrabold text-white"
                         style="background: linear-gradient(135deg, var(--frs-primary), #0A3D7A);">
-                    Créer
+                    {{ __('Créer') }}
                 </button>
                 <a href="{{ url('/fournisseur/categories') }}"
                    class="flex-1 text-center rounded-2xl px-4 py-3 font-extrabold border border-white/10 hover:bg-white/10">
-                    Annuler
+                    {{ __('Annuler') }}
                 </a>
             </div>
         </form>
     </div>
 </div>
 @endsection
-

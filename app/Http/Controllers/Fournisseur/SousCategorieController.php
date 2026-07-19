@@ -70,7 +70,7 @@ class SousCategorieController extends Controller
             'nom' => trim($data['nom']),
         ]);
 
-        return redirect()->to('/fournisseur/sous-categories')->with('success', 'Sous-catégorie créée.');
+        return redirect()->to('/fournisseur/sous-categories')->with('success', __('Sous-catégorie créée.'));
     }
 
     public function edit(int $id): View
@@ -119,7 +119,7 @@ class SousCategorieController extends Controller
             'nom' => trim($data['nom']),
         ]);
 
-        return redirect()->to('/fournisseur/sous-categories')->with('success', 'Sous-catégorie mise à jour.');
+        return redirect()->to('/fournisseur/sous-categories')->with('success', __('Sous-catégorie mise à jour.'));
     }
 
     public function destroy(int $id): RedirectResponse
@@ -136,11 +136,11 @@ class SousCategorieController extends Controller
             ->exists();
 
         if ($used) {
-            return back()->with('error', 'Impossible de supprimer: sous-catégorie utilisée par des produits.');
+            return back()->with('error', __('Impossible de supprimer: sous-catégorie utilisée par des produits.'));
         }
 
         $sousCategorie->delete();
 
-        return back()->with('success', 'Sous-catégorie supprimée.');
+        return back()->with('success', __('Sous-catégorie supprimée.'));
     }
 }

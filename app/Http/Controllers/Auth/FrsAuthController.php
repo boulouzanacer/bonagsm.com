@@ -24,7 +24,7 @@ class FrsAuthController extends Controller
             if ((int) $frs->actif !== 1) {
                 return back()
                     ->withInput($request->only('email'))
-                    ->withErrors(['email' => 'Compte désactivé']);
+                    ->withErrors(['email' => __('Compte désactivé.')]);
             }
 
             $request->session()->regenerate();
@@ -42,7 +42,7 @@ class FrsAuthController extends Controller
             if ((int) $user->actif !== 1) {
                 return back()
                     ->withInput($request->only('email'))
-                    ->withErrors(['email' => 'Compte désactivé']);
+                    ->withErrors(['email' => __('Compte désactivé.')]);
             }
 
             $request->session()->regenerate();
@@ -58,7 +58,7 @@ class FrsAuthController extends Controller
 
         return back()
             ->withInput($request->only('email'))
-            ->withErrors(['email' => 'Identifiants invalides.']);
+            ->withErrors(['email' => __('Identifiants invalides.')]);
     }
 
     public function logout(Request $request): RedirectResponse

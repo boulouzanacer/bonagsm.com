@@ -9,18 +9,18 @@
                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-white/50"></i>
                     <input name="q"
                            value="{{ $q }}"
-                           placeholder="Rechercher sous-catégorie..."
+                           placeholder="{{ __('Rechercher sous-catégorie...') }}"
                            class="w-full rounded-2xl border border-white/10 bg-[var(--frs-card)] pl-11 pr-4 py-3 outline-none focus:border-[var(--frs-primary)]">
                 </div>
             </div>
             <div class="flex gap-2 md:col-span-3">
                 <button class="flex-1 rounded-2xl px-4 py-3 font-bold text-white"
                         style="background: linear-gradient(135deg, var(--frs-primary), #0A3D7A);">
-                    Filtrer
+                    {{ __('Filtrer') }}
                 </button>
                 <a href="{{ url('/fournisseur/sous-categories') }}"
                    class="rounded-2xl px-4 py-3 font-bold border border-white/10 hover:bg-white/10">
-                    Reset
+                    {{ __('Réinitialiser') }}
                 </a>
             </div>
         </form>
@@ -29,7 +29,7 @@
            class="inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 font-bold text-white"
            style="background: linear-gradient(135deg, var(--frs-primary), #0A3D7A);">
             <i class="fa-solid fa-plus"></i>
-            Nouvelle sous-catégorie
+            {{ __('Nouvelle sous-catégorie') }}
         </a>
     </div>
 
@@ -50,21 +50,21 @@
                 <div class="p-4 flex items-center justify-between gap-3">
                     <div>
                         <div class="font-extrabold">{{ $sc->nom }}</div>
-                        <div class="text-xs text-white/50">Catégorie: {{ $sc->categorie->nom }}</div>
+                        <div class="text-xs text-white/50">{{ __('Catégorie:') }} {{ $sc->categorie->nom }}</div>
                     </div>
                     <div class="flex items-center gap-2">
                         <a href="{{ url('/fournisseur/sous-categories/'.$sc->id.'/edit') }}"
                            class="h-9 w-9 inline-flex items-center justify-center rounded-xl text-xs font-bold border border-white/10 hover:bg-white/10"
-                           title="Modifier">
+                           title="{{ __('Modifier') }}">
                             <i class="fa-solid fa-pen-to-square"></i>
                         </a>
                         <form method="POST" action="{{ url('/fournisseur/sous-categories/'.$sc->id) }}">
                             @csrf
                             @method('DELETE')
                             <button type="submit"
-                                    onclick="return confirm('Supprimer cette sous-catégorie ?')"
+                                    onclick="return confirm(@js(__('Supprimer cette sous-catégorie ?')))"
                                     class="h-9 w-9 inline-flex items-center justify-center rounded-xl text-xs font-bold border border-red-400/20 text-red-300 hover:bg-red-500/10"
-                                    title="Supprimer">
+                                    title="{{ __('Supprimer') }}">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </form>
@@ -72,7 +72,7 @@
                 </div>
             @empty
                 <div class="p-10 text-center text-white/60">
-                    Aucune sous-catégorie.
+                    {{ __('Aucune sous-catégorie.') }}
                 </div>
             @endforelse
         </div>

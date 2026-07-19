@@ -1,13 +1,13 @@
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ ($isRtl ?? false) ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $title ?? 'Boutique' }} - {{ config('app.name') }}</title>
+    <title>{{ __($title ?? 'Boutique') }} - {{ config('app.name') }}</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <script>
         window.tailwind = window.tailwind || {};
         window.tailwind.config = {
@@ -28,6 +28,7 @@
             --store-shadow:0 20px 60px rgba(15, 23, 42, 0.08);
         }
         html,body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
+        html[dir="rtl"], html[dir="rtl"] body{font-family:Tajawal,Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
         body{
             background:
                 radial-gradient(circle at top left, rgba(15,122,67,0.12), transparent 30%),
@@ -90,6 +91,36 @@
             0%,100%{transform:translateY(0);}
             50%{transform:translateY(-10px);}
         }
+        html[dir="rtl"] .store-search-icon{
+            left:auto;
+            right:1rem;
+        }
+        html[dir="rtl"] .store-search-input{
+            padding-left:1rem;
+            padding-right:2.75rem;
+        }
+        html[dir="rtl"] .header-counter{
+            margin-left:0;
+            margin-right:.25rem;
+        }
+        html[dir="rtl"] .gallery-prev{
+            left:auto;
+            right:.75rem;
+        }
+        html[dir="rtl"] .gallery-next{
+            right:auto;
+            left:.75rem;
+        }
+        html[dir="rtl"] .gallery-counter{
+            right:auto;
+            left:.75rem;
+        }
+        html[dir="rtl"] .table-align-start{
+            text-align:right;
+        }
+        html[dir="rtl"] .table-align-end{
+            text-align:left;
+        }
     </style>
 </head>
 <body class="min-h-screen bg-[var(--store-bg)] text-slate-900 overflow-x-hidden">
@@ -118,17 +149,17 @@
                     <div class="leading-tight min-w-0 hidden sm:block">
                         <div class="flex items-center gap-2">
                             <div class="font-extrabold tracking-wide truncate">{{ $storeFrs?->nom_frs ?? config('app.name') }}</div>
-                            <span class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.2em] text-emerald-700">Store</span>
+                            <span class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.2em] text-emerald-700">{{ __('Store') }}</span>
                         </div>
                         <div class="text-xs text-slate-500">
                             @if(($storeFrs?->telephone ?? '') !== '')
                                 <a href="tel:{{ $storeFrs->telephone }}" class="hover:underline">{{ $storeFrs->telephone }}</a>
                             @else
-                                Store
+                                {{ __('Store') }}
                             @endif
                             @if(($storeFrs?->google_maps_url ?? '') !== '')
                                 <span class="mx-2 text-slate-300">•</span>
-                                <a href="{{ $storeFrs->google_maps_url }}" target="_blank" class="hover:underline">Localisation</a>
+                                <a href="{{ $storeFrs->google_maps_url }}" target="_blank" class="hover:underline">{{ __('Localisation') }}</a>
                             @endif
                         </div>
                     </div>
@@ -140,22 +171,33 @@
                         @if(($storeFrs?->telephone ?? '') !== '')
                             <span>{{ $storeFrs->telephone }}</span>
                         @else
-                            <span>Store</span>
+                            <span>{{ __('Store') }}</span>
                         @endif
                     </div>
                     @if(($storeFrs?->google_maps_url ?? '') !== '')
                         <div class="text-xs text-slate-500 truncate">
-                            <span>Localisation</span>
+                            <span>{{ __('Localisation') }}</span>
                         </div>
                     @endif
                 </a>
 
                 <div class="col-span-2 flex items-center gap-2 justify-end sm:col-span-1 sm:justify-end">
+                    <div class="inline-flex items-center rounded-2xl border border-white/70 bg-white/90 p-1 shadow-sm">
+                        <a href="{{ url('/locale/fr') }}"
+                           class="rounded-xl px-2.5 py-1.5 text-xs font-extrabold transition {{ app()->getLocale() === 'fr' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-500 hover:text-slate-900' }}">
+                            FR
+                        </a>
+                        <a href="{{ url('/locale/ar') }}"
+                           class="rounded-xl px-2.5 py-1.5 text-xs font-extrabold transition {{ app()->getLocale() === 'ar' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-500 hover:text-slate-900' }}">
+                            AR
+                        </a>
+                    </div>
+
                     <a href="{{ url('/wishlist') }}"
                        class="interactive-lift inline-flex items-center gap-2 rounded-2xl px-3.5 py-2.5 text-sm font-semibold border border-white/70 bg-white/90 hover:bg-white shadow-sm">
                         <i class="fa-regular fa-heart text-[var(--store-primary)]"></i>
-                        <span class="hidden sm:inline">Favoris</span>
-                        <span class="ml-1 inline-flex items-center justify-center min-w-[22px] h-5 px-1.5 rounded-full text-xs font-extrabold bg-emerald-50 text-emerald-700">
+                        <span class="hidden sm:inline">{{ __('Favoris') }}</span>
+                        <span class="header-counter ml-1 inline-flex items-center justify-center min-w-[22px] h-5 px-1.5 rounded-full text-xs font-extrabold bg-emerald-50 text-emerald-700">
                             {{ $wishlistCount }}
                         </span>
                     </a>
@@ -163,8 +205,8 @@
                     <a href="{{ url('/panier') }}"
                        class="interactive-lift inline-flex items-center gap-2 rounded-2xl px-3.5 py-2.5 text-sm font-semibold border border-white/70 bg-white/90 hover:bg-white shadow-sm">
                         <i class="fa-solid fa-cart-shopping text-[var(--store-primary)]"></i>
-                        <span class="hidden sm:inline">Panier</span>
-                        <span class="ml-1 inline-flex items-center justify-center min-w-[22px] h-5 px-1.5 rounded-full text-xs font-extrabold bg-emerald-50 text-emerald-700">
+                        <span class="hidden sm:inline">{{ __('Panier') }}</span>
+                        <span class="header-counter ml-1 inline-flex items-center justify-center min-w-[22px] h-5 px-1.5 rounded-full text-xs font-extrabold bg-emerald-50 text-emerald-700">
                             {{ $cartCount }}
                         </span>
                     </a>
@@ -173,26 +215,26 @@
                         <a href="{{ url('/mes-commandes') }}"
                            class="interactive-lift hidden sm:inline-flex items-center gap-2 rounded-2xl px-3.5 py-2.5 text-sm font-semibold border border-white/70 bg-white/90 hover:bg-white shadow-sm">
                             <i class="fa-solid fa-receipt text-[var(--store-primary)]"></i>
-                            <span>Mes commandes</span>
+                            <span>{{ __('Mes commandes') }}</span>
                         </a>
                         <form method="POST" action="{{ url('/logout') }}">
                             @csrf
                             <button type="submit"
                                     class="interactive-lift inline-flex items-center gap-2 rounded-2xl px-3.5 py-2.5 text-sm font-semibold border border-white/70 bg-white/90 hover:bg-white shadow-sm">
                                 <i class="fa-solid fa-right-from-bracket text-red-600"></i>
-                                <span class="hidden sm:inline">Déconnexion</span>
+                                <span class="hidden sm:inline">{{ __('Déconnexion') }}</span>
                             </button>
                         </form>
                     @else
                         <a href="{{ url('/login') }}"
                            class="interactive-lift inline-flex items-center gap-2 rounded-2xl px-3.5 py-2.5 text-sm font-semibold border border-white/70 bg-white/90 hover:bg-white shadow-sm">
                             <i class="fa-solid fa-user text-[var(--store-primary)]"></i>
-                            <span class="hidden sm:inline">Connexion</span>
+                            <span class="hidden sm:inline">{{ __('Connexion') }}</span>
                         </a>
                         <a href="{{ url('/register') }}"
                            class="interactive-lift inline-flex items-center gap-2 rounded-2xl px-3.5 py-2.5 text-sm font-extrabold text-white store-gradient shadow-lg shadow-emerald-950/20">
                             <i class="fa-solid fa-user-plus"></i>
-                            <span class="hidden sm:inline">Créer compte</span>
+                            <span class="hidden sm:inline">{{ __('Créer compte') }}</span>
                         </a>
                     @endif
                 </div>
@@ -227,9 +269,9 @@
             <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>© {{ date('Y') }} {{ config('app.name') }}</div>
                 <div class="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.2em] text-slate-400">
-                    <span>Responsive</span>
-                    <span>Secure Checkout</span>
-                    <span>Modern UI</span>
+                    <span>{{ __('Responsive') }}</span>
+                    <span>{{ __('Secure Checkout') }}</span>
+                    <span>{{ __('Modern UI') }}</span>
                 </div>
             </div>
         </div>

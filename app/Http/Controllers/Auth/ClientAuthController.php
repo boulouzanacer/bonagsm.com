@@ -22,7 +22,7 @@ class ClientAuthController extends Controller
 {
     public function showLogin(): View
     {
-        return view('auth.client-login', ['title' => 'Connexion']);
+        return view('auth.client-login', ['title' => __('Connexion')]);
     }
 
     public function login(Request $request): RedirectResponse
@@ -38,19 +38,19 @@ class ClientAuthController extends Controller
             if (! $client || ! Hash::check($credentials['password'], $client->password)) {
                 return back()
                     ->withInput($request->only('email'))
-                    ->withErrors(['email' => 'Identifiants invalides.']);
+                    ->withErrors(['email' => __('Identifiants invalides.')]);
             }
 
             if ((int) $client->actif !== 1) {
                 return back()
                     ->withInput($request->only('email'))
-                    ->withErrors(['email' => 'Compte désactivé.']);
+                    ->withErrors(['email' => __('Compte désactivé.')]);
             }
 
             if ($client->type_client === 'simple' && empty($client->email_verified_at)) {
                 return back()
                     ->withInput($request->only('email'))
-                    ->withErrors(['email' => 'Email non vérifié. Veuillez vérifier votre boîte mail.']);
+                    ->withErrors(['email' => __('Email non vérifié. Veuillez vérifier votre boîte mail.')]);
             }
 
             $request->session()->regenerate();
@@ -64,12 +64,12 @@ class ClientAuthController extends Controller
             report($e);
             return back()
                 ->withInput($request->only('email'))
-                ->withErrors(['email' => 'Erreur base de données. Veuillez contacter l’administrateur.']);
+                ->withErrors(['email' => __('Erreur base de données. Veuillez contacter l’administrateur.')]);
         } catch (Throwable $e) {
             report($e);
             return back()
                 ->withInput($request->only('email'))
-                ->withErrors(['email' => 'Erreur serveur. Veuillez réessayer.']);
+                ->withErrors(['email' => __('Erreur serveur. Veuillez réessayer.')]);
         }
     }
 
@@ -83,7 +83,7 @@ class ClientAuthController extends Controller
             ->get(['ID_COMMUNE', 'COMMUNE', 'ID_WILAYA']);
 
         return view('auth.client-register', [
-            'title' => 'Créer un compte',
+            'title' => __('Créer un compte'),
             'wilayas' => $wilayas,
             'communes' => $communes,
             'default_wilaya' => $defaultWilaya,
@@ -116,13 +116,13 @@ class ClientAuthController extends Controller
         if ($existing && ! empty($existing->email_verified_at)) {
             return back()
                 ->withInput($request->only('nom', 'prenom', 'email', 'telephone', 'adresse', 'id_wilaya', 'id_commune'))
-                ->withErrors(['email' => 'Email déjà utilisé.']);
+                ->withErrors(['email' => __('Email déjà utilisé.')]);
         }
 
         if ($existing && $existing->type_client !== 'simple') {
             return back()
                 ->withInput($request->only('nom', 'prenom', 'email', 'telephone', 'adresse', 'id_wilaya', 'id_commune'))
-                ->withErrors(['email' => 'Email déjà utilisé.']);
+                ->withErrors(['email' => __('Email déjà utilisé.')]);
         }
 
         $payload = [
@@ -147,7 +147,7 @@ class ClientAuthController extends Controller
         if (! $this->sendEmailVerificationCode($client)) {
             return back()
                 ->withInput($request->only('nom', 'prenom', 'email', 'telephone', 'adresse', 'id_wilaya', 'id_commune'))
-                ->withErrors(['email' => 'Impossible d’envoyer le code. Vérifiez la configuration Resend/Mail.']);
+                ->withErrors(['email' => __('Impossible d’envoyer le code. Vérifiez la configuration Resend/Mail.')]);
         }
 
         $request->session()->forget(['role', 'client_id']);
@@ -156,7 +156,7 @@ class ClientAuthController extends Controller
             'pending_client_email' => $client->email,
         ]);
 
-        return redirect()->to('/register')->with('success', 'Un code de vérification a été envoyé par email.');
+        return redirect()->to('/register')->with('success', __('Un code de vérification a été envoyé par email.'));
     }
 
     public function verifyEmail(Request $request): RedirectResponse
@@ -167,34 +167,34 @@ class ClientAuthController extends Controller
 
         $pendingId = (int) $request->session()->get('pending_client_id');
         if ($pendingId <= 0) {
-            return redirect()->to('/register')->withErrors(['code' => 'Session expirée. Veuillez refaire l’inscription.']);
+            return redirect()->to('/register')->withErrors(['code' => __('Session expirée. Veuillez refaire l’inscription.')]);
         }
 
         $client = Client::query()->find($pendingId);
         if (! $client) {
-            return redirect()->to('/register')->withErrors(['code' => 'Compte introuvable.']);
+            return redirect()->to('/register')->withErrors(['code' => __('Compte introuvable.')]);
         }
 
         if ($client->type_client !== 'simple') {
-            return redirect()->to('/register')->withErrors(['code' => 'Compte invalide.']);
+            return redirect()->to('/register')->withErrors(['code' => __('Compte invalide.')]);
         }
 
         if (! empty($client->email_verified_at)) {
             $request->session()->forget(['pending_client_id', 'pending_client_email']);
-            return redirect()->to('/login')->with('success', 'Email déjà vérifié. Vous pouvez vous connecter.');
+            return redirect()->to('/login')->with('success', __('Email déjà vérifié. Vous pouvez vous connecter.'));
         }
 
         if (empty($client->email_verification_code_hash) || empty($client->email_verification_expires_at)) {
-            return redirect()->to('/register')->withErrors(['code' => 'Code invalide.']);
+            return redirect()->to('/register')->withErrors(['code' => __('Code invalide.')]);
         }
 
         $expiresAt = Carbon::parse($client->email_verification_expires_at);
         if (Carbon::now()->greaterThan($expiresAt)) {
-            return redirect()->to('/register')->withErrors(['code' => 'Code expiré. Cliquez sur "Renvoyer le code".']);
+            return redirect()->to('/register')->withErrors(['code' => __('Code expiré. Cliquez sur "Renvoyer le code".')]);
         }
 
         if (! Hash::check($data['code'], $client->email_verification_code_hash)) {
-            return redirect()->to('/register')->withErrors(['code' => 'Code incorrect.']);
+            return redirect()->to('/register')->withErrors(['code' => __('Code incorrect.')]);
         }
 
         $client->forceFill([
@@ -210,35 +210,35 @@ class ClientAuthController extends Controller
             'client_id' => $client->id,
         ]);
 
-        return redirect()->to('/')->with('success', 'Email vérifié. Bienvenue.');
+        return redirect()->to('/')->with('success', __('Email vérifié. Bienvenue.'));
     }
 
     public function resendEmailCode(Request $request): RedirectResponse
     {
         $pendingId = (int) $request->session()->get('pending_client_id');
         if ($pendingId <= 0) {
-            return redirect()->to('/register')->withErrors(['code' => 'Session expirée. Veuillez refaire l’inscription.']);
+            return redirect()->to('/register')->withErrors(['code' => __('Session expirée. Veuillez refaire l’inscription.')]);
         }
 
         $client = Client::query()->find($pendingId);
         if (! $client) {
-            return redirect()->to('/register')->withErrors(['code' => 'Compte introuvable.']);
+            return redirect()->to('/register')->withErrors(['code' => __('Compte introuvable.')]);
         }
 
         if ($client->type_client !== 'simple') {
-            return redirect()->to('/register')->withErrors(['code' => 'Compte invalide.']);
+            return redirect()->to('/register')->withErrors(['code' => __('Compte invalide.')]);
         }
 
         if (! empty($client->email_verified_at)) {
             $request->session()->forget(['pending_client_id', 'pending_client_email']);
-            return redirect()->to('/login')->with('success', 'Email déjà vérifié. Vous pouvez vous connecter.');
+            return redirect()->to('/login')->with('success', __('Email déjà vérifié. Vous pouvez vous connecter.'));
         }
 
         if (! $this->sendEmailVerificationCode($client)) {
-            return redirect()->to('/register')->withErrors(['code' => 'Impossible d’envoyer le code. Vérifiez la configuration Resend/Mail.']);
+            return redirect()->to('/register')->withErrors(['code' => __('Impossible d’envoyer le code. Vérifiez la configuration Resend/Mail.')]);
         }
 
-        return redirect()->to('/register')->with('success', 'Code renvoyé.');
+        return redirect()->to('/register')->with('success', __('Code renvoyé.'));
     }
 
     private function sendEmailVerificationCode(Client $client): bool
@@ -251,8 +251,11 @@ class ClientAuthController extends Controller
             'email_verified_at' => null,
         ])->save();
 
-        $subject = 'Code de vérification email';
-        $body = "Votre code de vérification est : {$code}\n\nCe code expire dans 10 minutes.\n\n" . config('app.name');
+        $subject = __('Code de vérification email');
+        $body = __('Votre code de vérification est : :code\n\nCe code expire dans 10 minutes.\n\n:app', [
+            'code' => $code,
+            'app' => config('app.name'),
+        ]);
 
         try {
             $resendKey = (string) (config('services.resend.key') ?? '');

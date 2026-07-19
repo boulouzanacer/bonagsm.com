@@ -67,7 +67,6 @@ class SiteSettingsController extends Controller
 
         $frs->update($payload);
 
-        return back()->with('success', 'Paramètres du site mis à jour.');
+        return back()->with('success', __('Paramètres du site mis à jour.'));
     }
 }
-

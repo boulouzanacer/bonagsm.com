@@ -22,10 +22,9 @@
 @endif
 
 <div>
-    <label class="block text-sm font-semibold text-white/70 mb-1">Nom</label>
+    <label class="block text-sm font-semibold text-white/70 mb-1">{{ __('Nom') }}</label>
     <input name="nom"
            value="{{ old('nom', $categorie->nom ?? '') }}"
            class="w-full rounded-2xl border border-white/10 bg-[var(--frs-card)] px-4 py-3 outline-none focus:border-[var(--frs-primary)]"
            required>
 </div>
-

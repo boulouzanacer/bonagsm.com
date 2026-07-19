@@ -11,12 +11,12 @@
 <div class="max-w-4xl">
     <div class="flex items-center justify-between mb-4">
         <div>
-            <div class="text-2xl font-extrabold tracking-wide">Éditer produit</div>
+            <div class="text-2xl font-extrabold tracking-wide">{{ __('Éditer produit') }}</div>
             <div class="text-sm text-white/60">{{ $produit->designation }} • {{ $produit->reference }}</div>
         </div>
         <a href="{{ $safeReturn }}"
            class="rounded-2xl px-4 py-3 font-bold border border-white/10 hover:bg-white/10">
-            Retour
+            {{ __('Retour') }}
         </a>
     </div>
 
@@ -29,7 +29,7 @@
                 <button type="submit"
                         class="rounded-2xl px-6 py-3 font-extrabold text-white"
                         style="background: linear-gradient(135deg, var(--frs-primary), #0A3D7A);">
-                    Enregistrer
+                    {{ __('Enregistrer') }}
                 </button>
             </div>
         </form>

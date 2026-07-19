@@ -19,7 +19,7 @@
     @endif
 
     <div class="rounded-2xl border border-white/10 bg-[var(--frs-card)] p-6">
-        <div class="text-2xl font-extrabold tracking-wide">Informations</div>
+        <div class="text-2xl font-extrabold tracking-wide">{{ __('Informations') }}</div>
 
         <form method="POST" action="{{ url('/fournisseur/profil') }}" class="mt-5" id="profilForm" enctype="multipart/form-data">
             @csrf
@@ -27,7 +27,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-semibold text-white/70 mb-1">Nom</label>
+                    <label class="block text-sm font-semibold text-white/70 mb-1">{{ __('Nom') }}</label>
                     <input name="nom_frs"
                            value="{{ old('nom_frs', $frs->nom_frs) }}"
                            class="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--frs-primary)]"
@@ -35,14 +35,14 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-white/70 mb-1">Téléphone</label>
+                    <label class="block text-sm font-semibold text-white/70 mb-1">{{ __('Téléphone') }}</label>
                     <input name="telephone"
                            value="{{ old('telephone', $frs->telephone) }}"
                            class="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--frs-primary)]">
                 </div>
 
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-semibold text-white/70 mb-1">Adresse</label>
+                    <label class="block text-sm font-semibold text-white/70 mb-1">{{ __('Adresse') }}</label>
                     <textarea name="adresse"
                               rows="3"
                               class="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--frs-primary)]"
@@ -50,7 +50,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-white/70 mb-1">Latitude (optionnel)</label>
+                    <label class="block text-sm font-semibold text-white/70 mb-1">{{ __('Latitude (optionnel)') }}</label>
                     <input name="latitude"
                            id="latInput"
                            value="{{ old('latitude', $frs->latitude ?? '') }}"
@@ -59,7 +59,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-white/70 mb-1">Longitude (optionnel)</label>
+                    <label class="block text-sm font-semibold text-white/70 mb-1">{{ __('Longitude (optionnel)') }}</label>
                     <input name="longitude"
                            id="lngInput"
                            value="{{ old('longitude', $frs->longitude ?? '') }}"
@@ -71,24 +71,24 @@
                     <button type="button"
                             id="geoBtn"
                             class="rounded-2xl px-4 py-2 text-sm font-extrabold border border-white/10 hover:bg-white/10">
-                        Utiliser ma position
+                        {{ __('Utiliser ma position') }}
                     </button>
                     @if(($frs->latitude ?? null) && ($frs->longitude ?? null))
                         <a href="https://www.google.com/maps?q={{ $frs->latitude }},{{ $frs->longitude }}"
                            target="_blank"
                            class="text-sm font-bold text-white/70 hover:text-white underline">
-                            Ouvrir sur Maps
+                            {{ __('Ouvrir sur Maps') }}
                         </a>
                     @endif
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-white/70 mb-1">Wilaya</label>
+                    <label class="block text-sm font-semibold text-white/70 mb-1">{{ __('Wilaya') }}</label>
                     <select name="id_wilaya"
                             id="wilayaSelectFrs"
                             class="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--frs-primary)]"
                             required>
-                        <option value="">Choisir...</option>
+                        <option value="">{{ __('Choisir...') }}</option>
                         @foreach($wilayas as $w)
                             <option value="{{ $w->ID_WILAYA }}"
                                     @selected((int)old('id_wilaya', $frs->id_wilaya) === (int)$w->ID_WILAYA)>
@@ -99,12 +99,12 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-white/70 mb-1">Commune</label>
+                    <label class="block text-sm font-semibold text-white/70 mb-1">{{ __('Commune') }}</label>
                     <select name="id_commune"
                             id="communeSelectFrs"
                             class="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--frs-primary)]"
                             required>
-                        <option value="">Choisir...</option>
+                        <option value="">{{ __('Choisir...') }}</option>
                         @foreach($communes as $c)
                             <option value="{{ $c->ID_COMMUNE }}"
                                     @selected((int)old('id_commune', $frs->id_commune) === (int)$c->ID_COMMUNE)>
@@ -119,14 +119,14 @@
                 <button type="submit"
                         class="rounded-2xl px-6 py-3 font-extrabold text-white"
                         style="background: linear-gradient(135deg, var(--frs-primary), #0A3D7A);">
-                    Enregistrer
+                    {{ __('Enregistrer') }}
                 </button>
             </div>
         </form>
     </div>
 
     <div class="rounded-2xl border border-white/10 bg-[var(--frs-card)] p-6">
-        <div class="text-2xl font-extrabold tracking-wide">Mot de passe</div>
+        <div class="text-2xl font-extrabold tracking-wide">{{ __('Mot de passe') }}</div>
 
         <form method="POST" action="{{ url('/fournisseur/profil/password') }}" class="mt-5">
             @csrf
@@ -134,21 +134,21 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                    <label class="block text-sm font-semibold text-white/70 mb-1">Ancien</label>
+                    <label class="block text-sm font-semibold text-white/70 mb-1">{{ __('Ancien') }}</label>
                     <input type="password"
                            name="old_password"
                            class="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--frs-primary)]"
                            required>
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-white/70 mb-1">Nouveau</label>
+                    <label class="block text-sm font-semibold text-white/70 mb-1">{{ __('Nouveau') }}</label>
                     <input type="password"
                            name="password"
                            class="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--frs-primary)]"
                            required>
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-white/70 mb-1">Confirmation</label>
+                    <label class="block text-sm font-semibold text-white/70 mb-1">{{ __('Confirmation') }}</label>
                     <input type="password"
                            name="password_confirmation"
                            class="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--frs-primary)]"
@@ -159,7 +159,7 @@
             <div class="mt-6 flex justify-end">
                 <button type="submit"
                         class="rounded-2xl px-6 py-3 font-extrabold border border-white/10 hover:bg-white/10">
-                    Mettre à jour
+                    {{ __('Mettre à jour') }}
                 </button>
             </div>
         </form>
@@ -173,9 +173,9 @@
         if (!wilayaSelect || !communeSelect) return;
 
         async function loadCommunes(wilayaId) {
-            communeSelect.innerHTML = '<option value="">Chargement...</option>';
+            communeSelect.innerHTML = '<option value="">{{ __('Chargement...') }}</option>';
             if (!wilayaId) {
-                communeSelect.innerHTML = '<option value="">Choisir...</option>';
+                communeSelect.innerHTML = '<option value="">{{ __('Choisir...') }}</option>';
                 return;
             }
 
@@ -183,7 +183,7 @@
             const rows = await res.json();
             const current = '{{ (int)old('id_commune', $frs->id_commune) }}';
 
-            communeSelect.innerHTML = '<option value="">Choisir...</option>';
+            communeSelect.innerHTML = '<option value="">{{ __('Choisir...') }}</option>';
             rows.forEach(r => {
                 const opt = document.createElement('option');
                 opt.value = r.ID_COMMUNE;

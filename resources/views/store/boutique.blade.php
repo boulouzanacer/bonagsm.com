@@ -5,9 +5,9 @@
     <div class="rounded-2xl border border-slate-200 bg-[var(--store-card)] p-4 sm:p-6">
         <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
             <div>
-                <a href="{{ url('/') }}" class="text-sm text-slate-500 hover:text-slate-900">
-                    <i class="fa-solid fa-arrow-left-long mr-2"></i>
-                    Retour au store
+                <a href="{{ url('/') }}" class="text-sm text-slate-500 hover:text-slate-900 inline-flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-left-long"></i>
+                    {{ __('Retour au store') }}
                 </a>
                 <div class="mt-3 flex items-start gap-4">
                     @if(($boutique->logo_url ?? '') !== '')
@@ -29,7 +29,7 @@
                                target="_blank"
                                class="mt-1 inline-flex items-center gap-2 text-sm font-semibold text-[var(--store-primary)] hover:underline">
                                 <i class="fa-solid fa-location-dot"></i>
-                                Voir sur Maps
+                                {{ __('Voir sur Maps') }}
                             </a>
                         @endif
                     </div>
@@ -39,7 +39,7 @@
                 <a href="{{ url('/panier') }}"
                    class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold border border-slate-200 bg-white hover:bg-slate-50">
                     <i class="fa-solid fa-cart-shopping text-[var(--store-primary)]"></i>
-                    <span>Panier</span>
+                    <span>{{ __('Panier') }}</span>
                 </a>
             </div>
         </div>
@@ -47,29 +47,29 @@
         <form method="GET" action="{{ url('/boutiques/'.$boutique->id) }}" class="mt-5 grid grid-cols-1 lg:grid-cols-3 gap-3">
             <div class="lg:col-span-2">
                 <div class="relative">
-                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <i class="store-search-icon fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
                     <input name="q"
                            value="{{ $q }}"
-                           placeholder="Rechercher référence/désignation/catégorie..."
-                           class="w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 py-3 outline-none focus:border-[var(--store-primary)]">
+                           placeholder="{{ __('Rechercher référence/désignation/catégorie...') }}"
+                           class="store-search-input w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 py-3 outline-none focus:border-[var(--store-primary)]">
                 </div>
             </div>
             <div>
                 <select name="categorie" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none focus:border-[var(--store-primary)]">
-                    <option value="">Toutes catégories</option>
+                    <option value="">{{ __('Toutes catégories') }}</option>
                     @foreach($categories as $c)
                         <option value="{{ $c }}" @selected((string)$selected_categorie === (string)$c)>{{ $c }}</option>
                     @endforeach
                 </select>
             </div>
-            <button class="hidden" type="submit">Filter</button>
+            <button class="hidden" type="submit">{{ __('Filter') }}</button>
         </form>
     </div>
 
     <div class="space-y-3">
         <div class="flex items-center justify-between">
-            <div class="text-lg font-extrabold tracking-wide">Produits</div>
-            <div class="text-sm text-slate-500">{{ $produits->total() }} produit(s)</div>
+            <div class="text-lg font-extrabold tracking-wide">{{ __('Produits') }}</div>
+            <div class="text-sm text-slate-500">{{ $produits->total() }} {{ __('produit(s)') }}</div>
         </div>
 
         <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2">
@@ -94,7 +94,7 @@
                             <a href="{{ url('/produits/'.$p->id) }}" class="block font-extrabold text-xs sm:text-[13px] leading-tight hover:underline truncate" title="{{ $p->designation }}">
                                 {{ $p->designation }}
                             </a>
-                            <div class="text-[10px] text-slate-400 truncate">Ref: {{ $p->reference }}</div>
+                            <div class="text-[10px] text-slate-400 truncate">{{ __('Ref:') }} {{ $p->reference }}</div>
                         </div>
 
                         <div class="mt-1.5 flex items-center justify-between gap-2">
@@ -104,7 +104,7 @@
                                 </div>
                             </div>
                             <div class="hidden sm:block text-[10px] font-bold {{ (int)$p->stock > 0 ? 'text-emerald-600' : 'text-red-500' }}">
-                                {{ (int)$p->stock > 0 ? 'Stock: '.(int)$p->stock : 'Rupture' }}
+                                {{ (int)$p->stock > 0 ? __('Stock: :stock', ['stock' => (int) $p->stock]) : __('Rupture') }}
                             </div>
                         </div>
 
@@ -121,12 +121,12 @@
                                 <input type="hidden" name="produit_id" value="{{ $p->id }}">
                                 <input type="hidden" name="qty" value="1">
                                 <button type="submit"
-                                        aria-label="Ajouter au panier"
+                                        aria-label="{{ __('Ajouter au panier') }}"
                                         class="inline-flex items-center justify-center gap-2 rounded-xl w-9 h-9 sm:w-auto sm:h-auto sm:px-2.5 sm:py-2 text-xs font-extrabold text-white disabled:opacity-40"
                                         style="background: linear-gradient(135deg, var(--store-primary), #0A3D7A);"
                                         @disabled((int)$p->stock <= 0)>
                                     <i class="fa-solid fa-cart-plus"></i>
-                                    <span class="sr-only sm:not-sr-only">Ajouter</span>
+                                    <span class="sr-only sm:not-sr-only">{{ __('Ajouter') }}</span>
                                 </button>
                             </form>
                         </div>
@@ -134,7 +134,7 @@
                 </div>
             @empty
                 <div class="col-span-full rounded-2xl border border-slate-200 bg-[var(--store-card)] p-10 text-center text-slate-600">
-                    Aucun produit.
+                    {{ __('Aucun produit.') }}
                 </div>
             @endforelse
         </div>

@@ -268,7 +268,7 @@ class StoreController extends Controller
         $cartSummary = $this->cartSummary();
 
         return view('store.index', [
-            'title' => $boutique?->nom_frs ? ($boutique->nom_frs.' - Produits') : 'Produits',
+            'title' => $boutique?->nom_frs ? ($boutique->nom_frs.' - '.__('Produits')) : __('Produits'),
             'client' => $client,
             'boutique' => $boutique,
             'produits' => $produits,
@@ -366,7 +366,7 @@ class StoreController extends Controller
         $canShowPrices = $this->canShowPrices($client, $boutique);
 
         return view('store.panier', [
-            'title' => 'Panier',
+            'title' => __('Panier'),
             'client' => $client,
             'items' => $summary['items'],
             'total' => $summary['total'],
@@ -381,7 +381,7 @@ class StoreController extends Controller
         $client = $this->currentClient();
         if (! $client) {
             session(['url.intended' => url('/wishlist')]);
-            return redirect()->to('/login')->with('error', 'Connectez-vous pour voir vos favoris.');
+            return redirect()->to('/login')->with('error', __('Connectez-vous pour voir vos favoris.'));
         }
 
         $boutique = $this->singleFournisseur();
@@ -401,7 +401,7 @@ class StoreController extends Controller
         $wishlistIds = $this->wishlistProductIds($client);
 
         return view('store.wishlist', [
-            'title' => 'Mes favoris',
+            'title' => __('Mes favoris'),
             'client' => $client,
             'boutique' => $boutique,
             'produits' => $produits,
@@ -418,7 +418,7 @@ class StoreController extends Controller
         $client = $this->currentClient();
         if (! $client) {
             session(['url.intended' => url()->previous()]);
-            return redirect()->to('/login')->with('error', 'Connectez-vous pour enregistrer vos favoris.');
+            return redirect()->to('/login')->with('error', __('Connectez-vous pour enregistrer vos favoris.'));
         }
 
         $data = $request->validate([
@@ -433,12 +433,12 @@ class StoreController extends Controller
             ->findOrFail((int) $data['produit_id']);
 
         if ((string) $client->type_client !== 'abonne' && (int) ($p->abonne_only ?? 0) === 1) {
-            return back()->with('error', 'Produit réservé aux abonnés.');
+            return back()->with('error', __('Produit réservé aux abonnés.'));
         }
 
         $client->wishlistProduits()->syncWithoutDetaching([(int) $p->id]);
 
-        return back()->with('success', 'Produit ajouté aux favoris.');
+        return back()->with('success', __('Produit ajouté aux favoris.'));
     }
 
     public function wishlistRemove(Request $request): RedirectResponse
@@ -446,7 +446,7 @@ class StoreController extends Controller
         $client = $this->currentClient();
         if (! $client) {
             session(['url.intended' => url('/wishlist')]);
-            return redirect()->to('/login')->with('error', 'Connectez-vous pour gérer vos favoris.');
+            return redirect()->to('/login')->with('error', __('Connectez-vous pour gérer vos favoris.'));
         }
 
         $data = $request->validate([
@@ -455,7 +455,7 @@ class StoreController extends Controller
 
         $client->wishlistProduits()->detach([(int) $data['produit_id']]);
 
-        return back()->with('success', 'Produit retiré des favoris.');
+        return back()->with('success', __('Produit retiré des favoris.'));
     }
 
     public function panierAdd(Request $request): RedirectResponse
@@ -477,17 +477,17 @@ class StoreController extends Controller
             ->findOrFail((int) $data['produit_id']);
 
         if (! $p->fournisseur || (int) $p->fournisseur->actif !== 1 || $p->fournisseur->deleted_at) {
-            return back()->with('error', 'Produit indisponible.');
+            return back()->with('error', __('Produit indisponible.'));
         }
 
         if (! $client || (string) $client->type_client !== 'abonne') {
             if ((int) ($p->abonne_only ?? 0) === 1) {
-                return back()->with('error', 'Produit réservé aux abonnés.');
+                return back()->with('error', __('Produit réservé aux abonnés.'));
             }
         }
 
         if ((int) $p->stock <= 0) {
-            return back()->with('error', 'Produit en rupture de stock.');
+            return back()->with('error', __('Produit en rupture de stock.'));
         }
 
         $cart = $this->cart();
@@ -498,7 +498,7 @@ class StoreController extends Controller
         $cart[$p->id] = $next;
         $this->setCart($cart, $newFrsId);
 
-        return back()->with('success', 'Ajouté au panier.');
+        return back()->with('success', __('Ajouté au panier.'));
     }
 
     public function panierUpdate(Request $request): RedirectResponse
@@ -574,13 +574,13 @@ class StoreController extends Controller
         $client = $this->currentClient();
         if (! $client) {
             session(['url.intended' => url('/checkout')]);
-            return redirect()->to('/login')->with('error', 'Connectez-vous pour continuer.');
+            return redirect()->to('/login')->with('error', __('Connectez-vous pour continuer.'));
         }
 
         try {
             $summary = $this->cartSummary();
             if (count($summary['items']) === 0) {
-                return redirect()->to('/panier')->with('error', 'Votre panier est vide.');
+                return redirect()->to('/panier')->with('error', __('Votre panier est vide.'));
             }
 
             $boutique = $this->singleFournisseur();
@@ -621,7 +621,7 @@ class StoreController extends Controller
                 ->all();
 
             return view('store.checkout', [
-                'title' => 'Finaliser la commande',
+                'title' => __('Finaliser la commande'),
                 'client' => $client,
                 'items' => $summary['items'],
                 'total' => $summary['total'],
@@ -640,12 +640,12 @@ class StoreController extends Controller
             report($e);
             return redirect()
                 ->to('/panier')
-                ->with('error', 'Erreur base de données. Lancez les migrations sur le serveur (php artisan migrate --force).');
+                ->with('error', __('Erreur base de données. Lancez les migrations sur le serveur (php artisan migrate --force).'));
         } catch (Throwable $e) {
             report($e);
             return redirect()
                 ->to('/panier')
-                ->with('error', 'Erreur serveur. Veuillez réessayer.');
+                ->with('error', __('Erreur serveur. Veuillez réessayer.'));
         }
     }
 
@@ -654,7 +654,7 @@ class StoreController extends Controller
         $client = $this->currentClient();
         if (! $client) {
             session(['url.intended' => url('/checkout')]);
-            return redirect()->to('/login')->with('error', 'Connectez-vous pour continuer.');
+            return redirect()->to('/login')->with('error', __('Connectez-vous pour continuer.'));
         }
 
         $data = $request->validate([
@@ -666,12 +666,12 @@ class StoreController extends Controller
 
         $summary = $this->cartSummary();
         if (count($summary['items']) === 0) {
-            return redirect()->to('/panier')->with('error', 'Votre panier est vide.');
+            return redirect()->to('/panier')->with('error', __('Votre panier est vide.'));
         }
 
         $frsId = (int) ($this->singleFournisseur()?->id ?? 0);
         if ($frsId <= 0) {
-            return redirect()->to('/panier')->with('error', 'Boutique introuvable.');
+            return redirect()->to('/panier')->with('error', __('Boutique introuvable.'));
         }
 
         try {
@@ -683,7 +683,7 @@ class StoreController extends Controller
                     ->first();
 
                 if (! $frs) {
-                    throw new \RuntimeException('Fournisseur introuvable.');
+                    throw new \RuntimeException(__('Fournisseur introuvable.'));
                 }
 
                 $sousTotal = 0.0;
@@ -703,15 +703,15 @@ class StoreController extends Controller
                         ->first();
 
                     if (! $pdb) {
-                        throw new \RuntimeException("Produit {$p->id} introuvable.");
+                        throw new \RuntimeException(__('Produit :id introuvable.', ['id' => $p->id]));
                     }
 
                     if ((string) $client->type_client !== 'abonne' && (int) ($pdb->abonne_only ?? 0) === 1) {
-                        throw new \RuntimeException("Produit {$pdb->id} réservé aux abonnés.");
+                        throw new \RuntimeException(__('Produit :id réservé aux abonnés.', ['id' => $pdb->id]));
                     }
 
                     if ((int) $pdb->stock < $qty) {
-                        throw new \RuntimeException("Stock insuffisant pour {$pdb->designation}.");
+                        throw new \RuntimeException(__('Stock insuffisant pour :designation.', ['designation' => $pdb->designation]));
                     }
 
                     $prixUnitaire = (float) $pdb->prixUnitairePourQuantite($client, $qty);
@@ -773,7 +773,7 @@ class StoreController extends Controller
             return redirect()
                 ->to('/checkout')
                 ->withInput()
-                ->with('error', 'Erreur base de données. Lancez les migrations sur le serveur (php artisan migrate --force).');
+                ->with('error', __('Erreur base de données. Lancez les migrations sur le serveur (php artisan migrate --force).'));
         } catch (\RuntimeException $e) {
             report($e);
             return redirect()
@@ -785,7 +785,7 @@ class StoreController extends Controller
             return redirect()
                 ->to('/checkout')
                 ->withInput()
-                ->with('error', 'Erreur serveur. Veuillez réessayer.');
+                ->with('error', __('Erreur serveur. Veuillez réessayer.'));
         }
 
         $contents = collect($summary['items'])->map(function ($it) {
@@ -802,7 +802,7 @@ class StoreController extends Controller
 
         session()->forget(['cart', 'cart_frs_id']);
 
-        return redirect()->to('/mes-commandes/'.$result->id)->with('success', 'Commande créée.');
+        return redirect()->to('/mes-commandes/'.$result->id)->with('success', __('Commande créée.'));
     }
 
     public function mesCommandes(): RedirectResponse|View
@@ -810,7 +810,7 @@ class StoreController extends Controller
         $client = $this->currentClient();
         if (! $client) {
             session(['url.intended' => url('/mes-commandes')]);
-            return redirect()->to('/login')->with('error', 'Connectez-vous pour continuer.');
+            return redirect()->to('/login')->with('error', __('Connectez-vous pour continuer.'));
         }
 
         $commandes = Cmd1::query()
@@ -821,7 +821,7 @@ class StoreController extends Controller
             ->paginate(15);
 
         return view('store.commandes.index', [
-            'title' => 'Mes commandes',
+            'title' => __('Mes commandes'),
             'client' => $client,
             'commandes' => $commandes,
             'wishlist_count' => $this->wishlistCount($client),
@@ -833,7 +833,7 @@ class StoreController extends Controller
         $client = $this->currentClient();
         if (! $client) {
             session(['url.intended' => url('/mes-commandes/'.$id)]);
-            return redirect()->to('/login')->with('error', 'Connectez-vous pour continuer.');
+            return redirect()->to('/login')->with('error', __('Connectez-vous pour continuer.'));
         }
 
         $commande = Cmd1::query()
@@ -861,7 +861,7 @@ class StoreController extends Controller
             });
 
         return view('store.commandes.show', [
-            'title' => 'Commande #'.$commande->id,
+            'title' => __('Commande').' #'.$commande->id,
             'client' => $client,
             'commande' => $commande,
             'lignes' => $lignes,

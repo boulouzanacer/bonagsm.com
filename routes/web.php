@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\ClientAuthController;
 use App\Http\Controllers\Auth\FrsAuthController;
@@ -15,6 +16,14 @@ use App\Http\Controllers\Fournisseur\ProfileController as FrsProfileController;
 use App\Http\Controllers\Fournisseur\SiteSettingsController as FrsSiteSettingsController;
 use App\Http\Controllers\Fournisseur\UtilisateurController as FrsUtilisateurController;
 use App\Http\Controllers\StoreController;
+
+Route::get('/locale/{locale}', function (string $locale, Request $request) {
+    abort_unless(in_array($locale, ['fr', 'ar'], true), 404);
+
+    $request->session()->put('locale', $locale);
+
+    return redirect()->back()->withCookie(cookie()->forever('locale', $locale));
+})->where('locale', 'fr|ar');
 
 Route::get('/', [StoreController::class, 'index']);
 Route::get('/boutiques/{id}', [StoreController::class, 'boutique']);

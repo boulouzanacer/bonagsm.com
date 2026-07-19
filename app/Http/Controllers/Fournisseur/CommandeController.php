@@ -184,14 +184,14 @@ class CommandeController extends Controller
                 return ['changed' => true, 'commande' => $commande];
             });
         } catch (\InvalidArgumentException $e) {
-            return back()->with('error', 'Stock insuffisant');
+            return back()->with('error', __('Stock insuffisant'));
         }
 
         /** @var Cmd1 $commande */
         $commande = $result['commande'];
 
         if (! ($result['changed'] ?? false)) {
-            return back()->with('success', 'Aucun changement.');
+            return back()->with('success', __('Aucun changement.'));
         }
 
         $client = Client::query()->find($commande->id_client);
@@ -199,7 +199,7 @@ class CommandeController extends Controller
             $client->notify(new StatutCommandeChange($commande, $new));
         }
 
-        return back()->with('success', 'Statut mis à jour.');
+        return back()->with('success', __('Statut mis à jour.'));
     }
 
     public function updateLigneQuantite(Request $request, int $id, int $ligneId): RedirectResponse
@@ -272,10 +272,13 @@ class CommandeController extends Controller
                 ]);
             });
         } catch (\InvalidArgumentException $e) {
-            $msg = $e->getMessage() === 'Commande annulée' ? 'Impossible de modifier: commande annulée.' : 'Stock insuffisant';
+            $msg = $e->getMessage() === 'Commande annulée'
+                ? __('Impossible de modifier: commande annulée.')
+                : __('Stock insuffisant');
+
             return back()->with('error', $msg);
         }
 
-        return back()->with('success', 'Quantité mise à jour.');
+        return back()->with('success', __('Quantité mise à jour.'));
     }
 }

@@ -60,7 +60,7 @@ class ProfileController extends Controller
 
         $frs->update($payload);
 
-        return back()->with('success', 'Profil mis à jour.');
+        return back()->with('success', __('Profil mis à jour.'));
     }
 
     public function updatePassword(Request $request): RedirectResponse
@@ -73,12 +73,12 @@ class ProfileController extends Controller
         ]);
 
         if (! Hash::check($data['old_password'], $frs->password)) {
-            return back()->withErrors(['old_password' => 'Ancien mot de passe incorrect.']);
+            return back()->withErrors(['old_password' => __('Ancien mot de passe incorrect.')]);
         }
 
         $frs->update(['password' => Hash::make($data['password'])]);
 
-        return back()->with('success', 'Mot de passe mis à jour.');
+        return back()->with('success', __('Mot de passe mis à jour.'));
     }
 
     public function communes(int $idWilaya): JsonResponse

@@ -57,7 +57,7 @@ class MarqueController extends Controller
             'nom' => trim($data['nom']),
         ]);
 
-        return redirect()->to('/fournisseur/marques')->with('success', 'Marque créée.');
+        return redirect()->to('/fournisseur/marques')->with('success', __('Marque créée.'));
     }
 
     public function edit(int $id): View
@@ -95,7 +95,7 @@ class MarqueController extends Controller
             'nom' => trim($data['nom']),
         ]);
 
-        return redirect()->to('/fournisseur/marques')->with('success', 'Marque mise à jour.');
+        return redirect()->to('/fournisseur/marques')->with('success', __('Marque mise à jour.'));
     }
 
     public function destroy(int $id): RedirectResponse
@@ -112,11 +112,11 @@ class MarqueController extends Controller
             ->exists();
 
         if ($used) {
-            return back()->with('error', 'Impossible de supprimer: marque utilisée par des produits.');
+            return back()->with('error', __('Impossible de supprimer: marque utilisée par des produits.'));
         }
 
         $marque->delete();
 
-        return back()->with('success', 'Marque supprimée.');
+        return back()->with('success', __('Marque supprimée.'));
     }
 }

@@ -61,7 +61,7 @@ class UtilisateurController extends Controller
             'actif' => (int) ($data['actif'] ?? 0) === 1 ? 1 : 0,
         ]);
 
-        return redirect()->to('/fournisseur/utilisateurs')->with('success', 'Utilisateur ajouté.');
+        return redirect()->to('/fournisseur/utilisateurs')->with('success', __('Utilisateur ajouté.'));
     }
 
     public function show(int $id): View
@@ -121,7 +121,7 @@ class UtilisateurController extends Controller
 
         $user->update($payload);
 
-        return redirect()->to('/fournisseur/utilisateurs/'.$user->id)->with('success', 'Utilisateur mis à jour.');
+        return redirect()->to('/fournisseur/utilisateurs/'.$user->id)->with('success', __('Utilisateur mis à jour.'));
     }
 
     public function destroy(int $id): RedirectResponse
@@ -134,6 +134,6 @@ class UtilisateurController extends Controller
 
         $user->delete();
 
-        return redirect()->to('/fournisseur/utilisateurs')->with('success', 'Utilisateur supprimé.');
+        return redirect()->to('/fournisseur/utilisateurs')->with('success', __('Utilisateur supprimé.'));
     }
 }

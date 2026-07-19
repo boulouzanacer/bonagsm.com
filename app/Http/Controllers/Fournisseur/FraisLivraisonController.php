@@ -70,7 +70,6 @@ class FraisLivraisonController extends Controller
             }
         });
 
-        return back()->with('success', 'Enregistré.');
+        return back()->with('success', __('Enregistré.'));
     }
 }
-

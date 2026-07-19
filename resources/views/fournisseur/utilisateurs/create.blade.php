@@ -14,9 +14,9 @@
 
     <div class="rounded-2xl border border-white/10 bg-[var(--frs-card)] p-6">
         <div class="flex items-center justify-between gap-3">
-            <div class="text-2xl font-extrabold tracking-wide">Ajouter Utilisateur</div>
+            <div class="text-2xl font-extrabold tracking-wide">{{ __('Ajouter Utilisateur') }}</div>
             <a href="{{ url('/fournisseur/utilisateurs') }}" class="text-sm text-white/60 hover:text-white">
-                Retour
+                {{ __('Retour') }}
             </a>
         </div>
 
@@ -25,7 +25,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-semibold text-white/70 mb-1">Nom</label>
+                    <label class="block text-sm font-semibold text-white/70 mb-1">{{ __('Nom') }}</label>
                     <input name="nom"
                            value="{{ old('nom') }}"
                            class="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--frs-primary)]"
@@ -33,7 +33,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-white/70 mb-1">Email</label>
+                    <label class="block text-sm font-semibold text-white/70 mb-1">{{ __('Email') }}</label>
                     <input name="email"
                            type="email"
                            value="{{ old('email') }}"
@@ -42,12 +42,12 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-white/70 mb-1">Rôle</label>
+                    <label class="block text-sm font-semibold text-white/70 mb-1">{{ __('Rôle') }}</label>
                     <select name="role"
                             class="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--frs-primary)]"
                             required>
-                        <option value="user" @selected(old('role', 'user') === 'user')>user</option>
-                        <option value="admin" @selected(old('role') === 'admin')>admin</option>
+                        <option value="user" @selected(old('role', 'user') === 'user')>{{ __('user') }}</option>
+                        <option value="admin" @selected(old('role') === 'admin')>{{ __('admin') }}</option>
                     </select>
                 </div>
 
@@ -58,12 +58,12 @@
                                value="1"
                                class="h-5 w-5 rounded border-white/20 bg-black/20"
                                @checked((int)old('actif', 1) === 1)>
-                        <span class="text-sm font-semibold text-white/70">Actif</span>
+                        <span class="text-sm font-semibold text-white/70">{{ __('Actif') }}</span>
                     </label>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-white/70 mb-1">Mot de passe</label>
+                    <label class="block text-sm font-semibold text-white/70 mb-1">{{ __('Mot de passe') }}</label>
                     <input name="password"
                            type="password"
                            class="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--frs-primary)]"
@@ -71,7 +71,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-white/70 mb-1">Confirmation</label>
+                    <label class="block text-sm font-semibold text-white/70 mb-1">{{ __('Confirmation') }}</label>
                     <input name="password_confirmation"
                            type="password"
                            class="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--frs-primary)]"
@@ -83,11 +83,10 @@
                 <button type="submit"
                         class="rounded-2xl px-6 py-3 font-extrabold text-white"
                         style="background: linear-gradient(135deg, var(--frs-primary), #0A3D7A);">
-                    Enregistrer
+                    {{ __('Enregistrer') }}
                 </button>
             </div>
         </form>
     </div>
 </div>
 @endsection
-

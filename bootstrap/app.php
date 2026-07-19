@@ -12,6 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->appendToGroup('web', [
+            \App\Http\Middleware\SetLocale::class,
+        ]);
+
         $middleware->appendToGroup('api', [
             \Illuminate\Http\Middleware\HandleCors::class,
             \App\Http\Middleware\SanitizeInput::class,
@@ -30,7 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json([
                     'success' => false,
                     'data' => null,
-                    'message' => 'Validation échouée',
+                    'message' => __('Validation échouée'),
                     'errors' => $e->errors(),
                 ], 422);
             }
@@ -41,7 +45,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json([
                     'success' => false,
                     'data' => null,
-                    'message' => 'Non autorisé',
+                    'message' => __('Non autorisé'),
                     'errors' => null,
                 ], 401);
             }
@@ -52,7 +56,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json([
                     'success' => false,
                     'data' => null,
-                    'message' => 'Ressource introuvable',
+                    'message' => __('Ressource introuvable'),
                     'errors' => null,
                 ], 404);
             }
@@ -63,7 +67,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json([
                     'success' => false,
                     'data' => null,
-                    'message' => 'Ressource introuvable',
+                    'message' => __('Ressource introuvable'),
                     'errors' => null,
                 ], 404);
             }

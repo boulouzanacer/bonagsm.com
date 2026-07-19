@@ -9,8 +9,8 @@
                 <i class="fa-solid fa-key text-white text-lg"></i>
             </div>
             <div>
-                <div class="text-2xl font-extrabold tracking-wide">Votre Token PME Pro</div>
-                <div class="text-sm text-white/60">Ce token permet à votre logiciel PME Pro de se connecter à Bona GSM.</div>
+                <div class="text-2xl font-extrabold tracking-wide">{{ __('Votre Token PME Pro') }}</div>
+                <div class="text-sm text-white/60">{{ __('Ce token permet à votre logiciel PME Pro de se connecter à Bona GSM.') }}</div>
             </div>
         </div>
 
@@ -22,19 +22,19 @@
             <button type="button"
                     class="flex-1 rounded-2xl px-4 py-3 font-extrabold border border-white/10 hover:bg-white/10"
                     @click="show = !show">
-                <span x-show="!show">👁 Afficher</span>
-                <span x-show="show">🙈 Masquer</span>
+                <span x-show="!show">{{ __('Afficher') }}</span>
+                <span x-show="show">{{ __('Masquer') }}</span>
             </button>
             <button type="button"
                     class="flex-1 rounded-2xl px-4 py-3 font-extrabold text-white"
                     style="background: linear-gradient(135deg, var(--frs-primary), #0A3D7A);"
                     @click="navigator.clipboard.writeText('{{ $token }}')">
-                📋 Copier
+                {{ __('Copier') }}
             </button>
         </div>
 
         <div class="mt-4 text-sm text-amber-200/90">
-            ⚠ Ne partagez jamais ce token.
+            {{ __('Ne partagez jamais ce token.') }}
         </div>
     </div>
 </div>

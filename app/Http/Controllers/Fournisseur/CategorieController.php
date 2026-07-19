@@ -65,7 +65,7 @@ class CategorieController extends Controller
             'slug' => $slug,
         ]);
 
-        return redirect()->to('/fournisseur/categories')->with('success', 'Catégorie créée.');
+        return redirect()->to('/fournisseur/categories')->with('success', __('Catégorie créée.'));
     }
 
     public function edit(int $id): View
@@ -116,7 +116,7 @@ class CategorieController extends Controller
             ->where('categorie', $oldName)
             ->update(['categorie' => $name]);
 
-        return back()->with('success', 'Catégorie mise à jour.');
+        return back()->with('success', __('Catégorie mise à jour.'));
     }
 
     public function destroy(int $id): RedirectResponse
@@ -133,11 +133,11 @@ class CategorieController extends Controller
             ->exists();
 
         if ($used) {
-            return back()->with('error', 'Impossible de supprimer: catégorie utilisée par des produits.');
+            return back()->with('error', __('Impossible de supprimer: catégorie utilisée par des produits.'));
         }
 
         $categorie->delete();
 
-        return back()->with('success', 'Catégorie supprimée.');
+        return back()->with('success', __('Catégorie supprimée.'));
     }
 }

@@ -6,9 +6,9 @@
         <div>
             <select name="statut"
                     class="w-full rounded-2xl border border-white/10 bg-[var(--frs-card)] px-4 py-3 outline-none focus:border-[var(--frs-primary)]">
-                <option value="">Tous statuts</option>
+                <option value="">{{ __('Tous statuts') }}</option>
                 @foreach($statuts as $s)
-                    <option value="{{ $s }}" @selected((string)$selected_statut === (string)$s)>{{ $s }}</option>
+                    <option value="{{ $s }}" @selected((string)$selected_statut === (string)$s)>{{ match($s) { 'en_attente' => __('En attente'), 'confirmee' => __('Confirmée'), 'expediee' => __('Expédiée'), 'livree' => __('Livrée'), 'annulee' => __('Annulée'), default => $s } }}</option>
                 @endforeach
             </select>
         </div>
@@ -16,7 +16,7 @@
         <div>
             <select name="client"
                     class="w-full rounded-2xl border border-white/10 bg-[var(--frs-card)] px-4 py-3 outline-none focus:border-[var(--frs-primary)]">
-                <option value="">Tous clients</option>
+                <option value="">{{ __('Tous clients') }}</option>
                 @foreach($clients as $c)
                     <option value="{{ $c->id }}" @selected((string)$selected_client === (string)$c->id)>{{ $c->prenom }} {{ $c->nom }}</option>
                 @endforeach
@@ -39,7 +39,7 @@
 
         <button class="rounded-2xl px-4 py-3 font-bold text-white"
                 style="background: linear-gradient(135deg, var(--frs-primary), #0A3D7A);">
-            Filtrer
+            {{ __('Filtrer') }}
         </button>
     </form>
 
@@ -59,12 +59,12 @@
             <table class="min-w-full text-sm">
                 <thead class="text-white/60">
                     <tr>
-                        <th class="text-left py-3 px-4 font-semibold">N°</th>
-                        <th class="text-left py-3 px-4 font-semibold">Client</th>
-                        <th class="text-left py-3 px-4 font-semibold">Date</th>
-                        <th class="text-right py-3 px-4 font-semibold">Montant</th>
-                        <th class="text-left py-3 px-4 font-semibold">Statut</th>
-                        <th class="text-left py-3 px-4 font-semibold">Synced PME</th>
+                        <th class="table-align-start text-left py-3 px-4 font-semibold">{{ __('N°') }}</th>
+                        <th class="table-align-start text-left py-3 px-4 font-semibold">{{ __('Client') }}</th>
+                        <th class="table-align-start text-left py-3 px-4 font-semibold">{{ __('Date') }}</th>
+                        <th class="table-align-end text-right py-3 px-4 font-semibold">{{ __('Montant') }}</th>
+                        <th class="table-align-start text-left py-3 px-4 font-semibold">{{ __('Statut') }}</th>
+                        <th class="table-align-start text-left py-3 px-4 font-semibold">{{ __('Synced PME') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-white/10">
@@ -79,24 +79,32 @@
                                 'annulee' => 'bg-red-500/15 text-red-300 border border-red-400/20',
                                 default => 'bg-white/10 text-white/70 border border-white/10'
                             };
+                            $statutLabel = match($statut) {
+                                'en_attente' => __('En attente'),
+                                'confirmee' => __('Confirmée'),
+                                'expediee' => __('Expédiée'),
+                                'livree' => __('Livrée'),
+                                'annulee' => __('Annulée'),
+                                default => $statut,
+                            };
                         @endphp
                         <tr class="hover:bg-white/5 cursor-pointer" onclick="window.location='{{ url('/fournisseur/commandes/'.$c->id) }}'">
                             <td class="py-3 px-4 font-semibold">#{{ $c->id }}</td>
                             <td class="py-3 px-4 text-white/80">{{ trim(($c->client_prenom ?? '').' '.($c->client_nom ?? '')) }}</td>
                             <td class="py-3 px-4 text-white/80">{{ \Illuminate\Support\Carbon::parse($c->date_cmd)->format('d/m/Y H:i') }}</td>
-                            <td class="py-3 px-4 text-right font-extrabold">{{ number_format((float)$c->montant_total, 2, '.', ' ') }}</td>
+                            <td class="table-align-end py-3 px-4 text-right font-extrabold">{{ number_format((float)$c->montant_total, 2, '.', ' ') }}</td>
                             <td class="py-3 px-4">
-                                <span class="text-xs font-bold px-2.5 py-1 rounded-full {{ $badge }}">{{ $statut }}</span>
+                                <span class="text-xs font-bold px-2.5 py-1 rounded-full {{ $badge }}">{{ $statutLabel }}</span>
                             </td>
                             <td class="py-3 px-4">
                                 <span class="text-xs font-bold px-2.5 py-1 rounded-full {{ (int)$c->synced_pme === 1 ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-400/20' : 'bg-amber-500/15 text-amber-300 border border-amber-400/20' }}">
-                                    {{ (int)$c->synced_pme === 1 ? 'Synchronisé' : 'En attente' }}
+                                    {{ (int)$c->synced_pme === 1 ? __('Synchronisé') : __('En attente') }}
                                 </span>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="py-10 text-center text-white/60">Aucune commande</td>
+                            <td colspan="6" class="py-10 text-center text-white/60">{{ __('Aucune commande') }}</td>
                         </tr>
                     @endforelse
                 </tbody>

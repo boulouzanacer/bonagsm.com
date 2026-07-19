@@ -19,7 +19,7 @@
     @endif
 
     <div class="rounded-2xl border border-white/10 bg-[var(--frs-card)] p-6">
-        <div class="text-2xl font-extrabold tracking-wide">Paramètres Site Web</div>
+        <div class="text-2xl font-extrabold tracking-wide">{{ __('Paramètres Site Web') }}</div>
 
         <form method="POST" action="{{ url('/fournisseur/parametres-site') }}" class="mt-5" enctype="multipart/form-data">
             @csrf
@@ -27,13 +27,13 @@
 
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-semibold text-white/70 mb-1">Logo du site (optionnel)</label>
+                    <label class="block text-sm font-semibold text-white/70 mb-1">{{ __('Logo du site (optionnel)') }}</label>
                     <input type="file"
                            name="logo"
                            accept="image/png,image/jpeg,image/webp"
                            class="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--frs-primary)]">
                     <div class="mt-2 text-xs text-white/60">
-                        Dimensions idéales: 512×512 (carré). Minimum: 256×256. Format conseillé: PNG/WebP (fond transparent).
+                        {{ __('Dimensions idéales: 512×512 (carré). Minimum: 256×256. Format conseillé: PNG/WebP (fond transparent).') }}
                     </div>
                     @if(($frs->logo_path ?? null))
                         <div class="mt-3 flex items-center gap-4">
@@ -45,7 +45,7 @@
                                        name="remove_logo"
                                        value="1"
                                        class="h-5 w-5 rounded border-white/20 bg-black/20">
-                                <span class="text-sm font-semibold text-white/70">Supprimer</span>
+                                <span class="text-sm font-semibold text-white/70">{{ __('Supprimer') }}</span>
                             </label>
                         </div>
                     @endif
@@ -58,31 +58,31 @@
                                value="1"
                                class="h-5 w-5 rounded border-white/20 bg-black/20"
                                @checked((int)old('show_prices_to_guests', $frs->show_prices_to_guests ?? 1) === 1)>
-                        <span class="text-sm font-semibold text-white/70">Afficher les prix aux invités (non connectés)</span>
+                        <span class="text-sm font-semibold text-white/70">{{ __('Afficher les prix aux invités (non connectés)') }}</span>
                     </label>
                 </div>
 
                 <div class="pt-2">
-                    <div class="text-sm font-extrabold tracking-wide text-white/80">Pixels</div>
-                    <div class="text-xs text-white/60 mt-1">Meta Pixel et TikTok Pixel pour le suivi.</div>
+                    <div class="text-sm font-extrabold tracking-wide text-white/80">{{ __('Pixels') }}</div>
+                    <div class="text-xs text-white/60 mt-1">{{ __('Meta Pixel et TikTok Pixel pour le suivi.') }}</div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-semibold text-white/70 mb-1">Meta Pixel ID</label>
+                        <label class="block text-sm font-semibold text-white/70 mb-1">{{ __('Meta Pixel ID') }}</label>
                         <input name="meta_pixel_id"
                                value="{{ old('meta_pixel_id', $frs->meta_pixel_id ?? '') }}"
                                inputmode="numeric"
                                class="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--frs-primary)]"
-                               placeholder="ex: 123456789012345">
+                               placeholder="{{ __('ex: 123456789012345') }}">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-white/70 mb-1">TikTok Pixel ID</label>
+                        <label class="block text-sm font-semibold text-white/70 mb-1">{{ __('TikTok Pixel ID') }}</label>
                         <input name="tiktok_pixel_id"
                                value="{{ old('tiktok_pixel_id', $frs->tiktok_pixel_id ?? '') }}"
                                class="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--frs-primary)]"
-                               placeholder="ex: C3ABCDEFG12345">
+                               placeholder="{{ __('ex: C3ABCDEFG12345') }}">
                     </div>
                 </div>
             </div>
@@ -91,11 +91,10 @@
                 <button type="submit"
                         class="rounded-2xl px-6 py-3 font-extrabold text-white"
                         style="background: linear-gradient(135deg, var(--frs-primary), #0A3D7A);">
-                    Enregistrer
+                    {{ __('Enregistrer') }}
                 </button>
             </div>
         </form>
     </div>
 </div>
 @endsection
-

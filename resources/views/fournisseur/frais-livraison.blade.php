@@ -26,8 +26,8 @@
 
         <div class="p-5 flex items-center justify-between gap-3 border-b border-white/10">
             <div>
-                <div class="text-lg font-extrabold tracking-wide">Frais de livraison</div>
-                <div class="text-sm text-white/60">Définir des frais par wilaya.</div>
+                <div class="text-lg font-extrabold tracking-wide">{{ __('Frais de livraison') }}</div>
+                <div class="text-sm text-white/60">{{ __('Définir des frais par wilaya.') }}</div>
             </div>
 
             <div class="flex items-center gap-3">
@@ -41,18 +41,18 @@
                          :class="canEdit ? '' : 'opacity-60'">
                         <div class="absolute left-1 top-1 h-5 w-5 rounded-full bg-white transition peer-checked:translate-x-5"></div>
                     </div>
-                    <span class="text-sm font-extrabold text-white/80" x-text="enabled ? 'Activé' : 'Désactivé'"></span>
+                    <span class="text-sm font-extrabold text-white/80" x-text="enabled ? @js(__('Activé')) : @js(__('Désactivé'))"></span>
                 </label>
 
                 @if($canEdit)
                     <button type="submit"
                             class="rounded-2xl px-4 py-3 font-extrabold text-white"
                             style="background: linear-gradient(135deg, var(--frs-primary), #0A3D7A);">
-                        Enregistrer
+                        {{ __('Enregistrer') }}
                     </button>
                 @else
                     <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-white/10 border border-white/10 text-white/70">
-                        Lecture seule
+                        {{ __('Lecture seule') }}
                     </span>
                 @endif
             </div>
@@ -63,8 +63,8 @@
                 <table class="min-w-full text-sm">
                     <thead class="text-white/60">
                         <tr>
-                            <th class="text-left py-3 px-4 font-semibold">Wilaya</th>
-                            <th class="text-right py-3 px-4 font-semibold">Frais (DA)</th>
+                            <th class="table-align-start text-left py-3 px-4 font-semibold">{{ __('Wilaya') }}</th>
+                            <th class="table-align-end text-right py-3 px-4 font-semibold">{{ __('Frais (DA)') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-white/10">

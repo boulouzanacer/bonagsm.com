@@ -7,16 +7,16 @@
             <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-white/50"></i>
             <input name="q"
                    value="{{ $q }}"
-                   placeholder="Rechercher nom ou code client..."
+                   placeholder="{{ __('Rechercher nom ou code client...') }}"
                    class="w-full rounded-2xl border border-white/10 bg-[var(--frs-card)] pl-11 pr-4 py-3 outline-none focus:border-[var(--frs-primary)]">
         </div>
         <button class="rounded-2xl px-4 py-3 font-bold text-white"
                 style="background: linear-gradient(135deg, var(--frs-primary), #0A3D7A);">
-            Filtrer
+            {{ __('Filtrer') }}
         </button>
         <a href="{{ url('/fournisseur/clients') }}"
            class="rounded-2xl px-4 py-3 font-bold border border-white/10 hover:bg-white/10">
-            Reset
+            {{ __('Réinitialiser') }}
         </a>
     </form>
 
@@ -25,13 +25,13 @@
             <table class="min-w-full text-sm">
                 <thead class="text-white/60">
                     <tr>
-                        <th class="text-left py-3 px-4 font-semibold">Code</th>
-                        <th class="text-left py-3 px-4 font-semibold">Nom</th>
-                        <th class="text-center py-3 px-4 font-semibold">Tarif</th>
-                        <th class="text-left py-3 px-4 font-semibold">Email</th>
-                        <th class="text-left py-3 px-4 font-semibold">Téléphone</th>
-                        <th class="text-left py-3 px-4 font-semibold">Commune</th>
-                        <th class="text-right py-3 px-4 font-semibold">Nb commandes</th>
+                        <th class="table-align-start text-left py-3 px-4 font-semibold">{{ __('Code') }}</th>
+                        <th class="table-align-start text-left py-3 px-4 font-semibold">{{ __('Nom') }}</th>
+                        <th class="text-center py-3 px-4 font-semibold">{{ __('Tarif') }}</th>
+                        <th class="table-align-start text-left py-3 px-4 font-semibold">{{ __('Email') }}</th>
+                        <th class="table-align-start text-left py-3 px-4 font-semibold">{{ __('Téléphone') }}</th>
+                        <th class="table-align-start text-left py-3 px-4 font-semibold">{{ __('Commune') }}</th>
+                        <th class="table-align-end text-right py-3 px-4 font-semibold">{{ __('Nb commandes') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-white/10">
@@ -48,11 +48,11 @@
                             <td class="py-3 px-4 text-white/80">{{ $c->email }}</td>
                             <td class="py-3 px-4 text-white/80">{{ $c->telephone }}</td>
                             <td class="py-3 px-4 text-white/80">{{ $c->commune_nom ?? '-' }}</td>
-                            <td class="py-3 px-4 text-right font-extrabold">{{ (int)$c->nb_commandes }}</td>
+                            <td class="table-align-end py-3 px-4 text-right font-extrabold">{{ (int)$c->nb_commandes }}</td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="py-10 text-center text-white/60">Aucun client</td>
+                            <td colspan="7" class="py-10 text-center text-white/60">{{ __('Aucun client') }}</td>
                         </tr>
                     @endforelse
                 </tbody>

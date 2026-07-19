@@ -8,7 +8,7 @@
         <div>
             <div class="text-center mb-6 text-slate-900 dark:text-white">
                 <div class="text-3xl font-extrabold tracking-wide">Bona GSM</div>
-                <div class="text-sm opacity-80 mt-1">Espace Fournisseur</div>
+                <div class="text-sm opacity-80 mt-1">{{ __('Espace Fournisseur') }}</div>
             </div>
 
         <div class="rounded-[32px] p-8 shadow-2xl bg-white/90 backdrop-blur border border-white/70 dark:bg-slate-900/90 dark:border-slate-800">
@@ -26,7 +26,7 @@
                 @csrf
 
                 <div>
-                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">Email</label>
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">{{ __('Email') }}</label>
                     <input name="email"
                            type="email"
                            value="{{ old('email') }}"
@@ -36,7 +36,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">Password</label>
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">{{ __('Password') }}</label>
                     <div class="relative">
                         <input name="password"
                                :type="show ? 'text' : 'password'"
@@ -54,11 +54,11 @@
                 <button type="submit"
                         class="w-full rounded-2xl py-3.5 font-bold text-white shadow-lg transition hover:-translate-y-0.5"
                         style="background: linear-gradient(135deg, #0f7a43 0%, #0b5e33 55%, #111827 100%);">
-                    Se connecter
+                    {{ __('Se connecter') }}
                 </button>
             </form>
             <div class="mt-5 text-center text-xs text-slate-500 dark:text-slate-400">
-                Tableau de bord sécurisé, moderne et optimisé mobile.
+                {{ __('Tableau de bord sécurisé, moderne et optimisé mobile.') }}
             </div>
         </div>
     </div>

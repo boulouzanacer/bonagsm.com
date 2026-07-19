@@ -39,13 +39,13 @@ class ProduitController extends Controller
             $price = (float) ($row['price'] ?? -1);
 
             if ($min <= 0) {
-                throw new \InvalidArgumentException('Quantité min invalide.');
+                throw new \InvalidArgumentException(__('Quantité min invalide.'));
             }
             if ($max !== null && $max < $min) {
-                throw new \InvalidArgumentException('Quantité max doit être >= quantité min.');
+                throw new \InvalidArgumentException(__('Quantité max doit être >= quantité min.'));
             }
             if ($price < 0) {
-                throw new \InvalidArgumentException('Prix invalide.');
+                throw new \InvalidArgumentException(__('Prix invalide.'));
             }
 
             $normalized[] = [
@@ -56,7 +56,7 @@ class ProduitController extends Controller
         }
 
         if (count($normalized) === 0) {
-            throw new \InvalidArgumentException('Ajoutez au moins un palier.');
+            throw new \InvalidArgumentException(__('Ajoutez au moins un palier.'));
         }
 
         usort($normalized, fn ($a, $b) => $a['quantity_min'] <=> $b['quantity_min']);
@@ -69,10 +69,10 @@ class ProduitController extends Controller
             }
 
             if ($prevMax === null) {
-                throw new \InvalidArgumentException('Aucun palier ne peut suivre un palier sans quantité max.');
+                throw new \InvalidArgumentException(__('Aucun palier ne peut suivre un palier sans quantité max.'));
             }
             if ($t['quantity_min'] <= $prevMax) {
-                throw new \InvalidArgumentException('Chevauchement détecté entre paliers.');
+                throw new \InvalidArgumentException(__('Chevauchement détecté entre paliers.'));
             }
 
             $prevMax = $t['quantity_max'];
@@ -121,7 +121,7 @@ class ProduitController extends Controller
                         ->get(['id', 'nom']);
                 }
             } catch (QueryException $e) {
-                $dbError = 'La base de données n’est pas à jour. Lancez les migrations (php artisan migrate --force).';
+                $dbError = __('La base de données n’est pas à jour. Lancez les migrations (php artisan migrate --force).');
             }
 
             try {
@@ -141,12 +141,12 @@ class ProduitController extends Controller
                     ->paginate(18)
                     ->withQueryString();
             } catch (QueryException $e) {
-                $dbError = 'La base de données n’est pas à jour. Lancez les migrations (php artisan migrate --force).';
+                $dbError = __('La base de données n’est pas à jour. Lancez les migrations (php artisan migrate --force).');
             }
         } catch (Throwable $e) {
             report($e);
             if ($dbError === null) {
-                $dbError = 'Erreur serveur. Consultez le fichier storage/logs/laravel.log.';
+                $dbError = __('Erreur serveur. Consultez le fichier storage/logs/laravel.log.');
             }
         }
 
@@ -238,7 +238,7 @@ class ProduitController extends Controller
             'images_order.*' => ['string'],
             'primary_image' => ['nullable', 'string'],
         ], [
-            'reference.unique' => 'Référence déjà utilisée.',
+            'reference.unique' => __('Référence déjà utilisée.'),
         ]);
 
         $categorieNom = Categorie::query()
@@ -247,7 +247,7 @@ class ProduitController extends Controller
             ->value('nom');
 
         if (! $categorieNom) {
-            return back()->withErrors(['id_categorie' => 'Catégorie invalide.'])->withInput();
+            return back()->withErrors(['id_categorie' => __('Catégorie invalide.')])->withInput();
         }
         $data['categorie_nom'] = $categorieNom;
 
@@ -313,7 +313,7 @@ class ProduitController extends Controller
 
         return redirect()
             ->to($isAdmin ? "/fournisseur/produits/{$produit->id}/edit" : "/fournisseur/produits/{$produit->id}")
-            ->with('success', 'Produit créé.');
+            ->with('success', __('Produit créé.'));
     }
 
     public function show(int $id): View
@@ -431,7 +431,7 @@ class ProduitController extends Controller
             'images_order.*' => ['string'],
             'primary_image' => ['nullable', 'string'],
         ], [
-            'reference.unique' => 'Référence déjà utilisée.',
+            'reference.unique' => __('Référence déjà utilisée.'),
         ]);
 
         $categorieNom = Categorie::query()
@@ -440,7 +440,7 @@ class ProduitController extends Controller
             ->value('nom');
 
         if (! $categorieNom) {
-            return back()->withErrors(['id_categorie' => 'Catégorie invalide.'])->withInput();
+            return back()->withErrors(['id_categorie' => __('Catégorie invalide.')])->withInput();
         }
         $data['categorie_nom'] = $categorieNom;
 
@@ -499,7 +499,7 @@ class ProduitController extends Controller
         $files = $request->file('images', []);
         $totalAfter = $existingCount + count($files);
         if ($totalAfter > 5) {
-            return back()->withErrors(['images' => 'Maximum 5 images par produit.'])->withInput();
+            return back()->withErrors(['images' => __('Maximum 5 images par produit.')])->withInput();
         }
 
         if (count($files) > 0) {
@@ -547,7 +547,7 @@ class ProduitController extends Controller
             }
         }
 
-        return back()->with('success', 'Produit mis à jour.');
+        return back()->with('success', __('Produit mis à jour.'));
     }
 
     public function destroy(int $id): RedirectResponse
@@ -560,7 +560,7 @@ class ProduitController extends Controller
 
         $produit->delete();
 
-        return redirect()->to('/fournisseur/produits')->with('success', 'Produit supprimé.');
+        return redirect()->to('/fournisseur/produits')->with('success', __('Produit supprimé.'));
     }
 
     public function import(Request $request): JsonResponse|RedirectResponse
@@ -604,7 +604,7 @@ class ProduitController extends Controller
         if (count($refs) === 0) {
             return response()->json([
                 'success' => false,
-                'message' => 'Aucune référence valide trouvée dans le fichier.',
+                'message' => __('Aucune référence valide trouvée dans le fichier.'),
                 'created' => 0,
                 'updated' => 0,
                 'skipped' => 0,
@@ -693,7 +693,7 @@ class ProduitController extends Controller
                 $stockVal = $stockRaw !== null ? (int) round((float) str_replace(',', '.', $stockRaw)) : null;
 
                 // Handle Category
-                $catName = $catName !== null ? mb_substr($catName, 0, 100) : 'Général';
+                $catName = $catName !== null ? mb_substr($catName, 0, 100) : __('Général');
                 if (! array_key_exists($catName, $catCache)) {
                     $slug = Str::slug($catName);
                     if ($slug === '') $slug = Str::slug('categorie-'.$catName);
@@ -808,7 +808,7 @@ class ProduitController extends Controller
                         'pv_2' => (float) max(0, (float)($pv2 ?? ($pv1 ?? 0))),
                         'pv_3' => (float) max(0, (float)($pv3 ?? ($pv1 ?? 0))),
                         'stock' => (int) max(0, (int)($stockVal ?? 0)),
-                        'categorie' => (string) ($catName ?? 'Général'),
+                        'categorie' => (string) ($catName ?? __('Général')),
                         'id_categorie' => $catId > 0 ? $catId : null,
                         'id_sous_categorie' => $subCatId,
                         'id_marque' => $marqueId,
@@ -825,7 +825,7 @@ class ProduitController extends Controller
                         Produit::create($new);
                         $created++;
                     } catch (Throwable $e) {
-                        $errors[] = ['row' => $i + 2, 'reference' => $reference, 'message' => 'Impossible de créer le produit.'];
+                        $errors[] = ['row' => $i + 2, 'reference' => $reference, 'message' => __('Impossible de créer le produit.')];
                     }
                 }
             }
@@ -833,7 +833,7 @@ class ProduitController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Import terminé.',
+            'message' => __('Import terminé.'),
             'created' => $created,
             'updated' => $updatedCount,
             'skipped' => $skipped,
@@ -852,6 +852,6 @@ class ProduitController extends Controller
         $produit->actif = (int) $produit->actif === 1 ? 0 : 1;
         $produit->save();
 
-        return back()->with('success', 'Statut produit mis à jour.');
+        return back()->with('success', __('Statut produit mis à jour.'));
     }
 }
