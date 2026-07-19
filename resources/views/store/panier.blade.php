@@ -44,67 +44,81 @@
             <div class="lg:col-span-2 space-y-3">
                 @foreach($items as $it)
                     @php($p = $it['produit'])
-                    <div class="soft-card interactive-lift rounded-[28px] p-4 sm:p-5 flex flex-col sm:flex-row items-start gap-4">
-                        <a href="{{ url('/produits/'.$p->id) }}" class="h-24 w-full sm:w-28 sm:h-20 rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 flex-shrink-0">
-                            @if(($it['image'] ?? '') !== '')
-                                <img src="{{ $it['image'] }}" alt="" class="w-full h-full object-cover">
-                            @else
-                                <div class="w-full h-full flex items-center justify-center text-slate-400">
-                                    <i class="fa-regular fa-image"></i>
-                                </div>
-                            @endif
-                        </a>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                                <div class="min-w-0">
-                                    <a href="{{ url('/produits/'.$p->id) }}" class="font-extrabold hover:text-[var(--store-primary)] block">
+                    <div class="soft-card interactive-lift rounded-[28px] p-4 sm:p-5">
+                        <div class="flex items-start gap-3 sm:gap-4">
+                            <a href="{{ url('/produits/'.$p->id) }}" class="h-24 w-24 rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 flex-shrink-0 sm:h-20 sm:w-28">
+                                @if(($it['image'] ?? '') !== '')
+                                    <img src="{{ $it['image'] }}" alt="" class="w-full h-full object-cover">
+                                @else
+                                    <div class="w-full h-full flex items-center justify-center text-slate-400">
+                                        <i class="fa-regular fa-image"></i>
+                                    </div>
+                                @endif
+                            </a>
+
+                            <div class="min-w-0 flex-1">
+                                <div class="flex flex-col gap-2">
+                                    <a href="{{ url('/produits/'.$p->id) }}" class="block text-sm sm:text-base font-extrabold leading-tight text-slate-900 hover:text-[var(--store-primary)]">
                                         {{ $p->designation }}
                                     </a>
-                                    <div class="mt-1 text-sm text-slate-600">Ref: {{ $p->reference }}</div>
-                                    @if(($can_show_prices ?? false) || ($client ?? null))
-                                        <div class="mt-1 text-xs text-slate-500">{{ number_format((float)$it['prix_unitaire'], 2, '.', ' ') }} DA</div>
-                                    @else
-                                        <div class="mt-1 text-xs text-slate-500">Connectez-vous pour voir le prix</div>
-                                    @endif
-                                </div>
-                                <div class="sm:text-right">
-                                    @if(($can_show_prices ?? false) || ($client ?? null))
-                                        <div class="font-extrabold text-lg">{{ number_format((float)$it['line_total'], 2, '.', ' ') }} DA</div>
-                                    @else
-                                        <div class="font-extrabold text-slate-500">—</div>
-                                    @endif
-                                    <div class="text-xs text-slate-500">Stock: {{ (int)$p->stock }}</div>
-                                </div>
-                            </div>
+                                    <div class="text-xs sm:text-sm text-slate-500">Ref: {{ $p->reference }}</div>
 
-                            <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                <form method="POST" action="{{ url('/panier/update') }}" class="flex flex-col gap-2 sm:flex-row sm:items-center">
-                                    @csrf
-                                    <input type="hidden" name="produit_id" value="{{ $p->id }}">
-                                    <div class="inline-flex items-center rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
-                                        <span class="mr-3 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Qté</span>
-                                        <input type="number"
-                                               name="qty"
-                                               min="1"
-                                               max="{{ max(1, (int)$p->stock) }}"
-                                               value="{{ (int)$it['qty'] }}"
-                                               class="w-16 bg-transparent text-base font-bold outline-none focus:border-[var(--store-primary)]">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-500">
+                                            Stock: {{ (int)$p->stock }}
+                                        </span>
+                                        @if(($can_show_prices ?? false) || ($client ?? null))
+                                            <span class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-700">
+                                                {{ number_format((float)$it['prix_unitaire'], 2, '.', ' ') }} DA / u
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-500">
+                                                Connexion requise
+                                            </span>
+                                        @endif
                                     </div>
-                                    <button type="submit"
-                                            class="interactive-lift rounded-2xl px-4 py-2.5 text-sm font-bold border border-slate-200 bg-white hover:bg-slate-50 shadow-sm">
-                                        Mettre à jour
-                                    </button>
-                                </form>
-
-                                <form method="POST" action="{{ url('/panier/remove') }}">
-                                    @csrf
-                                    <input type="hidden" name="produit_id" value="{{ $p->id }}">
-                                    <button type="submit"
-                                            class="interactive-lift rounded-2xl px-4 py-2.5 text-sm font-bold border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 shadow-sm">
-                                        Supprimer
-                                    </button>
-                                </form>
+                                </div>
                             </div>
+                        </div>
+
+                        <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50/80 p-3">
+                            <div class="flex items-center justify-between gap-3">
+                                <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Total ligne</div>
+                                @if(($can_show_prices ?? false) || ($client ?? null))
+                                    <div class="text-lg font-extrabold text-slate-900">{{ number_format((float)$it['line_total'], 2, '.', ' ') }} DA</div>
+                                @else
+                                    <div class="text-sm font-extrabold text-slate-500">—</div>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="mt-4 flex flex-col gap-3">
+                            <form method="POST" action="{{ url('/panier/update') }}" class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                @csrf
+                                <input type="hidden" name="produit_id" value="{{ $p->id }}">
+                                <div class="inline-flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm sm:w-auto sm:justify-start">
+                                    <span class="mr-3 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Qté</span>
+                                    <input type="number"
+                                           name="qty"
+                                           min="1"
+                                           max="{{ max(1, (int)$p->stock) }}"
+                                           value="{{ (int)$it['qty'] }}"
+                                           class="w-20 bg-transparent text-right sm:text-left text-base font-bold outline-none focus:border-[var(--store-primary)]">
+                                </div>
+                                <button type="submit"
+                                        class="interactive-lift w-full rounded-2xl px-4 py-2.5 text-sm font-bold border border-slate-200 bg-white hover:bg-slate-50 shadow-sm sm:w-auto">
+                                    Mettre à jour
+                                </button>
+                            </form>
+
+                            <form method="POST" action="{{ url('/panier/remove') }}">
+                                @csrf
+                                <input type="hidden" name="produit_id" value="{{ $p->id }}">
+                                <button type="submit"
+                                        class="interactive-lift w-full rounded-2xl px-4 py-2.5 text-sm font-bold border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 shadow-sm sm:w-auto">
+                                    Supprimer
+                                </button>
+                            </form>
                         </div>
                     </div>
                 @endforeach
