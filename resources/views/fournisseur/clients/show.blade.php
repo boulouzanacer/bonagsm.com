@@ -25,7 +25,7 @@
     <div class="flex items-center justify-between">
         <div>
             <div class="text-2xl font-extrabold tracking-wide">{{ $client->prenom }} {{ $client->nom }}</div>
-            <div class="text-sm text-white/60">{{ $client->email }}</div>
+            <div class="force-ltr text-sm text-white/60">{{ $client->email }}</div>
         </div>
         <a href="{{ url('/fournisseur/clients') }}"
            class="rounded-2xl px-4 py-3 font-bold border border-white/10 hover:bg-white/10">
@@ -36,7 +36,7 @@
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div class="rounded-2xl border border-white/10 bg-[var(--frs-card)] p-5">
             <div class="text-sm text-white/60">{{ __('Code client') }}</div>
-            <div class="font-extrabold mt-1">{{ $client->code_client ?? '-' }}</div>
+            <div class="force-ltr font-extrabold mt-1">{{ $client->code_client ?? '-' }}</div>
         </div>
         <div class="rounded-2xl border border-white/10 bg-[var(--frs-card)] p-5">
             <div class="text-sm text-white/60">{{ __('Téléphone') }}</div>

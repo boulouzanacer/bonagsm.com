@@ -61,7 +61,7 @@
                         <tr class="hover:bg-white/5">
                             <td class="py-3 px-4 font-semibold">#{{ $u->id }}</td>
                             <td class="py-3 px-4 font-semibold">{{ $u->nom }}</td>
-                            <td class="py-3 px-4 text-white/80">{{ $u->email }}</td>
+                            <td class="py-3 px-4 text-white/80 force-ltr">{{ $u->email }}</td>
                             <td class="py-3 px-4 text-center">
                                 <span class="text-xs font-bold px-2.5 py-1 rounded-full {{ $roleBadge }}">{{ __($role) }}</span>
                             </td>

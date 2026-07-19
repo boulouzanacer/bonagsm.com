@@ -138,11 +138,11 @@
                                     </div>
                                     <div class="min-w-0">
                                         <div class="font-extrabold truncate">{{ $p->designation }}</div>
-                                        <div class="text-xs text-white/60 truncate">{{ $p->reference }}</div>
+                                        <div class="force-ltr text-xs text-white/60 truncate">{{ $p->reference }}</div>
                                     </div>
                                 </div>
                             </td>
-                            <td class="py-3 px-4 text-white/80 font-semibold">{{ $p->reference }}</td>
+                            <td class="py-3 px-4 text-white/80 font-semibold force-ltr">{{ $p->reference }}</td>
                             <td class="py-3 px-4">
                                 <div class="text-white/80">{{ $p->categorie ?: '—' }}</div>
                                 @if($p->subCategory)
@@ -152,12 +152,12 @@
                             <td class="py-3 px-4 text-white/80">{{ $p->brand->nom ?? 'Standard' }}</td>
                             <td class="table-align-end py-3 px-4 text-right">
                                 <div class="flex flex-col items-end gap-1">
-                                    <div class="font-extrabold tabular-nums">{{ $stock }}</div>
+                                    <div class="force-ltr font-extrabold tabular-nums">{{ $stock }}</div>
                                     <span class="text-[11px] font-bold px-2.5 py-1 rounded-full {{ $stockBadge[1] }}">{{ $stockBadge[0] }}</span>
                                 </div>
                             </td>
                             <td class="table-align-end py-3 px-4 text-right">
-                                <span class="font-extrabold tabular-nums whitespace-nowrap">{{ number_format((float)$p->pv_1, 2, '.', ' ') }}</span>
+                                <span class="force-ltr font-extrabold tabular-nums whitespace-nowrap">{{ number_format((float)$p->pv_1, 2, '.', ' ') }}</span>
                             </td>
                             <td class="py-3 px-4 text-center">
                                 <span class="text-xs font-bold px-2.5 py-1 rounded-full {{ $actif ? 'bg-sky-500/15 text-sky-200 border border-sky-400/20' : 'bg-red-500/15 text-red-300 border border-red-400/20' }}">
@@ -447,7 +447,7 @@
                                     <tbody class="divide-y divide-white/10">
                                         <template x-for="(r, idx) in previewRows" :key="idx">
                                             <tr>
-                                                <td class="py-2 px-3 font-semibold" x-text="val(r, mapping.reference)"></td>
+                                                <td class="py-2 px-3 font-semibold force-ltr" x-text="val(r, mapping.reference)"></td>
                                                 <td class="py-2 px-3" x-text="val(r, mapping.designation)"></td>
                                                 <td class="py-2 px-3" x-text="val(r, mapping.categorie)"></td>
                                                 <td class="py-2 px-3" x-text="val(r, mapping.sous_categorie)"></td>

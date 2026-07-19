@@ -117,7 +117,7 @@
                             <a href="{{ url('/produits/'.$p->id) }}" class="block text-sm font-extrabold leading-tight text-slate-900 hover:text-[var(--store-primary)]" title="{{ $p->designation }}">
                                 {{ $p->designation }}
                             </a>
-                            <div class="mt-1 text-[11px] text-slate-400 truncate">{{ __('Ref:') }} {{ $p->reference }}</div>
+                            <div class="force-ltr mt-1 text-[11px] text-slate-400 truncate">{{ __('Ref:') }} {{ $p->reference }}</div>
                         </div>
 
                         <div class="mt-3 flex items-center justify-between gap-2">

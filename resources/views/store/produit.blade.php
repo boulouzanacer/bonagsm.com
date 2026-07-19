@@ -80,7 +80,7 @@
                     {{ $produit->designation }}
                 </h1>
             </div>
-            <div class="mt-1 text-sm text-slate-500">{{ __('Ref:') }} {{ $produit->reference }}</div>
+            <div class="force-ltr mt-1 text-sm text-slate-500">{{ __('Ref:') }} {{ $produit->reference }}</div>
 
             @php
                 $initialQty = (int) ($initialQty ?? 1);

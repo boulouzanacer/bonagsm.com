@@ -23,7 +23,7 @@
     <div class="flex items-center justify-between">
         <div>
             <div class="text-2xl font-extrabold tracking-wide">{{ __('Détail produit') }}</div>
-            <div class="text-sm text-white/60">{{ $produit->designation }} • {{ $produit->reference }}</div>
+            <div class="text-sm text-white/60"><span>{{ $produit->designation }}</span> • <span class="force-ltr">{{ $produit->reference }}</span></div>
         </div>
         <div class="flex items-center gap-2">
             @if($canEdit)

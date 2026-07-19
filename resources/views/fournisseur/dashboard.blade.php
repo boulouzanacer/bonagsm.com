@@ -158,7 +158,7 @@
                 <div class="flex items-center justify-between gap-3">
                     <div class="min-w-0">
                         <div class="font-semibold truncate">{{ $p->designation }}</div>
-                        <div class="text-xs text-white/60 truncate">{{ $p->reference }}</div>
+                        <div class="force-ltr text-xs text-white/60 truncate">{{ $p->reference }}</div>
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="text-xs font-bold px-2.5 py-1 rounded-full {{ $badge }}">{{ $label }} ({{ $stock }})</span>

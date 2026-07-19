@@ -62,7 +62,7 @@
                             <div class="flex items-start justify-between gap-3">
                                 <div class="min-w-0">
                                     <div class="font-extrabold truncate">{{ $l->produit_designation ?? (__('Produit').' #'.$l->id_produit) }}</div>
-                                    <div class="mt-1 text-sm text-slate-600">{{ __('Ref:') }} {{ $l->produit_reference ?? '—' }}</div>
+                                    <div class="force-ltr mt-1 text-sm text-slate-600">{{ __('Ref:') }} {{ $l->produit_reference ?? '—' }}</div>
                                 </div>
                                 <div class="table-align-end text-right">
                                     <div class="force-ltr font-extrabold">{{ number_format((float)$l->sous_total, 2, '.', ' ') }} DA</div>

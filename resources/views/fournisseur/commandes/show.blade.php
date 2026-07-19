@@ -34,7 +34,7 @@
                 </div>
                 <div class="rounded-2xl border border-white/10 bg-black/20 p-4">
                     <div class="text-white/60">{{ __('Email') }}</div>
-                    <div class="font-bold mt-1">{{ $client?->email }}</div>
+                    <div class="force-ltr font-bold mt-1">{{ $client?->email }}</div>
                 </div>
                 <div class="rounded-2xl border border-white/10 bg-black/20 p-4 md:col-span-2">
                     <div class="text-white/60">{{ __('Adresse livraison') }}</div>
@@ -153,7 +153,7 @@
                         <tr class="hover:bg-white/5">
                             <td class="py-3 px-4">
                                 <div class="font-semibold">{{ $l->produit_designation ?? __('Produit') }}</div>
-                                <div class="text-xs text-white/60">{{ $l->produit_reference }}</div>
+                                <div class="force-ltr text-xs text-white/60">{{ $l->produit_reference }}</div>
                             </td>
                             <td class="py-3 px-4 text-right">
                                 @if((string)$commande->statut !== 'annulee')

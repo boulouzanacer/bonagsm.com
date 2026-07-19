@@ -61,7 +61,7 @@
                                     <a href="{{ url('/produits/'.$p->id) }}" class="block text-sm sm:text-base font-extrabold leading-tight text-slate-900 hover:text-[var(--store-primary)]">
                                         {{ $p->designation }}
                                     </a>
-                                    <div class="text-xs sm:text-sm text-slate-500">{{ __('Ref:') }} {{ $p->reference }}</div>
+                                    <div class="force-ltr text-xs sm:text-sm text-slate-500">{{ __('Ref:') }} {{ $p->reference }}</div>
 
                                     <div class="flex flex-wrap items-center gap-2">
                                         <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-500">

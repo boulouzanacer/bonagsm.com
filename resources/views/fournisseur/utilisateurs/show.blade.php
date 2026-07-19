@@ -11,7 +11,7 @@
     <div class="flex items-center justify-between gap-3">
         <div>
             <div class="text-2xl font-extrabold tracking-wide">{{ $user->nom }}</div>
-            <div class="mt-1 text-sm text-white/60">{{ $user->email }}</div>
+            <div class="force-ltr mt-1 text-sm text-white/60">{{ $user->email }}</div>
         </div>
         <div class="flex items-center gap-2">
             <a href="{{ url('/fournisseur/utilisateurs') }}"

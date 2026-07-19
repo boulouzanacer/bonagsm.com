@@ -12,7 +12,7 @@
     <div class="flex items-center justify-between mb-4">
         <div>
             <div class="text-2xl font-extrabold tracking-wide">{{ __('Éditer produit') }}</div>
-            <div class="text-sm text-white/60">{{ $produit->designation }} • {{ $produit->reference }}</div>
+            <div class="text-sm text-white/60"><span>{{ $produit->designation }}</span> • <span class="force-ltr">{{ $produit->reference }}</span></div>
         </div>
         <a href="{{ $safeReturn }}"
            class="rounded-2xl px-4 py-3 font-bold border border-white/10 hover:bg-white/10">

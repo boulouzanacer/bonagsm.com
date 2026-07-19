@@ -254,7 +254,7 @@
                             <div class="text-sm font-bold truncate">
                                 {{ $frsUser ? trim(($frsUser->prenom ?? '').' '.($frsUser->nom ?? '')) : ($frs?->nom_frs ?? __('Fournisseur')) }}
                             </div>
-                            <div class="text-xs opacity-70 truncate">{{ $frsUser?->email ?? $frs?->email }}</div>
+                            <div class="force-ltr text-xs opacity-70 truncate">{{ $frsUser?->email ?? $frs?->email }}</div>
                             <div class="mt-1">
                                 <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-bold {{ (int)($frs?->actif ?? 0) === 1 ? 'border-emerald-400/20 bg-emerald-500/15 text-emerald-300' : 'border-red-400/20 bg-red-500/15 text-red-300' }}">
                                     {{ (int)($frs?->actif ?? 0) === 1 ? __('Actif') : __('Inactif') }}

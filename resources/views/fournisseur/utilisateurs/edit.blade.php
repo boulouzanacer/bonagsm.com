@@ -38,7 +38,7 @@
                     <input name="email"
                            type="email"
                            value="{{ old('email', $user->email) }}"
-                           class="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--frs-primary)]"
+                           class="force-ltr w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--frs-primary)]"
                            required>
                 </div>
 
