@@ -2,123 +2,73 @@
 
 @section('content')
 <div class="space-y-6 sm:space-y-8">
-    <section class="relative overflow-hidden rounded-[28px] border border-slate-200/80 bg-white p-5 sm:p-8 shadow-[0_24px_70px_rgba(15,23,42,0.08)]">
-        <div class="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-emerald-500 via-emerald-600 to-slate-900"></div>
-        <div class="absolute right-0 top-0 h-40 w-40 rounded-full bg-emerald-100/70 blur-3xl"></div>
-        <div class="relative grid gap-6 lg:grid-cols-[1.45fr,0.85fr] lg:items-start">
-            <div class="pl-2 sm:pl-4">
-                <div class="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.25em] text-emerald-700">BonaGsm Store</div>
-                <div class="mt-4 max-w-3xl text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl lg:text-[3.2rem] lg:leading-[1.05]">
-                    Une boutique plus claire, fluide et professionnelle.
-                </div>
-                <div class="mt-4 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
-                    @if(($client ?? null))
-                        Bienvenue {{ $client->prenom }} {{ $client->nom }}. Retrouvez vos produits, vos tarifs et vos commandes dans une interface plus lisible, plus légère et plus confortable.
-                    @else
-                        Parcourez le catalogue, trouvez rapidement vos produits et gérez votre panier dans une interface simple, élégante et agréable sur tous les écrans.
-                    @endif
-                </div>
-                <div class="mt-6 grid gap-3 sm:grid-cols-3">
-                    <div class="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3">
-                        <div class="text-[11px] uppercase tracking-[0.2em] text-slate-400">Catalogue</div>
-                        <div class="mt-1 text-xl font-extrabold text-slate-900">{{ $produits->total() }}</div>
-                    </div>
-                    <div class="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3">
-                        <div class="text-[11px] uppercase tracking-[0.2em] text-slate-400">Panier</div>
-                        <div class="mt-1 text-xl font-extrabold text-slate-900">{{ $cart_count }} produit(s)</div>
-                    </div>
-                    <div class="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3">
-                        <div class="text-[11px] uppercase tracking-[0.2em] text-slate-400">Accès</div>
-                        <div class="mt-1 text-xl font-extrabold text-slate-900">{{ ($client ?? null) ? 'Client' : 'Invité' }}</div>
-                    </div>
-                </div>
-            </div>
-            <div class="soft-card rounded-[24px] p-5 sm:p-6">
-                <div class="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">Resume rapide</div>
-                <div class="mt-4 space-y-3">
-                    <div class="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3">
-                        <div>
-                            <div class="text-[11px] uppercase tracking-[0.2em] text-slate-400">Panier</div>
-                            <div class="mt-1 text-sm font-semibold text-slate-500">Articles selectionnes</div>
-                        </div>
-                        <div class="text-lg font-extrabold text-slate-900">{{ $cart_count }}</div>
-                    </div>
-                    <div class="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3">
-                        <div>
-                            <div class="text-[11px] uppercase tracking-[0.2em] text-slate-400">Total</div>
-                            <div class="mt-1 text-sm font-semibold text-slate-500">Montant du panier</div>
-                        </div>
-                        @if(($can_show_prices ?? false) || ($client ?? null))
-                            <div class="text-lg font-extrabold text-slate-900">{{ number_format((float)$cart_total, 2, '.', ' ') }} DA</div>
+    <section class="rounded-[28px] border border-slate-200/80 bg-white/95 p-5 sm:p-6 lg:p-7 shadow-[0_16px_45px_rgba(15,23,42,0.06)]">
+        <div class="flex flex-col gap-5">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div class="min-w-0">
+                    <div class="text-[2rem] font-extrabold tracking-tight text-slate-900 sm:text-[2.2rem]">Produits</div>
+                    <div class="mt-1 text-sm text-slate-600 sm:text-base">
+                        @if(($client ?? null))
+                            Parcourez vos produits, retrouvez vos tarifs et ajoutez rapidement au panier.
                         @else
-                            <div class="text-sm font-extrabold text-emerald-700">Connexion requise</div>
+                            Parcourez le catalogue et ajoutez au panier avec une interface claire et fluide.
                         @endif
                     </div>
-                    <div class="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3">
-                        <div>
-                            <div class="text-[11px] uppercase tracking-[0.2em] text-slate-400">Compte</div>
-                            <div class="mt-1 text-sm font-semibold text-slate-500">Statut actuel</div>
-                        </div>
-                        <div class="text-sm font-extrabold text-slate-900">{{ ($client ?? null) ? 'Connecte' : 'Invite' }}</div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:min-w-[300px]">
+                    <div class="rounded-2xl border border-emerald-100 bg-emerald-50/60 px-4 py-3">
+                        <div class="text-sm font-medium text-slate-500">Panier</div>
+                        <div class="mt-1 text-[1.35rem] font-extrabold tracking-tight text-slate-900">{{ $cart_count }} produit(s)</div>
+                    </div>
+                    <div class="rounded-2xl border border-emerald-100 bg-emerald-50/60 px-4 py-3">
+                        <div class="text-sm font-medium text-slate-500">Total</div>
+                        @if(($can_show_prices ?? false) || ($client ?? null))
+                            <div class="mt-1 text-[1.35rem] font-extrabold tracking-tight text-slate-900">{{ number_format((float)$cart_total, 2, '.', ' ') }} DA</div>
+                        @else
+                            <div class="mt-1 text-[1.35rem] font-extrabold tracking-tight text-[var(--store-primary)]">Connectez-vous</div>
+                        @endif
                     </div>
                 </div>
-                <div class="mt-5 flex flex-wrap gap-2">
-                    <a href="{{ url('/panier') }}" class="inline-flex items-center justify-center rounded-2xl bg-emerald-600 px-4 py-2.5 text-sm font-extrabold text-white transition hover:bg-emerald-700">
-                        Voir le panier
-                    </a>
-                    @if(($client ?? null))
-                        <a href="{{ url('/mes-commandes') }}" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-extrabold text-slate-700 transition hover:bg-slate-50">
-                            Mes commandes
-                        </a>
-                    @else
-                        <a href="{{ url('/login') }}" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-extrabold text-slate-700 transition hover:bg-slate-50">
-                            Connexion
-                        </a>
-                    @endif
-                </div>
             </div>
-        </div>
-    </section>
 
-    <div class="soft-card rounded-[28px] p-4 sm:p-6">
-        <form method="GET" action="{{ url('/') }}" class="mt-5 grid grid-cols-1 lg:grid-cols-3 gap-3">
-            <div class="lg:col-span-2">
+            <form method="GET" action="{{ url('/') }}" class="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr),390px]">
                 <div class="relative">
                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
                     <input name="q"
                            value="{{ $q }}"
                            placeholder="Rechercher référence/désignation/catégorie..."
-                           class="w-full rounded-2xl border border-slate-200/80 bg-white/90 pl-11 pr-4 py-3.5 outline-none transition focus:border-[var(--store-primary)] focus:ring-4 focus:ring-emerald-100">
+                           class="w-full rounded-2xl border border-slate-200 bg-slate-50/60 pl-11 pr-4 py-3.5 text-slate-900 outline-none transition focus:border-[var(--store-primary)] focus:bg-white focus:ring-4 focus:ring-emerald-100">
                 </div>
-            </div>
 
-            <div>
-                <select name="categorie" class="w-full rounded-2xl border border-slate-200/80 bg-white/90 px-4 py-3.5 outline-none transition focus:border-[var(--store-primary)] focus:ring-4 focus:ring-emerald-100">
-                    <option value="">Toutes catégories</option>
-                    @foreach($categories as $c)
-                        <option value="{{ $c }}" @selected((string)$selected_categorie === (string)$c)>{{ $c }}</option>
-                    @endforeach
-                </select>
-            </div>
+                <div>
+                    <select name="categorie" class="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3.5 text-slate-900 outline-none transition focus:border-[var(--store-primary)] focus:bg-white focus:ring-4 focus:ring-emerald-100">
+                        <option value="">Toutes catégories</option>
+                        @foreach($categories as $c)
+                            <option value="{{ $c }}" @selected((string)$selected_categorie === (string)$c)>{{ $c }}</option>
+                        @endforeach
+                    </select>
+                </div>
 
-            <button class="hidden" type="submit">Search</button>
-        </form>
+                <button class="hidden" type="submit">Search</button>
+            </form>
 
-        @if(count($categories) > 0)
-            <div class="mt-4 flex flex-wrap gap-2">
-                <a href="{{ url('/').'?'.http_build_query(array_filter(['q' => $q])) }}"
-                   class="interactive-lift rounded-full px-3.5 py-1.5 text-xs font-bold border {{ $selected_categorie === '' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
-                    Tous
-                </a>
-                @foreach($categories as $c)
-                    <a href="{{ url('/').'?'.http_build_query(array_filter(['q' => $q, 'categorie' => $c])) }}"
-                       class="interactive-lift rounded-full px-3.5 py-1.5 text-xs font-bold border {{ (string)$selected_categorie === (string)$c ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
-                        {{ $c }}
+            @if(count($categories) > 0)
+                <div class="flex flex-wrap gap-2">
+                    <a href="{{ url('/').'?'.http_build_query(array_filter(['q' => $q])) }}"
+                       class="rounded-full px-3.5 py-1.5 text-xs font-bold border transition {{ $selected_categorie === '' ? 'border-emerald-300 bg-emerald-50 text-emerald-700 shadow-sm shadow-emerald-100/70' : 'border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:bg-emerald-50/50 hover:text-slate-900' }}">
+                        Tous
                     </a>
-                @endforeach
-            </div>
-        @endif
-    </div>
+                    @foreach($categories as $c)
+                        <a href="{{ url('/').'?'.http_build_query(array_filter(['q' => $q, 'categorie' => $c])) }}"
+                           class="rounded-full px-3.5 py-1.5 text-xs font-bold border transition {{ (string)$selected_categorie === (string)$c ? 'border-emerald-300 bg-emerald-50 text-emerald-700 shadow-sm shadow-emerald-100/70' : 'border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:bg-emerald-50/50 hover:text-slate-900' }}">
+                            {{ $c }}
+                        </a>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+    </section>
 
     <div class="space-y-3">
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
