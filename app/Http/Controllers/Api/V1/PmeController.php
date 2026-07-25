@@ -189,7 +189,7 @@ class PmeController extends Controller
                     'pv_1' => $item['pv_1'] ?? ($item['prix'] ?? 0),
                     'pv_2' => $item['pv_2'] ?? ($item['pv_1'] ?? ($item['prix'] ?? 0)),
                     'pv_3' => $item['pv_3'] ?? ($item['pv_1'] ?? ($item['prix'] ?? 0)),
-                    'stock' => (int) $item['stock'],
+                    'stock' => (int) round((float) $item['stock']),
                     'categorie' => $item['categorie'],
                     'abonne_only' => (int) ($item['abonne_only'] ?? 0) === 1 ? 1 : 0,
                     'actif' => 1,
