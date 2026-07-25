@@ -423,6 +423,7 @@ class PmeController extends Controller
         $syncedValue = $synced === '1' ? 1 : 0;
 
         $commandes = Cmd1::query()
+            ->with(['client:id,nom,prenom'])
             ->where('id_frs', $frs->id)
             ->where('synced_pme', $syncedValue)
             ->orderByDesc('date_cmd')
@@ -462,10 +463,16 @@ class PmeController extends Controller
         }
 
         $items = $commandes->map(function (Cmd1 $c) use ($lignes) {
+            $clientNom = trim(implode(' ', array_filter([
+                optional($c->client)->nom,
+                optional($c->client)->prenom,
+            ])));
+
             return [
                 'id' => $c->id,
                 'id_client' => (int) $c->id_client,
                 'date_cmd' => (string) $c->date_cmd,
+                'client_nom' => $clientNom !== '' ? $clientNom : 'Client #'.$c->id_client,
                 'statut' => (string) $c->statut,
                 'montant_total' => (float) $c->montant_total,
                 'adresse_livraison' => $c->adresse_livraison,
