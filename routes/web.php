@@ -14,6 +14,7 @@ use App\Http\Controllers\Fournisseur\CommandeController as FrsCommandeController
 use App\Http\Controllers\Fournisseur\FraisLivraisonController as FrsFraisLivraisonController;
 use App\Http\Controllers\Fournisseur\ProfileController as FrsProfileController;
 use App\Http\Controllers\Fournisseur\SiteSettingsController as FrsSiteSettingsController;
+use App\Http\Controllers\Fournisseur\TokenController as FrsTokenController;
 use App\Http\Controllers\Fournisseur\UtilisateurController as FrsUtilisateurController;
 use App\Http\Controllers\StoreController;
 
@@ -102,6 +103,7 @@ Route::prefix('fournisseur')->middleware('auth.fournisseur')->group(function () 
 
         Route::get('/parametres-site', [FrsSiteSettingsController::class, 'edit']);
         Route::put('/parametres-site', [FrsSiteSettingsController::class, 'update']);
+        Route::get('/token', [FrsTokenController::class, 'index']);
 
         Route::get('/utilisateurs', [FrsUtilisateurController::class, 'index']);
         Route::get('/utilisateurs/create', [FrsUtilisateurController::class, 'create']);

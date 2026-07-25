@@ -82,6 +82,46 @@
     </div>
 </div>
 
+@php($isAdmin = (int) session('is_admin', 0) === 1 || (string) session('role', '') === 'fournisseur')
+@if($isAdmin)
+    <div class="mt-4 rounded-[24px] p-5 border border-emerald-400/20 bg-gradient-to-br from-emerald-500/10 via-transparent to-sky-500/10">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div class="max-w-3xl">
+                <div class="flex items-center gap-3">
+                    <div class="h-12 w-12 rounded-2xl flex items-center justify-center"
+                         style="background: linear-gradient(135deg, var(--frs-primary), #0A3D7A);">
+                        <i class="fa-solid fa-key text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <div class="text-lg font-extrabold tracking-wide">{{ __('Connexion PME Communicator') }}</div>
+                        <div class="mt-1 text-sm text-white/70">
+                            {{ __("Pour récupérer le TOKEN PME et l'endpoint à coller dans l'application desktop, ouvrez la page Token PME.") }}
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
+                    <div class="text-xs uppercase tracking-[0.2em] text-white/50">{{ __('Endpoint PME') }}</div>
+                    <div class="mt-1 font-mono text-sm break-all force-ltr text-white/90">{{ url('/api/v1/pme') }}</div>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <a href="{{ url('/fournisseur/token') }}"
+                   class="inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 font-extrabold text-white"
+                   style="background: linear-gradient(135deg, var(--frs-primary), #0A3D7A);">
+                    <i class="fa-solid fa-key"></i>
+                    <span>{{ __('Voir le Token PME') }}</span>
+                </a>
+                <button type="button"
+                        class="inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 font-extrabold border border-white/10 hover:bg-white/10"
+                        onclick="navigator.clipboard.writeText('{{ url('/api/v1/pme') }}')">
+                    <i class="fa-solid fa-copy"></i>
+                    <span>{{ __('Copier endpoint') }}</span>
+                </button>
+            </div>
+        </div>
+    </div>
+@endif
+
 <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 mt-4">
     <div class="rounded-[24px] p-5 border border-white/10 bg-[var(--frs-card)] overflow-hidden">
         <div class="flex items-center justify-between mb-4">

@@ -15,7 +15,7 @@ class TokenController extends Controller
         return view('fournisseur.token', [
             'title' => 'Mon Token PME',
             'token' => $frs->token,
+            'endpoint' => url('/api/v1/pme'),
         ]);
     }
 }
-
