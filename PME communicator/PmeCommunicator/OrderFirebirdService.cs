@@ -65,7 +65,7 @@ internal static class OrderFirebirdService
                 WilayaLivraison: order.WilayaNom,
                 CommuneLivraison: order.CommuneNom,
                 ShippingTotal: order.FraisLivraison,
-                CompanyName: TrimToLength(order.ClientNom, 50),
+                CompanyName: null,
                 ReferenceBon: reference), cancellationToken).ConfigureAwait(false);
 
             foreach (var line in order.Lignes)
@@ -491,7 +491,7 @@ internal static class OrderFirebirdService
         string WilayaLivraison,
         string CommuneLivraison,
         decimal ShippingTotal,
-        string CompanyName,
+        string? CompanyName,
         string ReferenceBon);
 
     private sealed record Bcc2InsertModel(
