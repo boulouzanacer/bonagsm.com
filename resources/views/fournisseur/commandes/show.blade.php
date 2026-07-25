@@ -47,7 +47,7 @@
             <div class="font-extrabold tracking-wide mb-3">{{ __('Statut') }}</div>
 
             @php
-                $steps = ['en_attente', 'confirmee', 'expediee', 'livree'];
+                $steps = ['en_attente', 'validee', 'expediee', 'livree'];
                 $current = (string) $commande->statut;
                 $currentIndex = array_search($current, $steps, true);
             @endphp
@@ -64,7 +64,7 @@
                             <i class="fa-solid {{ $done ? 'fa-check' : 'fa-circle' }} text-white text-xs"></i>
                         </div>
                         <div class="{{ $isCurrent ? 'font-extrabold' : 'font-semibold text-white/80' }}">
-                            {{ match($s) { 'en_attente' => __('En attente'), 'confirmee' => __('Confirmée'), 'expediee' => __('Expédiée'), 'livree' => __('Livrée'), default => $s } }}
+                            {{ match($s) { 'en_attente' => __('En attente'), 'validee', 'confirmee' => __('Validée'), 'expediee' => __('Expédiée'), 'livree' => __('Livrée'), default => $s } }}
                         </div>
                     </div>
                 @endforeach
@@ -118,7 +118,7 @@
                     <select name="statut"
                             class="flex-1 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--frs-primary)]">
                         @foreach($statuts as $s)
-                            <option value="{{ $s }}" @selected($current === $s)>{{ match($s) { 'en_attente' => __('En attente'), 'confirmee' => __('Confirmée'), 'expediee' => __('Expédiée'), 'livree' => __('Livrée'), 'annulee' => __('Annulée'), default => $s } }}</option>
+                            <option value="{{ $s }}" @selected($current === $s)>{{ match($s) { 'en_attente' => __('En attente'), 'validee', 'confirmee' => __('Validée'), 'expediee' => __('Expédiée'), 'livree' => __('Livrée'), 'annulee' => __('Annulée'), default => $s } }}</option>
                         @endforeach
                     </select>
                     <button type="submit"

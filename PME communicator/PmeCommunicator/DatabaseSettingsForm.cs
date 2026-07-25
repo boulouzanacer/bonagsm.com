@@ -14,6 +14,7 @@ public sealed class DatabaseSettingsForm : Form
     private readonly TextBox txtWebEndpoint = new() { Width = 380 };
     private readonly TextBox txtWebApiToken = new() { Width = 380, UseSystemPasswordChar = true };
     private readonly CheckBox chkAutoSync = new() { AutoSize = true, Text = "Synchronisation automatique" };
+    private readonly CheckBox chkLaunchAtStartup = new() { AutoSize = true, Text = "Lancer au demarrage de Windows (mode minimise)" };
     private readonly ComboBox cmbSyncInterval = new() { Width = 220, DropDownStyle = ComboBoxStyle.DropDownList };
     private readonly Panel pnlConnectionLamp = new() { Width = 16, Height = 16, BackColor = Color.Firebrick, Margin = new Padding(0, 3, 8, 0) };
     private readonly Label lblConnectionState = new() { AutoSize = true, Text = "Connexion non testee" };
@@ -32,12 +33,13 @@ public sealed class DatabaseSettingsForm : Form
         Settings = CloneSettings(currentSettings);
 
         Text = "Parametres de connexion";
+        Icon = AppIconProvider.GetApplicationIcon();
         StartPosition = FormStartPosition.CenterParent;
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
         MinimizeBox = false;
         ShowInTaskbar = false;
-        ClientSize = new Size(760, 560);
+        ClientSize = new Size(760, 600);
 
         BuildLayout();
         FillFields();
@@ -50,7 +52,7 @@ public sealed class DatabaseSettingsForm : Form
         {
             AutoSize = true,
             MaximumSize = new Size(690, 0),
-            Text = "Renseignez la connexion Firebird. Si la connexion reussit, la liste des depots se charge automatiquement. Vous pouvez aussi configurer l'endpoint PME du site web, le token API, le mode manuel ou automatique et l'intervalle de synchronisation.",
+            Text = "Renseignez la connexion Firebird. Si la connexion reussit, la liste des depots se charge automatiquement. Vous pouvez aussi configurer l'endpoint PME du site web, le token API, le mode manuel ou automatique, l'intervalle de synchronisation et le lancement automatique avec Windows.",
         };
 
         var table = new TableLayoutPanel
@@ -58,7 +60,7 @@ public sealed class DatabaseSettingsForm : Form
             Dock = DockStyle.Fill,
             Padding = new Padding(12),
             ColumnCount = 3,
-            RowCount = 13,
+            RowCount = 14,
         };
 
         table.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 140));
@@ -105,6 +107,10 @@ public sealed class DatabaseSettingsForm : Form
         table.Controls.Add(new Label { Text = "Intervalle", AutoSize = true, Anchor = AnchorStyles.Left }, 0, 11);
         table.Controls.Add(cmbSyncInterval, 1, 11);
 
+        table.Controls.Add(new Label { Text = "Demarrage Windows", AutoSize = true, Anchor = AnchorStyles.Left }, 0, 12);
+        table.Controls.Add(chkLaunchAtStartup, 1, 12);
+        table.SetColumnSpan(chkLaunchAtStartup, 2);
+
         var connectionStatePanel = new FlowLayoutPanel
         {
             AutoSize = true,
@@ -126,7 +132,7 @@ public sealed class DatabaseSettingsForm : Form
         footerPanel.Controls.Add(lblStatus);
 
         lblStatus.ForeColor = Color.DimGray;
-        table.Controls.Add(footerPanel, 0, 12);
+        table.Controls.Add(footerPanel, 0, 13);
         table.SetColumnSpan(footerPanel, 3);
 
         var buttons = new FlowLayoutPanel
@@ -156,6 +162,7 @@ public sealed class DatabaseSettingsForm : Form
         txtWebEndpoint.Text = Settings.WebEndpoint;
         txtWebApiToken.Text = Settings.WebApiToken;
         chkAutoSync.Checked = Settings.AutoSyncEnabled;
+        chkLaunchAtStartup.Checked = Settings.LaunchAtStartup;
         PopulateSyncIntervals();
         SetConnectionState(false, "Connexion non testee");
         cmbDepot.Items.Clear();
@@ -290,6 +297,7 @@ public sealed class DatabaseSettingsForm : Form
             WebApiToken = txtWebApiToken.Text.Trim(),
             AutoSyncEnabled = chkAutoSync.Checked,
             SyncIntervalSeconds = (cmbSyncInterval.SelectedItem as SyncIntervalItem)?.Seconds ?? 60,
+            LaunchAtStartup = chkLaunchAtStartup.Checked,
         };
     }
 
@@ -581,6 +589,23 @@ public sealed class DatabaseSettingsForm : Form
         return builder.ToString();
     }
 
+    public static string BuildEventConnectionString(AppSettings settings)
+    {
+        var builder = new FbConnectionStringBuilder
+        {
+            Database = settings.DatabasePath,
+            DataSource = string.IsNullOrWhiteSpace(settings.Server) ? "localhost" : settings.Server,
+            Port = settings.Port,
+            UserID = string.IsNullOrWhiteSpace(settings.Username) ? "SYSDBA" : settings.Username,
+            Password = settings.Password,
+            Charset = string.IsNullOrWhiteSpace(settings.Charset) ? "UTF8" : settings.Charset,
+            Dialect = 3,
+            Pooling = false,
+        };
+
+        return builder.ToString();
+    }
+
     private static AppSettings CloneSettings(AppSettings source)
     {
         return new AppSettings
@@ -597,6 +622,7 @@ public sealed class DatabaseSettingsForm : Form
             WebApiToken = source.WebApiToken,
             AutoSyncEnabled = source.AutoSyncEnabled,
             SyncIntervalSeconds = source.SyncIntervalSeconds,
+            LaunchAtStartup = source.LaunchAtStartup,
         };
     }
 

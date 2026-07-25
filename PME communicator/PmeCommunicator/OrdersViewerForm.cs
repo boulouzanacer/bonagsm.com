@@ -22,6 +22,7 @@ public sealed class OrdersViewerForm : Form
         this.orders = orders;
 
         Text = $"Bons de commande web - Depot {depotCode}";
+        Icon = AppIconProvider.GetApplicationIcon();
         StartPosition = FormStartPosition.CenterParent;
         MinimumSize = new Size(980, 620);
         Size = new Size(1120, 720);

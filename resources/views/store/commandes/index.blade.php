@@ -35,7 +35,7 @@
                             $statut = (string)$c->statut;
                             $badge = match($statut) {
                                 'en_attente' => 'bg-amber-50 text-amber-700 border border-amber-200',
-                                'confirmee' => 'bg-sky-50 text-sky-700 border border-sky-200',
+                                'validee', 'confirmee' => 'bg-sky-50 text-sky-700 border border-sky-200',
                                 'expediee' => 'bg-indigo-50 text-indigo-700 border border-indigo-200',
                                 'livree' => 'bg-emerald-50 text-emerald-700 border border-emerald-200',
                                 'annulee' => 'bg-red-50 text-red-700 border border-red-200',
@@ -43,7 +43,7 @@
                             };
                             $statutLabel = match($statut) {
                                 'en_attente' => __('En attente'),
-                                'confirmee' => __('Confirmée'),
+                                'validee', 'confirmee' => __('Validée'),
                                 'expediee' => __('Expédiée'),
                                 'livree' => __('Livrée'),
                                 'annulee' => __('Annulée'),

@@ -67,7 +67,7 @@ class CommandeController extends Controller
             'from' => $from,
             'to' => $to,
             'selected_client' => $clientId,
-            'statuts' => ['en_attente', 'confirmee', 'expediee', 'livree', 'annulee'],
+            'statuts' => ['en_attente', 'validee', 'expediee', 'livree', 'annulee'],
         ]);
     }
 
@@ -100,7 +100,7 @@ class CommandeController extends Controller
             'commande' => $commande,
             'client' => $client,
             'lignes' => $lignes,
-            'statuts' => ['en_attente', 'confirmee', 'expediee', 'livree', 'annulee'],
+            'statuts' => ['en_attente', 'validee', 'expediee', 'livree', 'annulee'],
         ]);
     }
 
@@ -109,7 +109,7 @@ class CommandeController extends Controller
         $frsId = (int) session('frs_id');
 
         $data = $request->validate([
-            'statut' => ['required', 'in:en_attente,confirmee,expediee,livree,annulee'],
+            'statut' => ['required', 'in:en_attente,validee,expediee,livree,annulee'],
         ]);
 
         $new = (string) $data['statut'];

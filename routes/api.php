@@ -54,6 +54,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/sync-fournisseur', [PmeController::class, 'syncFournisseur']);
         Route::get('/commandes', [PmeController::class, 'commandes']);
         Route::get('/commandes/export-csv', [PmeController::class, 'exportCommandesCsv']);
+        Route::put('/commandes/{id}/status', [PmeController::class, 'updateCommandeStatus']);
         Route::put('/commandes/{id}/sync', [PmeController::class, 'markSynced']);
     });
 });

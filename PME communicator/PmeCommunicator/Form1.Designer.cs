@@ -87,8 +87,6 @@ partial class Form1
         // headerPanel
         // 
         headerPanel.BackColor = Color.FromArgb(17, 24, 39);
-        headerPanel.Controls.Add(btnSettings);
-        headerPanel.Controls.Add(btnReload);
         headerPanel.Controls.Add(lblSubtitle);
         headerPanel.Controls.Add(lblTitle);
         headerPanel.Dock = DockStyle.Top;
@@ -106,9 +104,9 @@ partial class Form1
         btnSettings.FlatStyle = FlatStyle.Flat;
         btnSettings.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
         btnSettings.ForeColor = Color.FromArgb(31, 41, 55);
-        btnSettings.Location = new Point(1254, 30);
+        btnSettings.Location = new Point(1284, 30);
         btnSettings.Name = "btnSettings";
-        btnSettings.Size = new Size(100, 42);
+        btnSettings.Size = new Size(126, 42);
         btnSettings.TabIndex = 2;
         btnSettings.Text = "Parametres";
         btnSettings.UseVisualStyleBackColor = false;
@@ -119,13 +117,13 @@ partial class Form1
         btnReload.BackColor = Color.FromArgb(37, 99, 235);
         btnReload.FlatAppearance.BorderSize = 0;
         btnReload.FlatStyle = FlatStyle.Flat;
-        btnReload.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
+        btnReload.Font = new Font("Segoe MDL2 Assets", 15F, FontStyle.Regular);
         btnReload.ForeColor = Color.White;
-        btnReload.Location = new Point(1366, 30);
+        btnReload.Location = new Point(1418, 30);
         btnReload.Name = "btnReload";
-        btnReload.Size = new Size(94, 42);
+        btnReload.Size = new Size(42, 42);
         btnReload.TabIndex = 3;
-        btnReload.Text = "Actualiser";
+        btnReload.Text = "";
         btnReload.UseVisualStyleBackColor = false;
         // 
         // lblSubtitle

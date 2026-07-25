@@ -12,6 +12,7 @@ use App\Models\Cmd2;
 use App\Models\Marque;
 use App\Models\Produit;
 use App\Models\SousCategorie;
+use App\Notifications\StatutCommandeChange;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
 use Throwable;
@@ -423,7 +424,19 @@ class PmeController extends Controller
         $syncedValue = $synced === '1' ? 1 : 0;
 
         $commandes = Cmd1::query()
-            ->with(['client:id,nom,prenom'])
+            ->leftJoin('client', 'client.id', '=', 'cmd1.id_client')
+            ->leftJoin('wilaya', 'wilaya.ID_WILAYA', '=', 'cmd1.id_wilaya')
+            ->leftJoin('commune', 'commune.ID_COMMUNE', '=', 'cmd1.id_commune')
+            ->select([
+                'cmd1.*',
+                'client.nom as client_nom',
+                'client.prenom as client_prenom',
+                'client.code_client as client_code_client',
+                'client.telephone as client_telephone',
+                'client.tarif as client_tarif',
+                'wilaya.WILAYA as wilaya_nom',
+                'commune.COMMUNE as commune_nom',
+            ])
             ->where('id_frs', $frs->id)
             ->where('synced_pme', $syncedValue)
             ->orderByDesc('date_cmd')
@@ -462,22 +475,29 @@ class PmeController extends Controller
             }
         }
 
-        $items = $commandes->map(function (Cmd1 $c) use ($lignes) {
+        $items = $commandes->map(function ($c) use ($lignes) {
             $clientNom = trim(implode(' ', array_filter([
-                optional($c->client)->nom,
-                optional($c->client)->prenom,
+                $c->client_nom,
+                $c->client_prenom,
             ])));
 
             return [
-                'id' => $c->id,
+                'id' => (int) $c->id,
                 'id_client' => (int) $c->id_client,
                 'date_cmd' => (string) $c->date_cmd,
                 'client_nom' => $clientNom !== '' ? $clientNom : 'Client #'.$c->id_client,
+                'code_client' => (string) ($c->client_code_client ?? ''),
+                'telephone_client' => (string) ($c->client_telephone ?? ''),
+                'mode_tarif' => (string) ($c->client_tarif ?? '0'),
                 'statut' => (string) $c->statut,
+                'sous_total' => (float) ($c->sous_total ?? 0),
+                'frais_livraison' => (float) ($c->frais_livraison ?? 0),
                 'montant_total' => (float) $c->montant_total,
                 'adresse_livraison' => $c->adresse_livraison,
                 'id_wilaya' => (int) $c->id_wilaya,
                 'id_commune' => (int) $c->id_commune,
+                'wilaya_nom' => (string) ($c->wilaya_nom ?? ''),
+                'commune_nom' => (string) ($c->commune_nom ?? ''),
                 'notes' => $c->notes,
                 'synced_pme' => (int) $c->synced_pme,
                 'lignes' => $lignes[$c->id] ?? [],
@@ -485,6 +505,41 @@ class PmeController extends Controller
         })->values();
 
         return $this->success($items, 'Commandes PME');
+    }
+
+    public function updateCommandeStatus(Request $request, int $id)
+    {
+        $frs = $request->attributes->get('fournisseur');
+
+        $data = $request->validate([
+            'statut' => ['required', 'in:en_attente,validee,expediee,livree,annulee'],
+        ]);
+
+        /** @var Cmd1|null $cmd */
+        $cmd = Cmd1::query()
+            ->where('id', $id)
+            ->where('id_frs', $frs->id)
+            ->first();
+
+        if (! $cmd) {
+            return $this->notFound();
+        }
+
+        $newStatus = (string) $data['statut'];
+        if ((string) $cmd->statut !== $newStatus) {
+            $cmd->update(['statut' => $newStatus]);
+
+            $client = Client::query()->find($cmd->id_client);
+            if ($client) {
+                $client->notify(new StatutCommandeChange($cmd, $newStatus));
+            }
+        }
+
+        return $this->success([
+            'id' => (int) $cmd->id,
+            'statut' => (string) $cmd->statut,
+            'synced_pme' => (int) $cmd->synced_pme,
+        ], 'Statut commande mis a jour');
     }
 
     public function markSynced(Request $request, int $id)

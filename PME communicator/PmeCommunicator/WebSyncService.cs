@@ -49,6 +49,32 @@ public static class WebSyncService
         return payload.Data ?? [];
     }
 
+    public static async Task UpdateOrderStatusAsync(
+        AppSettings settings,
+        int orderId,
+        string status,
+        CancellationToken cancellationToken = default)
+    {
+        using var client = CreateClient(settings);
+        using var response = await client.PutAsJsonAsync(
+            $"commandes/{orderId}/status",
+            new { statut = status },
+            JsonOptions,
+            cancellationToken);
+
+        _ = await ReadEnvelopeAsync<object>(response, cancellationToken);
+    }
+
+    public static async Task MarkOrderSyncedAsync(
+        AppSettings settings,
+        int orderId,
+        CancellationToken cancellationToken = default)
+    {
+        using var client = CreateClient(settings);
+        using var response = await client.PutAsync($"commandes/{orderId}/sync", null, cancellationToken);
+        _ = await ReadEnvelopeAsync<object>(response, cancellationToken);
+    }
+
     private static HttpClient CreateClient(AppSettings settings)
     {
         if (!settings.HasWebSyncConfiguration())
@@ -162,8 +188,26 @@ public sealed class SiteOrder
     [JsonPropertyName("date_cmd")]
     public string DateCommande { get; set; } = string.Empty;
 
+    [JsonPropertyName("client_nom")]
+    public string ClientNom { get; set; } = string.Empty;
+
+    [JsonPropertyName("code_client")]
+    public string CodeClient { get; set; } = string.Empty;
+
+    [JsonPropertyName("telephone_client")]
+    public string TelephoneClient { get; set; } = string.Empty;
+
+    [JsonPropertyName("mode_tarif")]
+    public string ModeTarif { get; set; } = string.Empty;
+
     [JsonPropertyName("statut")]
     public string Statut { get; set; } = string.Empty;
+
+    [JsonPropertyName("sous_total")]
+    public decimal SousTotal { get; set; }
+
+    [JsonPropertyName("frais_livraison")]
+    public decimal FraisLivraison { get; set; }
 
     [JsonPropertyName("montant_total")]
     public decimal MontantTotal { get; set; }
@@ -176,6 +220,12 @@ public sealed class SiteOrder
 
     [JsonPropertyName("id_commune")]
     public int CommuneId { get; set; }
+
+    [JsonPropertyName("wilaya_nom")]
+    public string WilayaNom { get; set; } = string.Empty;
+
+    [JsonPropertyName("commune_nom")]
+    public string CommuneNom { get; set; } = string.Empty;
 
     [JsonPropertyName("notes")]
     public string? Notes { get; set; }

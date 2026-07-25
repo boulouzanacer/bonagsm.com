@@ -8,7 +8,7 @@
                     class="w-full rounded-2xl border border-white/10 bg-[var(--frs-card)] px-4 py-3 outline-none focus:border-[var(--frs-primary)]">
                 <option value="">{{ __('Tous statuts') }}</option>
                 @foreach($statuts as $s)
-                    <option value="{{ $s }}" @selected((string)$selected_statut === (string)$s)>{{ match($s) { 'en_attente' => __('En attente'), 'confirmee' => __('Confirmée'), 'expediee' => __('Expédiée'), 'livree' => __('Livrée'), 'annulee' => __('Annulée'), default => $s } }}</option>
+                    <option value="{{ $s }}" @selected((string)$selected_statut === (string)$s)>{{ match($s) { 'en_attente' => __('En attente'), 'validee', 'confirmee' => __('Validée'), 'expediee' => __('Expédiée'), 'livree' => __('Livrée'), 'annulee' => __('Annulée'), default => $s } }}</option>
                 @endforeach
             </select>
         </div>
@@ -73,7 +73,7 @@
                             $statut = $c->statut;
                             $badge = match($statut) {
                                 'en_attente' => 'bg-amber-500/15 text-amber-300 border border-amber-400/20',
-                                'confirmee' => 'bg-sky-500/15 text-sky-300 border border-sky-400/20',
+                                'validee', 'confirmee' => 'bg-sky-500/15 text-sky-300 border border-sky-400/20',
                                 'expediee' => 'bg-indigo-500/15 text-indigo-300 border border-indigo-400/20',
                                 'livree' => 'bg-emerald-500/15 text-emerald-300 border border-emerald-400/20',
                                 'annulee' => 'bg-red-500/15 text-red-300 border border-red-400/20',
@@ -81,7 +81,7 @@
                             };
                             $statutLabel = match($statut) {
                                 'en_attente' => __('En attente'),
-                                'confirmee' => __('Confirmée'),
+                                'validee', 'confirmee' => __('Validée'),
                                 'expediee' => __('Expédiée'),
                                 'livree' => __('Livrée'),
                                 'annulee' => __('Annulée'),
