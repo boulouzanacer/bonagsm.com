@@ -192,7 +192,7 @@ class PmeController extends Controller
                 $subCategoryId = $this->resolveSubCategoryId($frs->id, $categoryId, $subCategoryName, $subCategoryCache);
                 $brandId = $this->resolveBrandId($frs->id, $brandName, $brandCache);
 
-                $existing = Produit::query()
+                $existing = Produit::withTrashed()
                     ->where('id_frs', $frs->id)
                     ->where('reference', $item['reference'])
                     ->first();
@@ -215,6 +215,9 @@ class PmeController extends Controller
                 ];
 
                 if ($existing) {
+                    if (method_exists($existing, 'trashed') && $existing->trashed()) {
+                        $existing->restore();
+                    }
                     $existing->update($data);
                     $updated++;
                 } else {
