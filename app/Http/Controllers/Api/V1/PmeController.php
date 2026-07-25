@@ -14,6 +14,7 @@ use App\Models\Produit;
 use App\Models\SousCategorie;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
+use Throwable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -309,30 +310,36 @@ class PmeController extends Controller
 
     private function resolveBrandId(int $frsId, string $name, array &$cache): ?int
     {
-        if ($name === '') {
-            return null;
-        }
-
-        $key = Str::lower($name);
+        $brandName = $name !== '' ? mb_substr($name, 0, 100) : 'Standard';
+        $key = Str::lower($brandName);
         if (array_key_exists($key, $cache)) {
             return $cache[$key];
         }
 
-        $brand = Marque::query()
+        $brandId = Marque::query()
             ->where('id_frs', $frsId)
             ->whereRaw('LOWER(nom) = ?', [$key])
-            ->first();
+            ->value('id');
 
-        if (! $brand) {
-            $brand = Marque::create([
-                'id_frs' => $frsId,
-                'nom' => $name,
-            ]);
+        if (! $brandId) {
+            try {
+                $brandId = DB::table('marques')->insertGetId([
+                    'id_frs' => $frsId,
+                    'nom' => $brandName,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            } catch (Throwable $e) {
+                $brandId = DB::table('marques')
+                    ->where('id_frs', $frsId)
+                    ->where('nom', $brandName)
+                    ->value('id');
+            }
         }
 
-        $cache[$key] = (int) $brand->id;
+        $cache[$key] = $brandId ? (int) $brandId : 0;
 
-        return $cache[$key];
+        return $cache[$key] > 0 ? $cache[$key] : null;
     }
 
     public function syncFournisseur(Request $request)
