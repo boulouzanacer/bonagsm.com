@@ -437,9 +437,9 @@ class PmeController extends Controller
                 'wilaya.WILAYA as wilaya_nom',
                 'commune.COMMUNE as commune_nom',
             ])
-            ->where('id_frs', $frs->id)
-            ->where('synced_pme', $syncedValue)
-            ->orderByDesc('date_cmd')
+            ->where('cmd1.id_frs', $frs->id)
+            ->where('cmd1.synced_pme', $syncedValue)
+            ->orderByDesc('cmd1.date_cmd')
             ->limit(200)
             ->get();
 
