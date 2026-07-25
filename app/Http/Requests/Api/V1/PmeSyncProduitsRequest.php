@@ -24,6 +24,8 @@ class PmeSyncProduitsRequest extends FormRequest
             'produits.*.pv_3' => ['nullable', 'numeric', 'min:0'],
             'produits.*.stock' => ['required', 'numeric'],
             'produits.*.categorie' => ['required', 'string', 'max:100'],
+            'produits.*.sous_categorie' => ['nullable', 'string', 'max:255'],
+            'produits.*.marque' => ['nullable', 'string', 'max:255'],
             'produits.*.abonne_only' => ['nullable', 'boolean'],
         ];
     }

@@ -5,15 +5,19 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\PmeSyncClientsRequest;
 use App\Http\Requests\Api\V1\PmeSyncProduitsRequest;
+use App\Models\Categorie;
 use App\Models\Client;
 use App\Models\Cmd1;
 use App\Models\Cmd2;
+use App\Models\Marque;
 use App\Models\Produit;
+use App\Models\SousCategorie;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class PmeController extends Controller
 {
@@ -173,9 +177,20 @@ class PmeController extends Controller
 
         $inserted = 0;
         $updated = 0;
+        $categoryCache = [];
+        $subCategoryCache = [];
+        $brandCache = [];
 
-        DB::transaction(function () use ($frs, $items, &$inserted, &$updated) {
+        DB::transaction(function () use ($frs, $items, &$inserted, &$updated, &$categoryCache, &$subCategoryCache, &$brandCache) {
             foreach ($items as $item) {
+                $categoryName = $this->normalizeCatalogName((string) ($item['categorie'] ?? ''));
+                $subCategoryName = $this->normalizeCatalogName((string) ($item['sous_categorie'] ?? ''));
+                $brandName = $this->normalizeCatalogName((string) ($item['marque'] ?? ''));
+
+                $categoryId = $this->resolveCategoryId($frs->id, $categoryName, $categoryCache);
+                $subCategoryId = $this->resolveSubCategoryId($frs->id, $categoryId, $subCategoryName, $subCategoryCache);
+                $brandId = $this->resolveBrandId($frs->id, $brandName, $brandCache);
+
                 $existing = Produit::query()
                     ->where('id_frs', $frs->id)
                     ->where('reference', $item['reference'])
@@ -190,7 +205,10 @@ class PmeController extends Controller
                     'pv_2' => $item['pv_2'] ?? ($item['pv_1'] ?? ($item['prix'] ?? 0)),
                     'pv_3' => $item['pv_3'] ?? ($item['pv_1'] ?? ($item['prix'] ?? 0)),
                     'stock' => (int) round((float) $item['stock']),
-                    'categorie' => $item['categorie'],
+                    'categorie' => $categoryName,
+                    'id_categorie' => $categoryId,
+                    'id_sous_categorie' => $subCategoryId,
+                    'id_marque' => $brandId,
                     'abonne_only' => (int) ($item['abonne_only'] ?? 0) === 1 ? 1 : 0,
                     'actif' => 1,
                 ];
@@ -209,6 +227,112 @@ class PmeController extends Controller
             'nb_inseres' => $inserted,
             'nb_mis_a_jour' => $updated,
         ], 'Sync produits terminé');
+    }
+
+    private function normalizeCatalogName(string $value): string
+    {
+        $normalized = trim(preg_replace('/\s+/', ' ', $value) ?? '');
+
+        return $normalized;
+    }
+
+    private function resolveCategoryId(int $frsId, string $name, array &$cache): ?int
+    {
+        if ($name === '') {
+            return null;
+        }
+
+        $key = Str::lower($name);
+        if (array_key_exists($key, $cache)) {
+            return $cache[$key];
+        }
+
+        $category = Categorie::query()
+            ->where('id_frs', $frsId)
+            ->whereRaw('LOWER(nom) = ?', [$key])
+            ->first();
+
+        if (! $category) {
+            $baseSlug = Str::slug($name);
+            if ($baseSlug === '') {
+                $baseSlug = 'categorie-'.Str::lower(Str::random(8));
+            }
+
+            $slug = $baseSlug;
+            $suffix = 2;
+            while (Categorie::query()->where('id_frs', $frsId)->where('slug', $slug)->exists()) {
+                $slug = $baseSlug.'-'.$suffix;
+                $suffix++;
+            }
+
+            $category = Categorie::create([
+                'id_frs' => $frsId,
+                'nom' => $name,
+                'slug' => $slug,
+            ]);
+        }
+
+        $cache[$key] = (int) $category->id;
+
+        return $cache[$key];
+    }
+
+    private function resolveSubCategoryId(int $frsId, ?int $categoryId, string $name, array &$cache): ?int
+    {
+        if ($categoryId === null || $name === '') {
+            return null;
+        }
+
+        $key = $categoryId.'|'.Str::lower($name);
+        if (array_key_exists($key, $cache)) {
+            return $cache[$key];
+        }
+
+        $subCategory = SousCategorie::query()
+            ->where('id_frs', $frsId)
+            ->where('id_categorie', $categoryId)
+            ->whereRaw('LOWER(nom) = ?', [Str::lower($name)])
+            ->first();
+
+        if (! $subCategory) {
+            $subCategory = SousCategorie::create([
+                'id_frs' => $frsId,
+                'id_categorie' => $categoryId,
+                'nom' => $name,
+            ]);
+        }
+
+        $cache[$key] = (int) $subCategory->id;
+
+        return $cache[$key];
+    }
+
+    private function resolveBrandId(int $frsId, string $name, array &$cache): ?int
+    {
+        if ($name === '') {
+            return null;
+        }
+
+        $key = Str::lower($name);
+        if (array_key_exists($key, $cache)) {
+            return $cache[$key];
+        }
+
+        $brand = Marque::query()
+            ->where('id_frs', $frsId)
+            ->whereRaw('LOWER(nom) = ?', [$key])
+            ->first();
+
+        if (! $brand) {
+            $brand = Marque::create([
+                'id_frs' => $frsId,
+                'nom' => $name,
+            ]);
+        }
+
+        $cache[$key] = (int) $brand->id;
+
+        return $cache[$key];
     }
 
     public function syncFournisseur(Request $request)
