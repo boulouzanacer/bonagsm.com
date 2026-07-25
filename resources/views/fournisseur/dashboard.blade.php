@@ -141,40 +141,42 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-white/10">
-                    @forelse($dernieres_commandes as $c)
-                        @php
-                            $statut = $c->statut;
-                            $badge = match($statut) {
-                                'en_attente' => 'bg-amber-500/15 text-amber-300 border border-amber-400/20',
-                                'confirmee' => 'bg-sky-500/15 text-sky-300 border border-sky-400/20',
-                                'expediee' => 'bg-indigo-500/15 text-indigo-300 border border-indigo-400/20',
-                                'livree' => 'bg-emerald-500/15 text-emerald-300 border border-emerald-400/20',
-                                'annulee' => 'bg-red-500/15 text-red-300 border border-red-400/20',
-                                default => 'bg-white/10 text-white/70 border border-white/10'
-                            };
-                            $statutLabel = match($statut) {
-                                'en_attente' => __('En attente'),
-                                'confirmee' => __('Confirmée'),
-                                'expediee' => __('Expédiée'),
-                                'livree' => __('Livrée'),
-                                'annulee' => __('Annulée'),
-                                default => $statut,
-                            };
-                        @endphp
-                        <tr class="hover:bg-white/5">
-                            <td class="py-3 pr-4 font-semibold">#{{ $c->id }}</td>
-                            <td class="py-3 pr-4 text-white/80 force-ltr">{{ \Illuminate\Support\Carbon::parse($c->date_cmd)->format('d/m/Y H:i') }}</td>
-                            <td class="py-3 pr-4 text-white/80">{{ trim(($c->client_prenom ?? '').' '.($c->client_nom ?? '')) }}</td>
-                            <td class="py-3 pr-4">
-                                <span class="text-xs font-bold px-2.5 py-1 rounded-full {{ $badge }}">{{ $statutLabel }}</span>
-                            </td>
-                            <td class="table-align-end py-3 text-right font-bold force-ltr">{{ number_format((float)$c->montant_total, 2, '.', ' ') }}</td>
-                        </tr>
-                    @empty
+                    @if($dernieres_commandes->isEmpty())
                         <tr>
                             <td colspan="5" class="py-10 text-center text-white/60">{{ __('Aucune commande') }}</td>
                         </tr>
-                    @endforelse
+                    @else
+                        @foreach($dernieres_commandes as $c)
+                            @php
+                                $statut = $c->statut;
+                                $badge = match($statut) {
+                                    'en_attente' => 'bg-amber-500/15 text-amber-300 border border-amber-400/20',
+                                    'confirmee' => 'bg-sky-500/15 text-sky-300 border border-sky-400/20',
+                                    'expediee' => 'bg-indigo-500/15 text-indigo-300 border border-indigo-400/20',
+                                    'livree' => 'bg-emerald-500/15 text-emerald-300 border border-emerald-400/20',
+                                    'annulee' => 'bg-red-500/15 text-red-300 border border-red-400/20',
+                                    default => 'bg-white/10 text-white/70 border border-white/10'
+                                };
+                                $statutLabel = match($statut) {
+                                    'en_attente' => __('En attente'),
+                                    'confirmee' => __('Confirmée'),
+                                    'expediee' => __('Expédiée'),
+                                    'livree' => __('Livrée'),
+                                    'annulee' => __('Annulée'),
+                                    default => $statut,
+                                };
+                            @endphp
+                            <tr class="hover:bg-white/5">
+                                <td class="py-3 pr-4 font-semibold">#{{ $c->id }}</td>
+                                <td class="py-3 pr-4 text-white/80 force-ltr">{{ \Illuminate\Support\Carbon::parse($c->date_cmd)->format('d/m/Y H:i') }}</td>
+                                <td class="py-3 pr-4 text-white/80">{{ trim(($c->client_prenom ?? '').' '.($c->client_nom ?? '')) }}</td>
+                                <td class="py-3 pr-4">
+                                    <span class="text-xs font-bold px-2.5 py-1 rounded-full {{ $badge }}">{{ $statutLabel }}</span>
+                                </td>
+                                <td class="table-align-end py-3 text-right font-bold force-ltr">{{ number_format((float)$c->montant_total, 2, '.', ' ') }}</td>
+                            </tr>
+                        @endforeach
+                    @endif
                 </tbody>
             </table>
         </div>
@@ -187,26 +189,28 @@
         </div>
 
         <div class="space-y-3">
-            @forelse($rupture_stock as $p)
-                @php
-                    $stock = (int) $p->stock;
-                    $badge = $stock === 0
-                        ? 'bg-red-500/15 text-red-300 border border-red-400/20'
-                        : 'bg-amber-500/15 text-amber-300 border border-amber-400/20';
-                    $label = $stock === 0 ? __('Rupture') : __('Stock faible');
-                @endphp
-                <div class="flex items-center justify-between gap-3">
-                    <div class="min-w-0">
-                        <div class="font-semibold truncate">{{ $p->designation }}</div>
-                        <div class="force-ltr text-xs text-white/60 truncate">{{ $p->reference }}</div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="force-ltr text-xs font-bold px-2.5 py-1 rounded-full {{ $badge }}">{{ $label }} ({{ $stock }})</span>
-                    </div>
-                </div>
-            @empty
+            @if($rupture_stock->isEmpty())
                 <div class="text-white/60">{{ __('Aucun produit en alerte stock.') }}</div>
-            @endforelse
+            @else
+                @foreach($rupture_stock as $p)
+                    @php
+                        $stock = (int) $p->stock;
+                        $badge = $stock === 0
+                            ? 'bg-red-500/15 text-red-300 border border-red-400/20'
+                            : 'bg-amber-500/15 text-amber-300 border border-amber-400/20';
+                        $label = $stock === 0 ? __('Rupture') : __('Stock faible');
+                    @endphp
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="min-w-0">
+                            <div class="font-semibold truncate">{{ $p->designation }}</div>
+                            <div class="force-ltr text-xs text-white/60 truncate">{{ $p->reference }}</div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="force-ltr text-xs font-bold px-2.5 py-1 rounded-full {{ $badge }}">{{ $label }} ({{ $stock }})</span>
+                        </div>
+                    </div>
+                @endforeach
+            @endif
         </div>
     </div>
 </div>
