@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use Throwable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -182,8 +183,9 @@ class PmeController extends Controller
         $categoryCache = [];
         $subCategoryCache = [];
         $brandCache = [];
+        $supportsTva = Schema::hasColumn('produit', 'tva');
 
-        DB::transaction(function () use ($frs, $items, &$inserted, &$updated, &$categoryCache, &$subCategoryCache, &$brandCache) {
+        DB::transaction(function () use ($frs, $items, &$inserted, &$updated, &$categoryCache, &$subCategoryCache, &$brandCache, $supportsTva) {
             foreach ($items as $item) {
                 $categoryName = $this->normalizeCatalogName((string) ($item['categorie'] ?? ''));
                 $subCategoryName = $this->normalizeCatalogName((string) ($item['sous_categorie'] ?? ''));
@@ -206,9 +208,6 @@ class PmeController extends Controller
                     'pv_1' => $item['pv_1'] ?? ($item['prix'] ?? 0),
                     'pv_2' => $item['pv_2'] ?? ($item['pv_1'] ?? ($item['prix'] ?? 0)),
                     'pv_3' => $item['pv_3'] ?? ($item['pv_1'] ?? ($item['prix'] ?? 0)),
-                    'tva' => array_key_exists('tva', $item) && $item['tva'] !== null && $item['tva'] !== ''
-                        ? (float) $item['tva']
-                        : null,
                     'promo_enabled' => (int) ($item['promo'] ?? 0) === 1 ? 1 : 0,
                     'promo_start_at' => $item['date_debut_promo'] ?? null,
                     'promo_end_at' => $item['date_fin_promo'] ?? null,
@@ -224,6 +223,12 @@ class PmeController extends Controller
                     'abonne_only' => (int) ($item['abonne_only'] ?? 0) === 1 ? 1 : 0,
                     'actif' => 1,
                 ];
+
+                if ($supportsTva) {
+                    $data['tva'] = array_key_exists('tva', $item) && $item['tva'] !== null && $item['tva'] !== ''
+                        ? (float) $item['tva']
+                        : null;
+                }
 
                 if ($existing) {
                     if (method_exists($existing, 'trashed') && $existing->trashed()) {
