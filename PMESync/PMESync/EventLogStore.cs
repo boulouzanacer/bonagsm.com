@@ -1,6 +1,6 @@
 using Microsoft.Data.Sqlite;
 
-namespace PmeCommunicator;
+namespace PMESync;
 
 public sealed record EventLogRecord(long Id, DateTime LoggedAt, string EventType, string Message);
 

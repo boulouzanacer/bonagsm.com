@@ -1,4 +1,4 @@
-namespace PmeCommunicator;
+namespace PMESync;
 
 partial class Form1
 {
@@ -145,7 +145,7 @@ partial class Form1
         lblTitle.Name = "lblTitle";
         lblTitle.Size = new Size(363, 41);
         lblTitle.TabIndex = 0;
-        lblTitle.Text = "PME Communicator";
+        lblTitle.Text = "PMESync";
         // 
         // contentPanel
         // 
@@ -572,7 +572,7 @@ partial class Form1
         MinimumSize = new Size(1200, 720);
         Name = "Form1";
         StartPosition = FormStartPosition.CenterScreen;
-        Text = "PME Communicator";
+        Text = "PMESync";
         headerPanel.ResumeLayout(false);
         headerPanel.PerformLayout();
         contentPanel.ResumeLayout(false);

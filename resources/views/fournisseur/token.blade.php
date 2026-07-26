@@ -50,9 +50,9 @@
         </div>
 
         <div class="mt-6 rounded-2xl border border-white/10 bg-white/5 p-5">
-            <div class="text-sm font-extrabold">{{ __('Comment l’utiliser dans PME Communicator ?') }}</div>
+            <div class="text-sm font-extrabold">{{ __('Comment l’utiliser dans PMESync ?') }}</div>
             <ol class="mt-3 space-y-2 text-sm text-white/70 list-decimal pl-5 rtl-list-pad">
-                <li>{{ __("Ouvrez l'application PME Communicator.") }}</li>
+                <li>{{ __("Ouvrez l'application PMESync.") }}</li>
                 <li>{{ __('Allez dans Paramètres de connexion.') }}</li>
                 <li>{{ __("Collez l'endpoint PME dans le champ Endpoint PME.") }}</li>
                 <li>{{ __('Copiez ce token dans le champ Token API PME.') }}</li>

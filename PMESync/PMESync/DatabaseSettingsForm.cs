@@ -1,6 +1,6 @@
 using FirebirdSql.Data.FirebirdClient;
 
-namespace PmeCommunicator;
+namespace PMESync;
 
 public sealed class DatabaseSettingsForm : Form
 {

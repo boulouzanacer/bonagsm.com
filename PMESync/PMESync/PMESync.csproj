@@ -3,6 +3,10 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
+    <AssemblyName>PMESync</AssemblyName>
+    <RootNamespace>PMESync</RootNamespace>
+    <Product>PMESync</Product>
+    <AssemblyTitle>PMESync</AssemblyTitle>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <ApplicationIcon>Assets\PmeSync.ico</ApplicationIcon>
     <Nullable>enable</Nullable>

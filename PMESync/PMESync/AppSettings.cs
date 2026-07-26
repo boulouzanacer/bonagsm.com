@@ -1,7 +1,7 @@
 using Microsoft.Win32;
 using System.Text.Json;
 
-namespace PmeCommunicator;
+namespace PMESync;
 
 public sealed class AppSettings
 {
@@ -48,6 +48,8 @@ public sealed class AppSettings
 
 public static class AppSettingsStore
 {
+    private const string CurrentAppName = "PMESync";
+    private const string LegacyAppName = "PME Communicator";
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -58,7 +60,7 @@ public static class AppSettingsStore
     {
         return Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "PME Communicator");
+            CurrentAppName);
     }
 
     public static string GetSettingsPath()
@@ -66,9 +68,22 @@ public static class AppSettingsStore
         return Path.Combine(GetSettingsDirectory(), "settings.json");
     }
 
+    private static string GetLegacySettingsPath()
+    {
+        return Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            LegacyAppName,
+            "settings.json");
+    }
+
     public static AppSettings Load()
     {
         var path = GetSettingsPath();
+        if (!File.Exists(path))
+        {
+            path = GetLegacySettingsPath();
+        }
+
         if (!File.Exists(path))
         {
             return new AppSettings
@@ -104,14 +119,21 @@ public static class AppSettingsStore
 public static class WindowsStartupManager
 {
     private const string RunKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Run";
-    private const string ValueName = "PME Communicator";
+    private const string ValueName = "PMESync";
+    private const string LegacyValueName = "PME Communicator";
     private const string StartMinimizedArgument = "--tray";
 
     public static bool IsEnabled()
     {
         using var key = Registry.CurrentUser.OpenSubKey(RunKeyPath, writable: false);
         var value = key?.GetValue(ValueName) as string;
-        return !string.IsNullOrWhiteSpace(value);
+        if (!string.IsNullOrWhiteSpace(value))
+        {
+            return true;
+        }
+
+        var legacyValue = key?.GetValue(LegacyValueName) as string;
+        return !string.IsNullOrWhiteSpace(legacyValue);
     }
 
     public static void Apply(bool enabled)
@@ -127,11 +149,13 @@ public static class WindowsStartupManager
         if (!enabled)
         {
             key.DeleteValue(ValueName, throwOnMissingValue: false);
+            key.DeleteValue(LegacyValueName, throwOnMissingValue: false);
             return;
         }
 
         var executablePath = Application.ExecutablePath;
         var command = $"\"{executablePath}\" {StartMinimizedArgument}";
         key.SetValue(ValueName, command);
+        key.DeleteValue(LegacyValueName, throwOnMissingValue: false);
     }
 }

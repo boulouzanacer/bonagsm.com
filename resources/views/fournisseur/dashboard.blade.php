@@ -93,7 +93,7 @@
                         <i class="fa-solid fa-key text-white text-lg"></i>
                     </div>
                     <div>
-                        <div class="text-lg font-extrabold tracking-wide">{{ __('Connexion PME Communicator') }}</div>
+                        <div class="text-lg font-extrabold tracking-wide">{{ __('Connexion PMESync') }}</div>
                         <div class="mt-1 text-sm text-white/70">
                             {{ __("Pour récupérer le TOKEN PME et l'endpoint à coller dans l'application desktop, ouvrez la page Token PME.") }}
                         </div>

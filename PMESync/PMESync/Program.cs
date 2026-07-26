@@ -1,4 +1,4 @@
-namespace PmeCommunicator;
+namespace PMESync;
 
 static class Program
 {

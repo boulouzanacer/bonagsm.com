@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace PmeCommunicator;
+namespace PMESync;
 
 public sealed class OrdersViewerForm : Form
 {

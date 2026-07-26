@@ -1,7 +1,7 @@
 using FirebirdSql.Data.FirebirdClient;
 using System.Globalization;
 
-namespace PmeCommunicator;
+namespace PMESync;
 
 internal static class OrderFirebirdService
 {

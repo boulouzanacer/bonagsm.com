@@ -1,4 +1,4 @@
-namespace PmeCommunicator;
+namespace PMESync;
 
 public sealed class EventDiagnosticsForm : Form
 {

@@ -1,4 +1,4 @@
-# PME Communicator
+# PMESync
 
 Windows desktop app for browsing the Firebird `PRODUIT` table and exporting selected rows to Excel.
 
@@ -15,7 +15,7 @@ Windows desktop app for browsing the Firebird `PRODUIT` table and exporting sele
 
 Published executable:
 
-- `PmeCommunicator\bin\Release\net8.0-windows\win-x64\publish\PmeCommunicator.exe`
+- `PMESync\bin\Release\net8.0-windows\win-x64\publish\PMESync.exe`
 
 ## First launch
 
@@ -35,13 +35,13 @@ The only required value is the Firebird database file path.
 
 The app stores its configuration here:
 
-- `%LOCALAPPDATA%\PME Communicator\settings.json`
+- `%LOCALAPPDATA%\PMESync\settings.json`
 
 ## Build again
 
 From the repo root:
 
 ```powershell
-dotnet build "PME communicator\PmeCommunicatorApp.slnx"
-dotnet publish "PME communicator\PmeCommunicator\PmeCommunicator.csproj" -c Release -r win-x64 /p:PublishSingleFile=true /p:SelfContained=true
+dotnet build "PMESync\PMESync.slnx"
+dotnet publish "PMESync\PMESync\PMESync.csproj" -c Release -r win-x64 /p:PublishSingleFile=true /p:SelfContained=true
 ```

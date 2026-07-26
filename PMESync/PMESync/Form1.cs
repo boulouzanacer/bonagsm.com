@@ -4,7 +4,7 @@ using System.Data;
 using System.Globalization;
 using System.Media;
 
-namespace PmeCommunicator;
+namespace PMESync;
 
 public partial class Form1 : Form
 {
@@ -155,7 +155,7 @@ public partial class Form1 : Form
 
         trayIcon.ContextMenuStrip = trayMenu;
         trayIcon.Icon = AppIconProvider.GetApplicationIcon();
-        trayIcon.Text = "PME Communicator";
+        trayIcon.Text = "PMESync";
         trayIcon.Visible = false;
         trayIcon.DoubleClick += (_, _) => RestoreFromTray();
     }
@@ -183,7 +183,7 @@ public partial class Form1 : Form
             AutoSize = true,
             Font = new Font("Segoe UI", 16F, FontStyle.Bold),
             ForeColor = Color.White,
-            Text = "PME",
+            Text = "PMESync",
             Location = new Point(20, 24),
         };
 
@@ -192,7 +192,7 @@ public partial class Form1 : Form
             AutoSize = true,
             Font = new Font("Segoe UI", 9.5F, FontStyle.Regular),
             ForeColor = Color.FromArgb(148, 163, 184),
-            Text = "Communicator",
+            Text = "Desktop Sync",
             Location = new Point(22, 58),
         };
 
@@ -623,7 +623,7 @@ public partial class Form1 : Form
             AutoSize = true,
             Font = new Font("Segoe UI", 13F, FontStyle.Bold),
             ForeColor = Color.FromArgb(15, 23, 42),
-            Text = "Configuration PME Communicator",
+            Text = "Configuration PMESync",
             Anchor = AnchorStyles.Left,
             Margin = new Padding(0, 4, 0, 0),
         };
@@ -901,7 +901,7 @@ public partial class Form1 : Form
                 lblSubtitle.Text = "Reglez la connexion Firebird, le depot actif et la synchronisation web.";
                 break;
             default:
-                lblTitle.Text = "PME Communicator";
+                lblTitle.Text = "PMESync";
                 lblSubtitle.Text = "Navigateur produits avec filtres par stock, famille, sous-famille et marque.";
                 break;
         }
@@ -2367,7 +2367,7 @@ public partial class Form1 : Form
 
         if (showBalloonTip)
         {
-            trayIcon.BalloonTipTitle = "PME Communicator";
+            trayIcon.BalloonTipTitle = "PMESync";
             trayIcon.BalloonTipText = "L'application reste active pres de l'horloge. Clic droit pour Ouvrir ou Quitter.";
             trayIcon.ShowBalloonTip(2500);
         }
