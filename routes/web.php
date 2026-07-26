@@ -91,6 +91,9 @@ Route::prefix('fournisseur')->middleware('auth.fournisseur')->group(function () 
     Route::get('/wilayas/{idWilaya}/communes', [FrsProfileController::class, 'communes'])->whereNumber('idWilaya');
 
     Route::middleware('auth.admin')->group(function () {
+        Route::post('/dashboard/database/unlock', [FrsDashboardController::class, 'unlockDatabaseTools']);
+        Route::post('/dashboard/database/reset', [FrsDashboardController::class, 'resetDatabaseTables']);
+
         Route::post('/produits/import', [FrsProduitController::class, 'import']);
         Route::delete('/produits/{id}', [FrsProduitController::class, 'destroy'])->whereNumber('id');
         Route::post('/produits/{id}/toggle-actif', [FrsProduitController::class, 'toggleActif'])->whereNumber('id');
