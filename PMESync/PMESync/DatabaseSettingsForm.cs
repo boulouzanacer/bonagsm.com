@@ -25,6 +25,7 @@ public sealed class DatabaseSettingsForm : Form
     private readonly Label lblStatus = new() { AutoSize = true };
 
     public AppSettings Settings { get; private set; }
+    public event Action<bool, string>? ConnectionTestCompleted;
     private bool connectionValidated;
     private bool autoConnectionAttempted;
 
@@ -40,6 +41,7 @@ public sealed class DatabaseSettingsForm : Form
         MinimizeBox = false;
         ShowInTaskbar = false;
         ClientSize = new Size(760, 600);
+        UiTheme.ApplyDialogChrome(this);
 
         BuildLayout();
         FillFields();
@@ -48,17 +50,52 @@ public sealed class DatabaseSettingsForm : Form
 
     private void BuildLayout()
     {
+        var root = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            BackColor = UiTheme.AppBackground,
+            Padding = new Padding(20),
+            ColumnCount = 1,
+            RowCount = 3,
+        };
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 94F));
+        root.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 64F));
+
+        var headerPanel = new Panel
+        {
+            Dock = DockStyle.Fill,
+            BackColor = UiTheme.HeaderBackground,
+            Padding = new Padding(22, 18, 22, 18),
+            Margin = new Padding(0, 0, 0, 16),
+        };
+
+        var title = new Label
+        {
+            AutoSize = true,
+            Text = "Configuration PMESync",
+            Font = new Font("Segoe UI", 15F, FontStyle.Bold),
+            ForeColor = Color.White,
+            Location = new Point(22, 14),
+        };
+
         var notes = new Label
         {
             AutoSize = true,
-            MaximumSize = new Size(690, 0),
+            MaximumSize = new Size(660, 0),
+            Font = new Font("Segoe UI", 9.5F),
+            ForeColor = Color.FromArgb(203, 213, 225),
             Text = "Renseignez la connexion Firebird. Si la connexion reussit, la liste des depots se charge automatiquement. Vous pouvez aussi configurer l'endpoint PME du site web, le token API, le mode manuel ou automatique, l'intervalle de synchronisation et le lancement automatique avec Windows.",
+            Location = new Point(22, 48),
         };
+        headerPanel.Controls.Add(title);
+        headerPanel.Controls.Add(notes);
 
         var table = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
-            Padding = new Padding(12),
+            Padding = new Padding(22),
+            BackColor = UiTheme.CardBackground,
             ColumnCount = 3,
             RowCount = 14,
         };
@@ -67,47 +104,44 @@ public sealed class DatabaseSettingsForm : Form
         table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         table.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
 
-        table.Controls.Add(notes, 0, 0);
-        table.SetColumnSpan(notes, 3);
-
-        table.Controls.Add(new Label { Text = "Base de donnees", AutoSize = true, Anchor = AnchorStyles.Left }, 0, 1);
+        table.Controls.Add(CreateFieldLabel("Base de donnees"), 0, 1);
         table.Controls.Add(txtDatabasePath, 1, 1);
         table.Controls.Add(btnBrowse, 2, 1);
 
-        table.Controls.Add(new Label { Text = "Serveur", AutoSize = true, Anchor = AnchorStyles.Left }, 0, 2);
+        table.Controls.Add(CreateFieldLabel("Serveur"), 0, 2);
         table.Controls.Add(txtServer, 1, 2);
 
-        table.Controls.Add(new Label { Text = "Port", AutoSize = true, Anchor = AnchorStyles.Left }, 0, 3);
+        table.Controls.Add(CreateFieldLabel("Port"), 0, 3);
         table.Controls.Add(numPort, 1, 3);
 
-        table.Controls.Add(new Label { Text = "Utilisateur", AutoSize = true, Anchor = AnchorStyles.Left }, 0, 4);
+        table.Controls.Add(CreateFieldLabel("Utilisateur"), 0, 4);
         table.Controls.Add(txtUsername, 1, 4);
 
-        table.Controls.Add(new Label { Text = "Mot de passe", AutoSize = true, Anchor = AnchorStyles.Left }, 0, 5);
+        table.Controls.Add(CreateFieldLabel("Mot de passe"), 0, 5);
         table.Controls.Add(txtPassword, 1, 5);
 
-        table.Controls.Add(new Label { Text = "Jeu de caracteres", AutoSize = true, Anchor = AnchorStyles.Left }, 0, 6);
+        table.Controls.Add(CreateFieldLabel("Jeu de caracteres"), 0, 6);
         table.Controls.Add(txtCharset, 1, 6);
 
-        table.Controls.Add(new Label { Text = "Depot", AutoSize = true, Anchor = AnchorStyles.Left }, 0, 7);
+        table.Controls.Add(CreateFieldLabel("Depot"), 0, 7);
         table.Controls.Add(cmbDepot, 1, 7);
 
-        table.Controls.Add(new Label { Text = "Endpoint PME", AutoSize = true, Anchor = AnchorStyles.Left }, 0, 8);
+        table.Controls.Add(CreateFieldLabel("Endpoint PME"), 0, 8);
         table.Controls.Add(txtWebEndpoint, 1, 8);
         table.SetColumnSpan(txtWebEndpoint, 2);
 
-        table.Controls.Add(new Label { Text = "Token API PME", AutoSize = true, Anchor = AnchorStyles.Left }, 0, 9);
+        table.Controls.Add(CreateFieldLabel("Token API PME"), 0, 9);
         table.Controls.Add(txtWebApiToken, 1, 9);
         table.SetColumnSpan(txtWebApiToken, 2);
 
-        table.Controls.Add(new Label { Text = "Mode de synchro", AutoSize = true, Anchor = AnchorStyles.Left }, 0, 10);
+        table.Controls.Add(CreateFieldLabel("Mode de synchro"), 0, 10);
         table.Controls.Add(chkAutoSync, 1, 10);
         table.SetColumnSpan(chkAutoSync, 2);
 
-        table.Controls.Add(new Label { Text = "Intervalle", AutoSize = true, Anchor = AnchorStyles.Left }, 0, 11);
+        table.Controls.Add(CreateFieldLabel("Intervalle"), 0, 11);
         table.Controls.Add(cmbSyncInterval, 1, 11);
 
-        table.Controls.Add(new Label { Text = "Demarrage Windows", AutoSize = true, Anchor = AnchorStyles.Left }, 0, 12);
+        table.Controls.Add(CreateFieldLabel("Demarrage Windows"), 0, 12);
         table.Controls.Add(chkLaunchAtStartup, 1, 12);
         table.SetColumnSpan(chkLaunchAtStartup, 2);
 
@@ -131,24 +165,64 @@ public sealed class DatabaseSettingsForm : Form
         footerPanel.Controls.Add(connectionStatePanel);
         footerPanel.Controls.Add(lblStatus);
 
-        lblStatus.ForeColor = Color.DimGray;
+        lblStatus.ForeColor = UiTheme.TextSecondary;
+        lblStatus.Font = new Font("Segoe UI", 9F, FontStyle.Regular);
         table.Controls.Add(footerPanel, 0, 13);
         table.SetColumnSpan(footerPanel, 3);
 
         var buttons = new FlowLayoutPanel
         {
             FlowDirection = FlowDirection.RightToLeft,
-            Dock = DockStyle.Bottom,
+            Dock = DockStyle.Fill,
             Height = 46,
-            Padding = new Padding(12, 0, 12, 12),
+            Padding = new Padding(0),
+            BackColor = UiTheme.AppBackground,
+            Margin = new Padding(0, 16, 0, 0),
         };
 
         buttons.Controls.Add(btnSave);
         buttons.Controls.Add(btnCancel);
         buttons.Controls.Add(btnTest);
 
-        Controls.Add(table);
-        Controls.Add(buttons);
+        ApplyControlTheme();
+
+        root.Controls.Add(headerPanel, 0, 0);
+        root.Controls.Add(table, 0, 1);
+        root.Controls.Add(buttons, 0, 2);
+        Controls.Add(root);
+    }
+
+    private static Label CreateFieldLabel(string text)
+    {
+        return new Label
+        {
+            Text = text,
+            AutoSize = true,
+            Anchor = AnchorStyles.Left,
+            ForeColor = UiTheme.TextSecondary,
+            Font = new Font("Segoe UI", 8.75F, FontStyle.Bold),
+        };
+    }
+
+    private void ApplyControlTheme()
+    {
+        UiTheme.StyleInput(txtDatabasePath);
+        UiTheme.StyleInput(txtServer);
+        UiTheme.StyleInput(txtUsername);
+        UiTheme.StyleInput(txtPassword);
+        UiTheme.StyleInput(txtCharset);
+        UiTheme.StyleInput(txtWebEndpoint);
+        UiTheme.StyleInput(txtWebApiToken);
+        UiTheme.StyleComboBox(cmbDepot);
+        UiTheme.StyleComboBox(cmbSyncInterval);
+        UiTheme.StyleNumericUpDown(numPort);
+        UiTheme.StyleCheckBox(chkAutoSync);
+        UiTheme.StyleCheckBox(chkLaunchAtStartup);
+        UiTheme.StyleSecondaryButton(btnBrowse);
+        UiTheme.StyleSecondaryButton(btnTest);
+        UiTheme.StylePrimaryButton(btnSave);
+        UiTheme.StyleSecondaryButton(btnCancel);
+        lblConnectionState.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
     }
 
     private void FillFields()
@@ -321,6 +395,7 @@ public sealed class DatabaseSettingsForm : Form
             connectionValidated = true;
             cmbDepot.Enabled = true;
             SetConnectionState(true, "Connexion reussie");
+            ConnectionTestCompleted?.Invoke(true, $"Connexion locale reussie vers {draft.Server}:{draft.Port} | {draft.DatabasePath}");
             await LoadDepotsAsync(selectSavedDepot: true, showSuccessMessage: showSuccessMessage);
             if (showSuccessMessage)
             {
@@ -334,6 +409,7 @@ public sealed class DatabaseSettingsForm : Form
             ResetDepotSelection();
             SetConnectionState(false, "Connexion echouee");
             SetError(ex.Message);
+            ConnectionTestCompleted?.Invoke(false, $"Connexion locale echouee vers {draft.Server}:{draft.Port} | {draft.DatabasePath} : {ex.Message}");
         }
         finally
         {
@@ -478,26 +554,26 @@ public sealed class DatabaseSettingsForm : Form
 
     private void SetError(string message)
     {
-        lblStatus.ForeColor = Color.Firebrick;
+        lblStatus.ForeColor = UiTheme.DangerAccent;
         lblStatus.Text = message;
     }
 
     private void SetSuccess(string message)
     {
-        lblStatus.ForeColor = Color.ForestGreen;
+        lblStatus.ForeColor = UiTheme.SuccessAccent;
         lblStatus.Text = message;
     }
 
     private void SetNeutral(string message)
     {
-        lblStatus.ForeColor = Color.DimGray;
+        lblStatus.ForeColor = UiTheme.TextSecondary;
         lblStatus.Text = message;
     }
 
     private void SetConnectionState(bool isConnected, string text)
     {
-        pnlConnectionLamp.BackColor = isConnected ? Color.ForestGreen : Color.Firebrick;
-        lblConnectionState.ForeColor = isConnected ? Color.ForestGreen : Color.Firebrick;
+        pnlConnectionLamp.BackColor = isConnected ? UiTheme.SuccessAccent : UiTheme.DangerAccent;
+        lblConnectionState.ForeColor = isConnected ? UiTheme.SuccessAccent : UiTheme.DangerAccent;
         lblConnectionState.Text = text;
     }
 

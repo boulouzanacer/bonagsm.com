@@ -122,9 +122,6 @@ class CommandeController extends Controller
                         'prix_unitaire' => $line['prix_unitaire'],
                         'sous_total' => $line['sous_total'],
                     ]);
-
-                    $p = $produitsById[$line['id_produit']];
-                    $p->decrement('stock', $line['quantite']);
                 }
 
                 $frs->notify(new NouvelleCommande($cmd1));

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Carbon;
 
 class Produit extends Model
 {
@@ -25,6 +26,11 @@ class Produit extends Model
         'pv_1',
         'pv_2',
         'pv_3',
+        'promo_enabled',
+        'promo_start_at',
+        'promo_end_at',
+        'promo_quantity',
+        'promo_price',
         'stock',
         'image_principale',
         'categorie',
@@ -40,6 +46,11 @@ class Produit extends Model
         'pv_1' => 'float',
         'pv_2' => 'float',
         'pv_3' => 'float',
+        'promo_enabled' => 'boolean',
+        'promo_start_at' => 'datetime',
+        'promo_end_at' => 'datetime',
+        'promo_quantity' => 'integer',
+        'promo_price' => 'float',
         'abonne_only' => 'integer',
         'enable_tier_pricing' => 'boolean',
         'actif' => 'integer',
@@ -84,7 +95,7 @@ class Produit extends Model
         return $this->quantityPrices()->exists();
     }
 
-    public function prixUnitairePourQuantite(?Client $client, int $quantite): float
+    public function prixStandardPourQuantite(?Client $client, int $quantite): float
     {
         $qty = max(1, (int) $quantite);
 
@@ -124,6 +135,73 @@ class Produit extends Model
         }
 
         return $this->prixPourClient($client);
+    }
+
+    public function promoThresholdQuantity(): int
+    {
+        return max(1, (int) ($this->promo_quantity ?? 1));
+    }
+
+    public function hasPromotionConfigured(): bool
+    {
+        return (bool) ($this->promo_enabled ?? false) && (float) ($this->promo_price ?? 0) > 0;
+    }
+
+    public function isPromotionActive(?Carbon $at = null): bool
+    {
+        if (! $this->hasPromotionConfigured()) {
+            return false;
+        }
+
+        $at ??= now();
+        $startAt = $this->promo_start_at;
+        if ($startAt instanceof Carbon && $at->lt($startAt)) {
+            return false;
+        }
+
+        $endAt = $this->normalizedPromotionEnd();
+        if ($endAt instanceof Carbon && $at->gt($endAt)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function prixPromoPourQuantite(int $quantite): ?float
+    {
+        if (! $this->isPromotionActive()) {
+            return null;
+        }
+
+        if (max(1, (int) $quantite) < $this->promoThresholdQuantity()) {
+            return null;
+        }
+
+        $promoPrice = (float) ($this->promo_price ?? 0);
+        return $promoPrice > 0 ? $promoPrice : null;
+    }
+
+    public function prixUnitairePourQuantite(?Client $client, int $quantite): float
+    {
+        $promoPrice = $this->prixPromoPourQuantite($quantite);
+        if ($promoPrice !== null) {
+            return $promoPrice;
+        }
+
+        return $this->prixStandardPourQuantite($client, $quantite);
+    }
+
+    public function normalizedPromotionEnd(): ?Carbon
+    {
+        if (! ($this->promo_end_at instanceof Carbon)) {
+            return null;
+        }
+
+        if ($this->promo_end_at->format('H:i:s') === '00:00:00') {
+            return $this->promo_end_at->copy()->endOfDay();
+        }
+
+        return $this->promo_end_at->copy();
     }
 
     public function fournisseur(): BelongsTo

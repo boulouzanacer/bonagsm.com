@@ -1,6 +1,7 @@
 using ClosedXML.Excel;
 using FirebirdSql.Data.FirebirdClient;
 using System.Data;
+using System.Drawing.Drawing2D;
 using System.Globalization;
 using System.Media;
 
@@ -25,11 +26,22 @@ public partial class Form1 : Form
         IReadOnlyList<SiteOrder> Orders,
         string? OrdersWarningMessage);
 
+    private sealed record ProductSnapshot(
+        string Reference,
+        string Designation,
+        decimal Stock,
+        decimal Pv1,
+        decimal Pv2,
+        decimal Pv3,
+        decimal PromoPrice,
+        decimal Colisage);
+
     private readonly List<DataRow> allRows = [];
     private readonly List<DataRow> visibleRows = [];
     private readonly HashSet<DataRow> selectedRows = [];
     private readonly List<SiteOrder> siteOrders = [];
     private readonly HashSet<int> knownSiteOrderIds = [];
+    private readonly Dictionary<string, ProductSnapshot> lastProductSnapshots = new(StringComparer.OrdinalIgnoreCase);
     private readonly System.Windows.Forms.Timer syncTimer = new();
     private readonly System.Windows.Forms.Timer databaseRefreshTimer = new();
     private readonly System.Windows.Forms.Timer databaseEventReconnectTimer = new();
@@ -42,7 +54,7 @@ public partial class Form1 : Form
     private readonly Label lblLastSyncValue = new();
     private readonly Label lblOrdersValue = new();
     private readonly Label lblSyncState = new();
-    private readonly List<string> databaseEventLogEntries = [];
+    private readonly List<EventLogRecord> databaseEventLogEntries = [];
     private readonly TableLayoutPanel shellLayout = new();
     private readonly Panel sidebarPanel = new();
     private readonly FlowLayoutPanel navButtonsPanel = new();
@@ -55,14 +67,20 @@ public partial class Form1 : Form
     private readonly Button btnNavOrders = new();
     private readonly Button btnNavEvents = new();
     private readonly Button btnNavSettings = new();
+    private readonly Button btnProductsSectionSync = new();
+    private readonly Button btnOrdersSectionSync = new();
     private readonly DataGridView gridOrdersSection = new();
     private readonly DataGridView gridOrderLinesSection = new();
     private readonly TextBox txtOrderNotesSection = new();
     private readonly Label lblOrdersSectionSummary = new();
     private readonly Label lblSelectedOrderTotalValue = new();
     private readonly Label lblSelectedOrderClientValue = new();
-    private readonly TextBox txtEventLogSection = new();
+    private readonly DataGridView gridEventsSection = new();
+    private readonly TextBox txtEventMessageSection = new();
     private readonly Label lblEventSectionState = new();
+    private readonly Label lblEventsSectionSummary = new();
+    private readonly Label lblSelectedEventTypeValue = new();
+    private readonly Label lblSelectedEventTimeValue = new();
     private readonly Button btnClearEventLogSection = new();
     private readonly Button btnReconnectEventsSection = new();
     private readonly Label lblSettingsDatabaseValue = new();
@@ -92,6 +110,7 @@ public partial class Form1 : Form
     private EventDiagnosticsForm? eventDiagnosticsForm;
     private AppSection currentSection = AppSection.Produits;
     private bool allowExit;
+    private string? lastProductSnapshotSignature;
 
     public Form1(bool startMinimizedToTray = false)
     {
@@ -103,6 +122,7 @@ public partial class Form1 : Form
         BuildSyncPanel();
         ConfigureGrid();
         ConfigureFilterInputs();
+        ApplySharedTheme();
         ConfigureSyncTimer();
         ConfigureDatabaseRefreshTimer();
         ConfigureDatabaseEventReconnectTimer();
@@ -133,10 +153,16 @@ public partial class Form1 : Form
         btnNavOrders.Click += async (_, _) => await OpenOrdersSectionAsync();
         btnNavEvents.Click += (_, _) => ShowSection(AppSection.Evenements);
         btnNavSettings.Click += (_, _) => ShowSection(AppSection.Parametres);
+        btnProductsSectionSync.Click += async (_, _) => await TriggerSyncAsync(true);
+        btnOrdersSectionSync.Click += async (_, _) => await TriggerSyncAsync(true);
         gridOrdersSection.SelectionChanged += (_, _) => LoadSelectedOrderLinesInSection();
         gridOrdersSection.CurrentCellDirtyStateChanged += GridOrdersSection_CurrentCellDirtyStateChanged;
         gridOrdersSection.CellValueChanged += GridOrdersSection_CellValueChanged;
+        gridOrdersSection.CellFormatting += GridOrdersSection_CellFormatting;
+        gridOrdersSection.CellPainting += GridOrdersSection_CellPainting;
         gridOrdersSection.DataError += GridOrdersSection_DataError;
+        gridEventsSection.SelectionChanged += (_, _) => LoadSelectedEventDetails();
+        gridEventsSection.CellFormatting += GridEventsSection_CellFormatting;
         btnClearEventLogSection.Click += (_, _) => ClearEventLogs();
         btnReconnectEventsSection.Click += async (_, _) => await RestartDatabaseEventListenerAsync(force: true);
         btnOpenSettingsSection.Click += async (_, _) => await OpenSettingsAsync();
@@ -160,12 +186,106 @@ public partial class Form1 : Form
         trayIcon.DoubleClick += (_, _) => RestoreFromTray();
     }
 
+    private void ApplySharedTheme()
+    {
+        BackColor = UiTheme.AppBackground;
+        contentPanel.BackColor = UiTheme.AppBackground;
+        productsSectionPanel.BackColor = UiTheme.AppBackground;
+        ordersSectionPanel.BackColor = UiTheme.AppBackground;
+        eventsSectionPanel.BackColor = UiTheme.AppBackground;
+        settingsSectionPanel.BackColor = UiTheme.AppBackground;
+
+        UiTheme.StylePrimaryButton(btnSyncNow);
+        UiTheme.StyleSecondaryButton(btnViewOrders);
+        UiTheme.StyleSecondaryButton(btnClearEventLogSection);
+        UiTheme.StylePrimaryButton(btnReconnectEventsSection);
+        UiTheme.StylePrimaryButton(btnOpenSettingsSection);
+        StyleSectionSyncButton(btnProductsSectionSync);
+        StyleSectionSyncButton(btnOrdersSectionSync);
+        UiTheme.StylePrimaryButton(btnExport);
+        UiTheme.StyleSecondaryButton(btnSelectVisible);
+        UiTheme.StyleSecondaryButton(btnClearSelection);
+        UiTheme.StyleSecondaryButton(btnResetFilters);
+
+        UiTheme.StyleInput(txtFilter);
+        UiTheme.StyleInput(txtOrderNotesSection);
+        UiTheme.StyleInput(txtEventMessageSection, mono: true);
+        UiTheme.StyleComboBox(cmbStock);
+        UiTheme.StyleComboBox(cmbFamille);
+        UiTheme.StyleComboBox(cmbSousFamille);
+        UiTheme.StyleComboBox(cmbMarque);
+
+        gridCardPanel.BackColor = UiTheme.CardBorder;
+        filterCardPanel.BackColor = UiTheme.CardBackground;
+        syncCardPanel.BackColor = UiTheme.CardBackground;
+
+        UiTheme.StyleDataGrid(gridProducts, Color.FromArgb(30, 64, 175), 36);
+        UiTheme.StyleDataGrid(gridOrdersSection, UiTheme.HeaderBackground, 46);
+        UiTheme.StyleDataGrid(gridOrderLinesSection, UiTheme.SecondaryAccent, 34);
+        UiTheme.StyleDataGrid(gridEventsSection, UiTheme.HeaderBackground, 42);
+
+        gridProducts.ColumnHeadersHeight = 40;
+        gridProducts.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+        gridProducts.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
+        gridProducts.ColumnHeadersDefaultCellStyle.WrapMode = DataGridViewTriState.False;
+        gridProducts.DefaultCellStyle.Padding = new Padding(4, 0, 4, 0);
+        gridProducts.RowTemplate.Height = 34;
+        gridProducts.RowsDefaultCellStyle.Padding = new Padding(4, 0, 4, 0);
+        gridProducts.AlternatingRowsDefaultCellStyle.Padding = new Padding(4, 0, 4, 0);
+
+        gridEventsSection.ColumnHeadersDefaultCellStyle.Padding = new Padding(8, 0, 8, 0);
+        gridEventsSection.DefaultCellStyle.Padding = new Padding(8, 4, 8, 4);
+        gridEventsSection.RowTemplate.Height = 34;
+        gridEventsSection.RowsDefaultCellStyle.Padding = new Padding(8, 4, 8, 4);
+        gridEventsSection.AlternatingRowsDefaultCellStyle.Padding = new Padding(8, 4, 8, 4);
+
+        txtOrderNotesSection.BackColor = Color.White;
+        txtEventMessageSection.BackColor = Color.White;
+        txtEventMessageSection.ForeColor = UiTheme.TextPrimary;
+        txtFilter.BackColor = Color.White;
+
+        lblOrdersSectionSummary.ForeColor = UiTheme.TextPrimary;
+        lblSelectedOrderClientValue.ForeColor = UiTheme.TextSecondary;
+        lblSelectedOrderTotalValue.ForeColor = UiTheme.TextPrimary;
+        lblEventSectionState.ForeColor = UiTheme.TextPrimary;
+        lblEventsSectionSummary.ForeColor = UiTheme.TextSecondary;
+        lblSelectedEventTypeValue.ForeColor = UiTheme.TextPrimary;
+        lblSelectedEventTimeValue.ForeColor = UiTheme.TextSecondary;
+        lblSettingsDatabaseValue.ForeColor = UiTheme.TextPrimary;
+        lblSettingsDepotValue.ForeColor = UiTheme.TextPrimary;
+        lblSettingsWebValue.ForeColor = UiTheme.TextPrimary;
+        lblSettingsSyncValue.ForeColor = UiTheme.TextPrimary;
+        lblSettingsEventValue.ForeColor = UiTheme.TextPrimary;
+
+        foreach (var panel in new[] { productsSectionPanel, ordersSectionPanel, eventsSectionPanel, settingsSectionPanel })
+        {
+            panel.Padding = new Padding(0);
+        }
+    }
+
+    private void StyleSectionSyncButton(Button button)
+    {
+        UiTheme.StylePrimaryButton(button);
+        button.Text = "";
+        button.Font = new Font("Segoe MDL2 Assets", 15F, FontStyle.Regular);
+        button.TextAlign = ContentAlignment.MiddleCenter;
+        button.Size = new Size(42, 36);
+        button.FlatAppearance.BorderSize = 0;
+        button.Margin = new Padding(0);
+        button.Cursor = Cursors.Hand;
+    }
+
     private void BuildNavigationShell()
     {
         btnEventDiagnostics.Visible = false;
         btnReload.Visible = false;
 
         contentPanel.Controls.Clear();
+
+        btnProductsSectionSync.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+        btnProductsSectionSync.Location = new Point(430, 16);
+        headerToolTip.SetToolTip(btnProductsSectionSync, "Synchronisation manuelle");
+        gridTopPanel.Controls.Add(btnProductsSectionSync);
 
         shellLayout.Dock = DockStyle.Fill;
         shellLayout.ColumnCount = 2;
@@ -306,19 +426,11 @@ public partial class Form1 : Form
         btnSyncNow.Text = "Synchroniser";
         btnSyncNow.Height = 38;
         btnSyncNow.Dock = DockStyle.Top;
-        btnSyncNow.BackColor = Color.FromArgb(37, 99, 235);
-        btnSyncNow.ForeColor = Color.White;
-        btnSyncNow.FlatStyle = FlatStyle.Flat;
-        btnSyncNow.FlatAppearance.BorderSize = 0;
         btnSyncNow.Margin = new Padding(0, 10, 0, 0);
 
         btnViewOrders.Text = "Voir commandes";
         btnViewOrders.Height = 38;
         btnViewOrders.Dock = DockStyle.Top;
-        btnViewOrders.BackColor = Color.FromArgb(248, 250, 252);
-        btnViewOrders.ForeColor = Color.FromArgb(51, 65, 85);
-        btnViewOrders.FlatStyle = FlatStyle.Flat;
-        btnViewOrders.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
         btnViewOrders.Margin = new Padding(0, 10, 0, 0);
 
         var buttonsPanel = new FlowLayoutPanel
@@ -425,6 +537,10 @@ public partial class Form1 : Form
         lblSelectedOrderClientValue.Margin = new Padding(0);
         lblSelectedOrderClientValue.Text = "Client : -";
 
+        btnOrdersSectionSync.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        btnOrdersSectionSync.Location = new Point(690, 18);
+        headerToolTip.SetToolTip(btnOrdersSectionSync, "Synchronisation manuelle");
+
         summaryTextPanel.Controls.Add(lblOrdersSectionSummary, 0, 0);
         summaryTextPanel.Controls.Add(lblSelectedOrderClientValue, 0, 1);
 
@@ -461,6 +577,7 @@ public partial class Form1 : Form
         summaryLayout.Controls.Add(summaryTextPanel, 0, 0);
         summaryLayout.Controls.Add(totalPanel, 1, 0);
         summaryCard.Controls.Add(summaryLayout);
+        summaryCard.Controls.Add(btnOrdersSectionSync);
 
         var ordersCard = CreateSectionCard();
         ordersCard.Padding = new Padding(1);
@@ -523,11 +640,12 @@ public partial class Form1 : Form
         {
             Dock = DockStyle.Fill,
             ColumnCount = 1,
-            RowCount = 2,
+            RowCount = 3,
             BackColor = Color.Transparent,
         };
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 108F));
-        layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        layout.RowStyles.Add(new RowStyle(SizeType.Percent, 58F));
+        layout.RowStyles.Add(new RowStyle(SizeType.Percent, 42F));
 
         var topCard = CreateSectionCard(108);
         lblEventSectionState.AutoSize = true;
@@ -548,19 +666,11 @@ public partial class Form1 : Form
 
         btnClearEventLogSection.Text = "Vider le journal";
         btnClearEventLogSection.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        btnClearEventLogSection.BackColor = Color.FromArgb(248, 250, 252);
-        btnClearEventLogSection.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
-        btnClearEventLogSection.FlatStyle = FlatStyle.Flat;
-        btnClearEventLogSection.ForeColor = Color.FromArgb(51, 65, 85);
         btnClearEventLogSection.Size = new Size(140, 36);
         btnClearEventLogSection.Location = new Point(802, 20);
 
         btnReconnectEventsSection.Text = "Reconnecter";
         btnReconnectEventsSection.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        btnReconnectEventsSection.BackColor = Color.FromArgb(37, 99, 235);
-        btnReconnectEventsSection.FlatAppearance.BorderSize = 0;
-        btnReconnectEventsSection.FlatStyle = FlatStyle.Flat;
-        btnReconnectEventsSection.ForeColor = Color.White;
         btnReconnectEventsSection.Size = new Size(120, 36);
         btnReconnectEventsSection.Location = new Point(950, 20);
 
@@ -569,20 +679,51 @@ public partial class Form1 : Form
         topCard.Controls.Add(btnClearEventLogSection);
         topCard.Controls.Add(btnReconnectEventsSection);
 
-        var logCard = CreateSectionCard();
-        logCard.Padding = new Padding(1);
-        txtEventLogSection.Dock = DockStyle.Fill;
-        txtEventLogSection.Multiline = true;
-        txtEventLogSection.ReadOnly = true;
-        txtEventLogSection.ScrollBars = ScrollBars.Both;
-        txtEventLogSection.WordWrap = false;
-        txtEventLogSection.BorderStyle = BorderStyle.None;
-        txtEventLogSection.BackColor = Color.White;
-        txtEventLogSection.Font = new Font("Consolas", 10F);
-        logCard.Controls.Add(txtEventLogSection);
+        var listCard = CreateSectionCard();
+        listCard.Padding = new Padding(1);
+        ConfigureEventsSectionGrid();
+        listCard.Controls.Add(gridEventsSection);
+
+        var detailsCard = CreateSectionCard();
+        detailsCard.Padding = new Padding(18);
+
+        lblEventsSectionSummary.AutoSize = true;
+        lblEventsSectionSummary.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        lblEventsSectionSummary.ForeColor = Color.FromArgb(100, 116, 139);
+        lblEventsSectionSummary.Location = new Point(18, 16);
+        lblEventsSectionSummary.Text = "Aucun evenement charge.";
+
+        lblSelectedEventTypeValue.AutoSize = true;
+        lblSelectedEventTypeValue.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
+        lblSelectedEventTypeValue.ForeColor = Color.FromArgb(15, 23, 42);
+        lblSelectedEventTypeValue.Location = new Point(18, 42);
+        lblSelectedEventTypeValue.Text = "Type : -";
+
+        lblSelectedEventTimeValue.AutoSize = true;
+        lblSelectedEventTimeValue.Font = new Font("Segoe UI", 9F, FontStyle.Regular);
+        lblSelectedEventTimeValue.ForeColor = Color.FromArgb(100, 116, 139);
+        lblSelectedEventTimeValue.Location = new Point(18, 70);
+        lblSelectedEventTimeValue.Text = "Date : -";
+
+        txtEventMessageSection.Dock = DockStyle.Bottom;
+        txtEventMessageSection.Multiline = true;
+        txtEventMessageSection.ReadOnly = true;
+        txtEventMessageSection.ScrollBars = ScrollBars.Vertical;
+        txtEventMessageSection.WordWrap = true;
+        txtEventMessageSection.BorderStyle = BorderStyle.None;
+        txtEventMessageSection.BackColor = Color.White;
+        txtEventMessageSection.Font = new Font("Segoe UI", 10F);
+        txtEventMessageSection.Height = 150;
+        txtEventMessageSection.Text = "Selectionnez un evenement pour voir le detail.";
+
+        detailsCard.Controls.Add(txtEventMessageSection);
+        detailsCard.Controls.Add(lblSelectedEventTimeValue);
+        detailsCard.Controls.Add(lblSelectedEventTypeValue);
+        detailsCard.Controls.Add(lblEventsSectionSummary);
 
         layout.Controls.Add(topCard, 0, 0);
-        layout.Controls.Add(logCard, 0, 1);
+        layout.Controls.Add(listCard, 0, 1);
+        layout.Controls.Add(detailsCard, 0, 2);
         eventsSectionPanel.Controls.Add(layout);
     }
 
@@ -637,10 +778,6 @@ public partial class Form1 : Form
             Margin = new Padding(0, 8, 16, 0),
         };
         btnOpenSettingsSection.Text = "Modifier les parametres";
-        btnOpenSettingsSection.BackColor = Color.FromArgb(37, 99, 235);
-        btnOpenSettingsSection.FlatAppearance.BorderSize = 0;
-        btnOpenSettingsSection.FlatStyle = FlatStyle.Flat;
-        btnOpenSettingsSection.ForeColor = Color.White;
         btnOpenSettingsSection.Size = new Size(200, 38);
         btnOpenSettingsSection.Anchor = AnchorStyles.Top | AnchorStyles.Right;
         btnOpenSettingsSection.Margin = new Padding(0);
@@ -713,35 +850,55 @@ public partial class Form1 : Form
         gridOrdersSection.AllowUserToAddRows = false;
         gridOrdersSection.AllowUserToDeleteRows = false;
         gridOrdersSection.AllowUserToResizeRows = false;
+        gridOrdersSection.AllowUserToResizeColumns = false;
         gridOrdersSection.MultiSelect = false;
         gridOrdersSection.ReadOnly = false;
         gridOrdersSection.RowHeadersVisible = false;
         gridOrdersSection.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         gridOrdersSection.BorderStyle = BorderStyle.None;
-        gridOrdersSection.BackgroundColor = Color.White;
+        gridOrdersSection.BackgroundColor = Color.FromArgb(248, 250, 252);
+        gridOrdersSection.GridColor = Color.FromArgb(226, 232, 240);
+        gridOrdersSection.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
         gridOrdersSection.EnableHeadersVisualStyles = false;
-        gridOrdersSection.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(30, 64, 175);
+        gridOrdersSection.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+        gridOrdersSection.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(15, 23, 42);
         gridOrdersSection.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
         gridOrdersSection.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-        gridOrdersSection.ColumnHeadersHeight = 38;
+        gridOrdersSection.ColumnHeadersDefaultCellStyle.SelectionBackColor = Color.FromArgb(15, 23, 42);
+        gridOrdersSection.ColumnHeadersHeight = 44;
         gridOrdersSection.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-        gridOrdersSection.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(248, 250, 252);
-        gridOrdersSection.RowTemplate.Height = 32;
-        gridOrdersSection.Columns.Add(new DataGridViewTextBoxColumn { Name = "Id", HeaderText = "Commande", Width = 110, ReadOnly = true });
-        gridOrdersSection.Columns.Add(new DataGridViewTextBoxColumn { Name = "ClientNom", HeaderText = "Client", Width = 210, ReadOnly = true });
-        gridOrdersSection.Columns.Add(new DataGridViewTextBoxColumn { Name = "DateCommande", HeaderText = "Date", Width = 160, ReadOnly = true });
+        gridOrdersSection.DefaultCellStyle.BackColor = Color.White;
+        gridOrdersSection.DefaultCellStyle.ForeColor = Color.FromArgb(15, 23, 42);
+        gridOrdersSection.DefaultCellStyle.SelectionBackColor = Color.FromArgb(239, 246, 255);
+        gridOrdersSection.DefaultCellStyle.SelectionForeColor = Color.FromArgb(15, 23, 42);
+        gridOrdersSection.DefaultCellStyle.Padding = new Padding(10, 8, 10, 8);
+        gridOrdersSection.DefaultCellStyle.Font = new Font("Segoe UI", 9.5F);
+        gridOrdersSection.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(250, 252, 255);
+        gridOrdersSection.RowTemplate.Height = 46;
+        gridOrdersSection.Columns.Add(new DataGridViewTextBoxColumn { Name = "Id", HeaderText = "Commande", Width = 120, ReadOnly = true });
+        gridOrdersSection.Columns.Add(new DataGridViewTextBoxColumn { Name = "ClientNom", HeaderText = "Client", Width = 230, ReadOnly = true });
+        gridOrdersSection.Columns.Add(new DataGridViewTextBoxColumn { Name = "DateCommande", HeaderText = "Date", Width = 145, ReadOnly = true });
         gridOrdersSection.Columns.Add(new DataGridViewComboBoxColumn
         {
             Name = "Statut",
             HeaderText = "Statut",
-            Width = 120,
+            Width = 128,
             FlatStyle = FlatStyle.Flat,
             DisplayStyle = DataGridViewComboBoxDisplayStyle.DropDownButton,
+            DisplayStyleForCurrentCellOnly = true,
             DataSource = OrderStatuses.ToArray(),
         });
         gridOrdersSection.Columns.Add(new DataGridViewTextBoxColumn { Name = "MontantTotal", HeaderText = "Montant total", Width = 140, ReadOnly = true });
         gridOrdersSection.Columns.Add(new DataGridViewTextBoxColumn { Name = "AdresseLivraison", HeaderText = "Adresse livraison", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill, ReadOnly = true });
-        gridOrdersSection.Columns.Add(new DataGridViewTextBoxColumn { Name = "SyncedPme", HeaderText = "Sync PME", Width = 90, ReadOnly = true });
+        gridOrdersSection.Columns.Add(new DataGridViewTextBoxColumn { Name = "SyncedPme", HeaderText = "Sync PME", Width = 102, ReadOnly = true });
+
+        gridOrdersSection.Columns["Id"].DefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        gridOrdersSection.Columns["Id"].DefaultCellStyle.ForeColor = Color.FromArgb(37, 99, 235);
+        gridOrdersSection.Columns["ClientNom"].DefaultCellStyle.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
+        gridOrdersSection.Columns["DateCommande"].DefaultCellStyle.ForeColor = Color.FromArgb(71, 85, 105);
+        gridOrdersSection.Columns["MontantTotal"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+        gridOrdersSection.Columns["MontantTotal"].DefaultCellStyle.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+        gridOrdersSection.Columns["AdresseLivraison"].DefaultCellStyle.ForeColor = Color.FromArgb(100, 116, 139);
     }
 
     private void ConfigureOrderLinesSectionGrid()
@@ -769,6 +926,32 @@ public partial class Form1 : Form
         gridOrderLinesSection.Columns.Add(new DataGridViewTextBoxColumn { Name = "Quantite", HeaderText = "Quantite", Width = 90 });
         gridOrderLinesSection.Columns.Add(new DataGridViewTextBoxColumn { Name = "PrixUnitaire", HeaderText = "Prix unitaire", Width = 120 });
         gridOrderLinesSection.Columns.Add(new DataGridViewTextBoxColumn { Name = "SousTotal", HeaderText = "Sous-total", Width = 120 });
+    }
+
+    private void ConfigureEventsSectionGrid()
+    {
+        gridEventsSection.Dock = DockStyle.Fill;
+        gridEventsSection.AllowUserToAddRows = false;
+        gridEventsSection.AllowUserToDeleteRows = false;
+        gridEventsSection.AllowUserToResizeRows = false;
+        gridEventsSection.AllowUserToResizeColumns = false;
+        gridEventsSection.MultiSelect = false;
+        gridEventsSection.ReadOnly = true;
+        gridEventsSection.RowHeadersVisible = false;
+        gridEventsSection.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+        gridEventsSection.ColumnHeadersHeight = 40;
+        gridEventsSection.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+        gridEventsSection.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
+        gridEventsSection.ColumnHeadersDefaultCellStyle.WrapMode = DataGridViewTriState.False;
+        gridEventsSection.Columns.Add(new DataGridViewTextBoxColumn { Name = "Id", HeaderText = "#", Width = 70, ReadOnly = true });
+        gridEventsSection.Columns.Add(new DataGridViewTextBoxColumn { Name = "LoggedAt", HeaderText = "Date", Width = 165, ReadOnly = true });
+        gridEventsSection.Columns.Add(new DataGridViewTextBoxColumn { Name = "EventType", HeaderText = "Type", Width = 130, ReadOnly = true });
+        gridEventsSection.Columns.Add(new DataGridViewTextBoxColumn { Name = "Message", HeaderText = "Detail rapide", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill, ReadOnly = true });
+
+        gridEventsSection.Columns["Id"].DefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        gridEventsSection.Columns["Id"].DefaultCellStyle.ForeColor = UiTheme.HeaderAccent;
+        gridEventsSection.Columns["LoggedAt"].DefaultCellStyle.ForeColor = UiTheme.TextSecondary;
+        gridEventsSection.Columns["EventType"].DefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
     }
 
     private void ConfigureSyncTimer()
@@ -1045,11 +1228,186 @@ public partial class Form1 : Form
         e.ThrowException = false;
     }
 
+    private void GridOrdersSection_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
+    {
+        if (e.RowIndex < 0 || e.ColumnIndex < 0)
+        {
+            return;
+        }
+
+        var columnName = gridOrdersSection.Columns[e.ColumnIndex].Name;
+        if (gridOrdersSection.Rows[e.RowIndex].Tag is not SiteOrder order)
+        {
+            return;
+        }
+
+        if (columnName == "Id")
+        {
+            e.Value = $"#{order.Id:D6}";
+            e.FormattingApplied = true;
+            return;
+        }
+
+        if (columnName == "DateCommande")
+        {
+            if (DateTime.TryParse(order.DateCommande, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var parsed) ||
+                DateTime.TryParse(order.DateCommande, CultureInfo.CurrentCulture, DateTimeStyles.AssumeLocal, out parsed))
+            {
+                e.Value = parsed.ToString("dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
+                e.FormattingApplied = true;
+            }
+
+            return;
+        }
+
+        if (columnName == "MontantTotal")
+        {
+            e.Value = $"{order.MontantTotal:0.00} DA";
+            e.CellStyle!.BackColor = Color.FromArgb(239, 246, 255);
+            e.CellStyle.ForeColor = Color.FromArgb(30, 64, 175);
+            e.FormattingApplied = true;
+            return;
+        }
+
+        if (columnName == "AdresseLivraison")
+        {
+            var address = string.IsNullOrWhiteSpace(order.AdresseLivraison) ? "Adresse non renseignee" : order.AdresseLivraison;
+            e.Value = address;
+            e.FormattingApplied = true;
+        }
+    }
+
+    private void GridOrdersSection_CellPainting(object? sender, DataGridViewCellPaintingEventArgs e)
+    {
+        if (e.RowIndex < 0 || e.ColumnIndex < 0)
+        {
+            return;
+        }
+
+        var columnName = gridOrdersSection.Columns[e.ColumnIndex].Name;
+        if (columnName is not ("Statut" or "SyncedPme"))
+        {
+            return;
+        }
+
+        if (columnName == "Statut" &&
+            gridOrdersSection.CurrentCell is not null &&
+            gridOrdersSection.CurrentCell.RowIndex == e.RowIndex &&
+            gridOrdersSection.CurrentCell.ColumnIndex == e.ColumnIndex &&
+            gridOrdersSection.IsCurrentCellInEditMode)
+        {
+            return;
+        }
+
+        var rawValue = Convert.ToString(e.FormattedValue, CultureInfo.InvariantCulture)?.Trim() ?? string.Empty;
+        var (backColor, textColor) = columnName == "Statut"
+            ? GetOrderStatusBadgeColors(rawValue)
+            : GetOrderSyncBadgeColors(rawValue);
+
+        e.PaintBackground(e.CellBounds, e.State.HasFlag(DataGridViewElementStates.Selected));
+
+        var badgeBounds = Rectangle.Inflate(e.CellBounds, -12, -9);
+        var graphics = e.Graphics;
+        if (graphics is null)
+        {
+            return;
+        }
+
+        using var path = CreateRoundedRectanglePath(badgeBounds, 16);
+        using var brush = new SolidBrush(backColor);
+        using var pen = new Pen(backColor);
+        graphics.SmoothingMode = SmoothingMode.AntiAlias;
+        graphics.FillPath(brush, path);
+        graphics.DrawPath(pen, path);
+
+        var text = columnName == "Statut" ? GetOrderStatusLabel(rawValue) : rawValue;
+        TextRenderer.DrawText(
+            graphics,
+            text,
+            new Font("Segoe UI Semibold", 8.5F, FontStyle.Bold),
+            badgeBounds,
+            textColor,
+            TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+
+        e.Handled = true;
+    }
+
+    private static string GetOrderStatusLabel(string status)
+    {
+        return status switch
+        {
+            "en_attente" => "En attente",
+            "validee" => "Validee",
+            "expediee" => "Expediee",
+            "livree" => "Livree",
+            "annulee" => "Annulee",
+            _ => status,
+        };
+    }
+
+    private static (Color BackColor, Color TextColor) GetOrderStatusBadgeColors(string status)
+    {
+        return status switch
+        {
+            "en_attente" => (Color.FromArgb(255, 247, 237), Color.FromArgb(194, 65, 12)),
+            "validee" => (Color.FromArgb(236, 253, 245), Color.FromArgb(5, 150, 105)),
+            "expediee" => (Color.FromArgb(239, 246, 255), Color.FromArgb(29, 78, 216)),
+            "livree" => (Color.FromArgb(238, 242, 255), Color.FromArgb(67, 56, 202)),
+            "annulee" => (Color.FromArgb(254, 242, 242), Color.FromArgb(220, 38, 38)),
+            _ => (Color.FromArgb(241, 245, 249), Color.FromArgb(71, 85, 105)),
+        };
+    }
+
+    private static (Color BackColor, Color TextColor) GetOrderSyncBadgeColors(string syncedValue)
+    {
+        return string.Equals(syncedValue, "Oui", StringComparison.OrdinalIgnoreCase)
+            ? (Color.FromArgb(236, 253, 245), Color.FromArgb(22, 163, 74))
+            : (Color.FromArgb(255, 251, 235), Color.FromArgb(217, 119, 6));
+    }
+
+    private static GraphicsPath CreateRoundedRectanglePath(Rectangle bounds, int radius)
+    {
+        var diameter = radius * 2;
+        var path = new GraphicsPath();
+        path.AddArc(bounds.X, bounds.Y, diameter, diameter, 180, 90);
+        path.AddArc(bounds.Right - diameter, bounds.Y, diameter, diameter, 270, 90);
+        path.AddArc(bounds.Right - diameter, bounds.Bottom - diameter, diameter, diameter, 0, 90);
+        path.AddArc(bounds.X, bounds.Bottom - diameter, diameter, diameter, 90, 90);
+        path.CloseFigure();
+        return path;
+    }
+
     private void SyncEventSection()
     {
-        txtEventLogSection.Lines = databaseEventLogEntries.ToArray();
-        txtEventLogSection.SelectionStart = txtEventLogSection.TextLength;
-        txtEventLogSection.ScrollToCaret();
+        var selectedEventId = gridEventsSection.CurrentRow?.Tag is EventLogRecord selectedEvent ? selectedEvent.Id : (long?)null;
+        gridEventsSection.Rows.Clear();
+
+        foreach (var entry in GetEventLogEntriesNewestFirst())
+        {
+            var index = gridEventsSection.Rows.Add(entry.Id, entry.LoggedAt, entry.EventType, entry.Message);
+            gridEventsSection.Rows[index].Tag = entry;
+        }
+
+        lblEventsSectionSummary.Text = databaseEventLogEntries.Count == 0
+            ? "Aucun evenement enregistre."
+            : $"{databaseEventLogEntries.Count} evenement(s) journalises.";
+
+        if (gridEventsSection.Rows.Count > 0)
+        {
+            var rowToSelect = selectedEventId.HasValue
+                ? gridEventsSection.Rows.Cast<DataGridViewRow>().FirstOrDefault(row => row.Tag is EventLogRecord entry && entry.Id == selectedEventId.Value)
+                : null;
+
+            (rowToSelect ?? gridEventsSection.Rows[0]).Selected = true;
+            LoadSelectedEventDetails();
+        }
+        else
+        {
+            lblSelectedEventTypeValue.Text = "Type : -";
+            lblSelectedEventTimeValue.Text = "Date : -";
+            txtEventMessageSection.Text = "Aucun evenement disponible.";
+        }
+
         lblEventSectionState.Text = databaseEvents is null
             ? "Ecoute Firebird inactive."
             : $"Ecoute Firebird active pour {string.Join(", ", WatchedDatabaseEvents)}";
@@ -1060,8 +1418,69 @@ public partial class Form1 : Form
     {
         EventLogStore.ClearAll();
         databaseEventLogEntries.Clear();
-        txtEventLogSection.Clear();
-        eventDiagnosticsForm?.SetEntries(databaseEventLogEntries);
+        eventDiagnosticsForm?.SetEntries(GetFormattedEventLogEntries());
+        SyncEventSection();
+    }
+
+    private void LoadSelectedEventDetails()
+    {
+        if (gridEventsSection.CurrentRow?.Tag is not EventLogRecord entry)
+        {
+            lblSelectedEventTypeValue.Text = "Type : -";
+            lblSelectedEventTimeValue.Text = "Date : -";
+            txtEventMessageSection.Text = "Selectionnez un evenement pour voir le detail.";
+            return;
+        }
+
+        lblSelectedEventTypeValue.Text = $"Type : {entry.EventType}";
+        lblSelectedEventTimeValue.Text = $"Date : {entry.LoggedAt:dd/MM/yyyy HH:mm:ss} | ID : {entry.Id}";
+        txtEventMessageSection.Text = entry.Message;
+    }
+
+    private void GridEventsSection_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
+    {
+        if (e.RowIndex < 0 || e.ColumnIndex < 0 || gridEventsSection.Rows[e.RowIndex].Tag is not EventLogRecord entry)
+        {
+            return;
+        }
+
+        var columnName = gridEventsSection.Columns[e.ColumnIndex].Name;
+        if (columnName == "Id")
+        {
+            e.Value = $"#{entry.Id}";
+            e.FormattingApplied = true;
+            return;
+        }
+
+        if (columnName == "LoggedAt")
+        {
+            e.Value = entry.LoggedAt.ToString("dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+            e.FormattingApplied = true;
+            return;
+        }
+
+        if (columnName == "EventType")
+        {
+            e.CellStyle!.BackColor = entry.EventType switch
+            {
+                "Erreur" => Color.FromArgb(254, 242, 242),
+                "Sync" => Color.FromArgb(239, 246, 255),
+                "Commande" => Color.FromArgb(236, 253, 245),
+                "Web" => Color.FromArgb(238, 242, 255),
+                "Evenement" => Color.FromArgb(255, 247, 237),
+                _ => Color.FromArgb(241, 245, 249),
+            };
+            e.CellStyle.ForeColor = entry.EventType switch
+            {
+                "Erreur" => UiTheme.DangerAccent,
+                "Sync" => UiTheme.HeaderAccent,
+                "Commande" => UiTheme.SuccessAccent,
+                "Web" => Color.FromArgb(79, 70, 229),
+                "Evenement" => UiTheme.WarningAccent,
+                _ => UiTheme.TextSecondary,
+            };
+            e.FormattingApplied = false;
+        }
     }
 
     private void RefreshSettingsSection()
@@ -1113,11 +1532,13 @@ public partial class Form1 : Form
 
     private async Task OpenSettingsAsync()
     {
-        var previousSettings = settings;
+        var previousSettings = settings.Clone();
         if (!ShowSettingsDialog())
         {
             return;
         }
+
+        LogSettingsChanges(previousSettings, settings);
 
         UpdateSyncPanel();
 
@@ -1144,7 +1565,14 @@ public partial class Form1 : Form
 
     private bool ShowSettingsDialog()
     {
+        var previousSettings = settings.Clone();
         using var dialog = new DatabaseSettingsForm(settings);
+        dialog.ConnectionTestCompleted += (isSuccess, message) =>
+        {
+            AddDatabaseEventLog(isSuccess ? "Base locale" : "Erreur", message);
+            SetStatus(message);
+        };
+
         if (dialog.ShowDialog(this) != DialogResult.OK)
         {
             return false;
@@ -1155,6 +1583,7 @@ public partial class Form1 : Form
         {
             WindowsStartupManager.Apply(settings.LaunchAtStartup);
             AppSettingsStore.Save(settings);
+            AddDatabaseEventLog("Parametres", BuildSettingsSavedMessage(previousSettings, settings));
         }
         catch (Exception ex)
         {
@@ -1182,7 +1611,18 @@ public partial class Form1 : Form
 
         try
         {
+            AddDatabaseEventLog("Base locale", $"Connexion locale en cours vers {settingsSnapshot.Server}:{settingsSnapshot.Port} | depot {settingsSnapshot.DepotCode}.");
             var table = await LoadProductsTableAsync(settingsSnapshot);
+            var snapshotSignature = BuildProductSnapshotSignature(settingsSnapshot);
+            var currentSnapshots = BuildProductSnapshots(table);
+            LogProductSnapshotChanges(snapshotSignature, currentSnapshots);
+            lastProductSnapshots.Clear();
+            foreach (var snapshot in currentSnapshots)
+            {
+                lastProductSnapshots[snapshot.Key] = snapshot.Value;
+            }
+
+            lastProductSnapshotSignature = snapshotSignature;
 
             productTable = table;
             allRows.Clear();
@@ -1193,6 +1633,7 @@ public partial class Form1 : Form
             BuildGridColumns(table);
             PopulateDataFilters();
             ApplyFilter();
+            AddDatabaseEventLog("Base locale", $"{allRows.Count} produit(s) charges depuis la base locale pour le depot {settingsSnapshot.DepotCode}.");
             SetStatus($"{allRows.Count} produit(s) charges pour le depot {settingsSnapshot.DepotCode}.");
             await RestartDatabaseEventListenerAsync();
             try
@@ -1209,6 +1650,7 @@ public partial class Form1 : Form
         }
         catch (Exception ex)
         {
+            AddDatabaseEventLog("Erreur", $"Echec connexion base locale / chargement produits : {ex.Message}");
             SetStatus("Echec du chargement.");
             MessageBox.Show(this, ex.Message, "Impossible de charger les produits", MessageBoxButtons.OK, MessageBoxIcon.Error);
             UpdateSyncPanel();
@@ -1318,6 +1760,8 @@ public partial class Form1 : Form
         btnReload.Enabled = settings.HasWebSyncConfiguration() && !syncInProgress && !isBusy;
         btnSyncNow.Enabled = settings.HasWebSyncConfiguration() && !syncInProgress;
         btnViewOrders.Enabled = settings.HasWebSyncConfiguration() && !syncInProgress;
+        btnProductsSectionSync.Enabled = settings.HasWebSyncConfiguration() && !syncInProgress && !isBusy;
+        btnOrdersSectionSync.Enabled = settings.HasWebSyncConfiguration() && !syncInProgress && !isBusy;
     }
 
     private string GetSyncStateText()
@@ -1564,7 +2008,7 @@ public partial class Form1 : Form
             "PROMO" => "En promotion",
             "D1" => "Date debut promo",
             "D2" => "Date fin promo",
-            "PP1_HT" => "Prix achat HT",
+            "PP1_HT" => "Prix promo",
             "QTE_PROMO" => "Quantite promo",
             "MARQUE" => "Marque",
             _ => columnName,
@@ -1922,6 +2366,11 @@ public partial class Form1 : Form
                 Pv2 = ReadDecimal(row, "PV2_HT"),
                 Pv3 = ReadDecimal(row, "PV3_HT"),
                 Stock = Decimal.ToInt32(decimal.Round(ReadDecimal(row, "STOCK"), 0, MidpointRounding.AwayFromZero)),
+                Promo = ReadDecimal(row, "PROMO") > 0,
+                DateDebutPromo = ReadNullableDateTime(row, "D1"),
+                DateFinPromo = ReadNullableDateTime(row, "D2"),
+                QuantitePromo = ReadNullableInt(row, "QTE_PROMO"),
+                PrixPromo = ReadNullableDecimal(row, "PP1_HT"),
                 Categorie = GetProductCategory(row),
                 SousCategorie = GetProductSubCategory(row),
                 Marque = GetProductBrand(row),
@@ -1952,6 +2401,180 @@ public partial class Form1 : Form
     {
         var designation = ReadText(row, "PRODUIT");
         return string.IsNullOrWhiteSpace(designation) ? "Produit sans designation" : designation;
+    }
+
+    private static string BuildProductSnapshotSignature(AppSettings settingsSnapshot)
+    {
+        return string.Join("|",
+            settingsSnapshot.Server?.Trim() ?? string.Empty,
+            settingsSnapshot.Port.ToString(CultureInfo.InvariantCulture),
+            settingsSnapshot.DatabasePath?.Trim() ?? string.Empty,
+            settingsSnapshot.DepotCode?.Trim() ?? string.Empty);
+    }
+
+    private static Dictionary<string, ProductSnapshot> BuildProductSnapshots(DataTable table)
+    {
+        var snapshots = new Dictionary<string, ProductSnapshot>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var row in table.Rows.Cast<DataRow>())
+        {
+            var key = GetPrimaryReference(row);
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                continue;
+            }
+
+            snapshots[key] = new ProductSnapshot(
+                key,
+                GetPrimaryDesignation(row),
+                ReadDecimal(row, "STOCK"),
+                ReadDecimal(row, "PV1_HT"),
+                ReadDecimal(row, "PV2_HT"),
+                ReadDecimal(row, "PV3_HT"),
+                ReadDecimal(row, "PP1_HT"),
+                ReadDecimal(row, "COLISSAGE"));
+        }
+
+        return snapshots;
+    }
+
+    private void LogProductSnapshotChanges(string snapshotSignature, IReadOnlyDictionary<string, ProductSnapshot> currentSnapshots)
+    {
+        if (!string.Equals(lastProductSnapshotSignature, snapshotSignature, StringComparison.OrdinalIgnoreCase) ||
+            lastProductSnapshots.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var added in currentSnapshots.Values.OrderBy(snapshot => snapshot.Designation, StringComparer.CurrentCultureIgnoreCase))
+        {
+            if (lastProductSnapshots.ContainsKey(added.Reference))
+            {
+                continue;
+            }
+
+            AddDatabaseEventLog("Produit", $"Nouveau produit ajoute : {FormatProductLabel(added)} | stock={FormatDecimal(added.Stock)} | pv1={FormatDecimal(added.Pv1)}.");
+        }
+
+        foreach (var removed in lastProductSnapshots.Values.OrderBy(snapshot => snapshot.Designation, StringComparer.CurrentCultureIgnoreCase))
+        {
+            if (currentSnapshots.ContainsKey(removed.Reference))
+            {
+                continue;
+            }
+
+            AddDatabaseEventLog("Produit", $"Produit supprime : {FormatProductLabel(removed)}.");
+        }
+
+        foreach (var current in currentSnapshots.Values.OrderBy(snapshot => snapshot.Designation, StringComparer.CurrentCultureIgnoreCase))
+        {
+            if (!lastProductSnapshots.TryGetValue(current.Reference, out var previous))
+            {
+                continue;
+            }
+
+            LogProductFieldChange(previous, current, "stock", previous.Stock, current.Stock);
+            LogProductFieldChange(previous, current, "prix vente 1", previous.Pv1, current.Pv1);
+            LogProductFieldChange(previous, current, "prix vente 2", previous.Pv2, current.Pv2);
+            LogProductFieldChange(previous, current, "prix vente 3", previous.Pv3, current.Pv3);
+            LogProductFieldChange(previous, current, "prix promo", previous.PromoPrice, current.PromoPrice);
+            LogProductFieldChange(previous, current, "colisage", previous.Colisage, current.Colisage);
+
+            if (!string.Equals(previous.Designation, current.Designation, StringComparison.CurrentCulture))
+            {
+                AddDatabaseEventLog("Produit", $"Produit mis a jour : {previous.Reference} | designation '{previous.Designation}' -> '{current.Designation}'.");
+            }
+        }
+    }
+
+    private void LogProductFieldChange(ProductSnapshot previous, ProductSnapshot current, string fieldLabel, decimal previousValue, decimal currentValue)
+    {
+        if (previousValue == currentValue)
+        {
+            return;
+        }
+
+        AddDatabaseEventLog("Produit", $"{FormatProductLabel(current)} | {fieldLabel} : {FormatDecimal(previousValue)} -> {FormatDecimal(currentValue)}.");
+    }
+
+    private static string FormatProductLabel(ProductSnapshot snapshot)
+    {
+        return $"{snapshot.Reference} - {snapshot.Designation}";
+    }
+
+    private static string FormatDecimal(decimal value)
+    {
+        return value.ToString("0.##", CultureInfo.InvariantCulture);
+    }
+
+    private static string BuildSettingsSavedMessage(AppSettings previousSettings, AppSettings currentSettings)
+    {
+        var changes = GetSettingsChangeLabels(previousSettings, currentSettings).ToList();
+        return changes.Count == 0
+            ? "Parametres verifies et enregistres sans changement."
+            : $"Parametres enregistres : {string.Join(", ", changes)}.";
+    }
+
+    private void LogSettingsChanges(AppSettings previousSettings, AppSettings currentSettings)
+    {
+        foreach (var label in GetSettingsChangeLabels(previousSettings, currentSettings))
+        {
+            AddDatabaseEventLog("Parametres", $"Mise a jour : {label}.");
+        }
+    }
+
+    private static IEnumerable<string> GetSettingsChangeLabels(AppSettings previousSettings, AppSettings currentSettings)
+    {
+        if (!string.Equals(previousSettings.DatabasePath, currentSettings.DatabasePath, StringComparison.OrdinalIgnoreCase))
+        {
+            yield return "chemin de base locale";
+        }
+
+        if (!string.Equals(previousSettings.Server, currentSettings.Server, StringComparison.OrdinalIgnoreCase) ||
+            previousSettings.Port != currentSettings.Port)
+        {
+            yield return "serveur Firebird";
+        }
+
+        if (!string.Equals(previousSettings.Username, currentSettings.Username, StringComparison.OrdinalIgnoreCase))
+        {
+            yield return "utilisateur Firebird";
+        }
+
+        if (!string.Equals(previousSettings.Password, currentSettings.Password, StringComparison.Ordinal))
+        {
+            yield return "mot de passe Firebird";
+        }
+
+        if (!string.Equals(previousSettings.DepotCode, currentSettings.DepotCode, StringComparison.OrdinalIgnoreCase))
+        {
+            yield return "depot actif";
+        }
+
+        if (!string.Equals(previousSettings.WebEndpoint, currentSettings.WebEndpoint, StringComparison.OrdinalIgnoreCase))
+        {
+            yield return "endpoint web PME";
+        }
+
+        if (!string.Equals(previousSettings.WebApiToken, currentSettings.WebApiToken, StringComparison.Ordinal))
+        {
+            yield return "token API web";
+        }
+
+        if (previousSettings.AutoSyncEnabled != currentSettings.AutoSyncEnabled)
+        {
+            yield return "mode de synchronisation automatique";
+        }
+
+        if (previousSettings.SyncIntervalSeconds != currentSettings.SyncIntervalSeconds)
+        {
+            yield return "intervalle de synchronisation";
+        }
+
+        if (previousSettings.LaunchAtStartup != currentSettings.LaunchAtStartup)
+        {
+            yield return "demarrage automatique Windows";
+        }
     }
 
     private static string GetProductCategory(DataRow row)
@@ -2132,6 +2755,7 @@ public partial class Form1 : Form
     {
         if (productTable is null || selectedRows.Count == 0)
         {
+            AddDatabaseEventLog("Export", "Export Excel annule : aucun produit selectionne.");
             MessageBox.Show(this, "Selectionnez au moins un produit avant l'export.", "Export Excel", MessageBoxButtons.OK, MessageBoxIcon.Information);
             return;
         }
@@ -2147,19 +2771,23 @@ public partial class Form1 : Form
 
         if (dialog.ShowDialog(this) != DialogResult.OK)
         {
+            AddDatabaseEventLog("Export", "Export Excel annule par l'utilisateur.");
             return;
         }
 
         ToggleBusy(true, "Export en cours vers Excel...");
+        AddDatabaseEventLog("Export", $"Export Excel lance pour {selectedRows.Count} produit(s) vers {dialog.FileName}.");
 
         try
         {
             await Task.Run(() => ExportWorkbook(dialog.FileName));
+            AddDatabaseEventLog("Export", $"Export Excel termine : {selectedRows.Count} produit(s) exporte(s) vers {dialog.FileName}.");
             SetStatus($"Fichier Excel cree : {dialog.FileName}");
             MessageBox.Show(this, $"Export termine.\n\n{dialog.FileName}", "Export Excel", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         catch (Exception ex)
         {
+            AddDatabaseEventLog("Erreur", $"Echec export Excel : {ex.Message}");
             SetStatus("Echec de l'export.");
             MessageBox.Show(this, ex.Message, "Impossible d'exporter vers Excel", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
@@ -2326,6 +2954,8 @@ public partial class Form1 : Form
         cmbMarque.Enabled = !isBusy;
         btnSyncNow.Enabled = !isBusy && settings.HasWebSyncConfiguration() && !syncInProgress;
         btnViewOrders.Enabled = !isBusy && settings.HasWebSyncConfiguration() && !syncInProgress;
+        btnProductsSectionSync.Enabled = !isBusy && settings.HasWebSyncConfiguration() && !syncInProgress;
+        btnOrdersSectionSync.Enabled = !isBusy && settings.HasWebSyncConfiguration() && !syncInProgress;
 
         if (!string.IsNullOrWhiteSpace(message))
         {
@@ -2400,21 +3030,17 @@ public partial class Form1 : Form
         databaseEventLogEntries.Clear();
         foreach (var entry in EventLogStore.GetRecent(300))
         {
-            databaseEventLogEntries.Add(FormatEventLogEntry(entry));
+            databaseEventLogEntries.Add(entry);
         }
 
-        txtEventLogSection.Lines = databaseEventLogEntries.ToArray();
-        txtEventLogSection.SelectionStart = txtEventLogSection.TextLength;
-        txtEventLogSection.ScrollToCaret();
-        eventDiagnosticsForm?.SetEntries(databaseEventLogEntries);
+        eventDiagnosticsForm?.SetEntries(GetFormattedEventLogEntries());
         SyncEventSection();
     }
 
     private void AddDatabaseEventLog(string category, string message)
     {
         var persistedEntry = EventLogStore.Append(category, message);
-        var line = FormatEventLogEntry(persistedEntry);
-        databaseEventLogEntries.Add(line);
+        databaseEventLogEntries.Add(persistedEntry);
 
         const int maxEntries = 300;
         if (databaseEventLogEntries.Count > maxEntries)
@@ -2422,10 +3048,7 @@ public partial class Form1 : Form
             databaseEventLogEntries.RemoveRange(0, databaseEventLogEntries.Count - maxEntries);
         }
 
-        eventDiagnosticsForm?.SetEntries(databaseEventLogEntries);
-        txtEventLogSection.Lines = databaseEventLogEntries.ToArray();
-        txtEventLogSection.SelectionStart = txtEventLogSection.TextLength;
-        txtEventLogSection.ScrollToCaret();
+        eventDiagnosticsForm?.SetEntries(GetFormattedEventLogEntries());
         SyncEventSection();
     }
 
@@ -2442,14 +3065,24 @@ public partial class Form1 : Form
             eventDiagnosticsForm.ClearRequested += (_, _) =>
             {
                 databaseEventLogEntries.Clear();
-                eventDiagnosticsForm?.SetEntries(databaseEventLogEntries);
+                eventDiagnosticsForm?.SetEntries(GetFormattedEventLogEntries());
             };
             eventDiagnosticsForm.FormClosed += (_, _) => eventDiagnosticsForm = null;
         }
 
-        eventDiagnosticsForm.SetEntries(databaseEventLogEntries);
+        eventDiagnosticsForm.SetEntries(GetFormattedEventLogEntries());
         eventDiagnosticsForm.Show(this);
         eventDiagnosticsForm.BringToFront();
+    }
+
+    private string[] GetFormattedEventLogEntries()
+    {
+        return GetEventLogEntriesNewestFirst().Select(FormatEventLogEntry).ToArray();
+    }
+
+    private IEnumerable<EventLogRecord> GetEventLogEntriesNewestFirst()
+    {
+        return databaseEventLogEntries.OrderByDescending(entry => entry.Id);
     }
 
     private static bool IsPriceColumn(string columnName)
@@ -2475,6 +3108,50 @@ public partial class Form1 : Form
         }
 
         return Convert.ToString(row[columnName], CultureInfo.CurrentCulture)?.Trim() ?? string.Empty;
+    }
+
+
+    private static int? ReadNullableInt(DataRow row, string columnName)
+    {
+        if (!row.Table.Columns.Contains(columnName) || row[columnName] == DBNull.Value)
+        {
+            return null;
+        }
+
+        return Convert.ToInt32(row[columnName], CultureInfo.InvariantCulture);
+    }
+
+    private static decimal? ReadNullableDecimal(DataRow row, string columnName)
+    {
+        if (!row.Table.Columns.Contains(columnName) || row[columnName] == DBNull.Value)
+        {
+            return null;
+        }
+
+        return Convert.ToDecimal(row[columnName], CultureInfo.InvariantCulture);
+    }
+
+    private static DateTime? ReadNullableDateTime(DataRow row, string columnName)
+    {
+        if (!row.Table.Columns.Contains(columnName) || row[columnName] == DBNull.Value)
+        {
+            return null;
+        }
+
+        var value = row[columnName];
+        if (value is DateTime dateTime)
+        {
+            return dateTime;
+        }
+
+        var text = Convert.ToString(value, CultureInfo.InvariantCulture);
+        if (DateTime.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var parsed) ||
+            DateTime.TryParse(text, CultureInfo.CurrentCulture, DateTimeStyles.AssumeLocal, out parsed))
+        {
+            return parsed;
+        }
+
+        return null;
     }
 
     protected override void OnFormClosed(FormClosedEventArgs e)

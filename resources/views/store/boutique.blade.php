@@ -76,15 +76,27 @@
             @forelse($produits as $p)
                 @php
                     $img = \App\Services\ImageProduitService::publicUrl($p->image_principale ?? '');
+                    $standardUnit = (float) $p->prixStandardPourQuantite($client ?? null, 1);
+                    $currentUnit = (float) $p->prixUnitairePourQuantite($client ?? null, 1);
+                    $promoActiveNow = $p->isPromotionActive();
+                    $promoThreshold = $p->promoThresholdQuantity();
+                    $promoPrice = $p->promo_price === null ? null : (float) $p->promo_price;
+                    $promoAppliesAtOne = $p->prixPromoPourQuantite(1) !== null;
                 @endphp
                 <div class="rounded-xl border border-slate-200 bg-[var(--store-card)] overflow-hidden">
                     <a href="{{ url('/produits/'.$p->id) }}" class="block">
-                        <div class="aspect-square bg-slate-100">
+                        <div class="relative aspect-square overflow-hidden bg-slate-100">
                             @if($img !== '')
                                 <img src="{{ $img }}" alt="" class="w-full h-full object-cover">
                             @else
                                 <div class="w-full h-full flex items-center justify-center text-slate-400">
                                     <i class="fa-regular fa-image text-2xl"></i>
+                                </div>
+                            @endif
+                            @if($promoActiveNow && $promoPrice !== null)
+                                <div class="absolute left-2.5 bottom-2.5 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.18em] promo-badge">
+                                    <i class="fa-solid fa-bolt"></i>
+                                    <span>{{ __('Promo') }}</span>
                                 </div>
                             @endif
                         </div>
@@ -99,9 +111,27 @@
 
                         <div class="mt-1.5 flex items-center justify-between gap-2">
                             <div>
-                                <div class="force-ltr font-extrabold text-xs sm:text-[14px] text-slate-900 whitespace-nowrap">
-                                    {{ number_format((float)$p->prixUnitairePourQuantite($client ?? null, 1), 2, '.', ' ') }} <span class="text-[10px] opacity-70">DA</span>
-                                </div>
+                                @if($promoActiveNow && $promoPrice !== null)
+                                    <div class="promo-price-card rounded-2xl px-2.5 py-2">
+                                        @if($promoAppliesAtOne && $standardUnit > $currentUnit)
+                                            <div class="force-ltr promo-old-price text-[10px] font-bold whitespace-nowrap">
+                                                {{ number_format($standardUnit, 2, '.', ' ') }} DA
+                                            </div>
+                                        @endif
+                                        <div class="force-ltr promo-new-price font-extrabold text-xs sm:text-[14px] whitespace-nowrap">
+                                            {{ number_format($currentUnit, 2, '.', ' ') }} <span class="text-[10px] opacity-80">DA</span>
+                                        </div>
+                                        @if(! $promoAppliesAtOne)
+                                            <div class="mt-0.5 text-[10px] font-bold promo-inline-note">
+                                                {{ __('Dès :qty', ['qty' => $promoThreshold]) }}
+                                            </div>
+                                        @endif
+                                    </div>
+                                @else
+                                    <div class="force-ltr font-extrabold text-xs sm:text-[14px] text-slate-900 whitespace-nowrap">
+                                        {{ number_format($currentUnit, 2, '.', ' ') }} <span class="text-[10px] opacity-70">DA</span>
+                                    </div>
+                                @endif
                             </div>
                             <div class="hidden sm:block text-[10px] font-bold {{ (int)$p->stock > 0 ? 'text-emerald-600' : 'text-red-500' }}">
                                 {{ (int)$p->stock > 0 ? __('Stock: :stock', ['stock' => (int) $p->stock]) : __('Rupture') }}

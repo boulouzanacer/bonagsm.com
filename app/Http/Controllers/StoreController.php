@@ -724,8 +724,6 @@ class StoreController extends Controller
                         'prix_unitaire' => $prixUnitaire,
                         'sous_total' => $lineTotal,
                     ];
-
-                    $pdb->update(['stock' => (int) $pdb->stock - $qty]);
                 }
 
                 $fraisLivraison = 0.0;

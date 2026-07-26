@@ -162,6 +162,21 @@ public sealed class WebSyncProduct
     [JsonPropertyName("stock")]
     public int Stock { get; set; }
 
+    [JsonPropertyName("promo")]
+    public bool Promo { get; set; }
+
+    [JsonPropertyName("date_debut_promo")]
+    public DateTime? DateDebutPromo { get; set; }
+
+    [JsonPropertyName("date_fin_promo")]
+    public DateTime? DateFinPromo { get; set; }
+
+    [JsonPropertyName("quantite_promo")]
+    public int? QuantitePromo { get; set; }
+
+    [JsonPropertyName("prix_promo")]
+    public decimal? PrixPromo { get; set; }
+
     [JsonPropertyName("categorie")]
     public string Categorie { get; set; } = string.Empty;
 

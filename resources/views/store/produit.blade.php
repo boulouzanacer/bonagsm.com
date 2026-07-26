@@ -85,6 +85,7 @@
             @php
                 $initialQty = (int) ($initialQty ?? 1);
                 $initialUnit = (float) ($initialUnit ?? $produit->prixUnitairePourQuantite($client ?? null, $initialQty));
+                $initialStandardUnit = (float) $produit->prixStandardPourQuantite($client ?? null, $initialQty);
 
                 $tiers = $tiers ?? ($produit->relationLoaded('quantityPrices') ? $produit->quantityPrices : $produit->quantityPrices()->get(['quantity_min', 'quantity_max', 'price']))
                     ->map(fn ($t) => [
@@ -96,16 +97,44 @@
                     ->all();
 
                 $tierEnabled = (bool) ($tierEnabled ?? ($produit->isTierPricingEnabled() && count($tiers) > 0));
+                $promoActiveNow = $produit->isPromotionActive();
+                $promoThreshold = $produit->promoThresholdQuantity();
+                $promoPrice = $produit->promo_price === null ? null : (float) $produit->promo_price;
+                $promoAppliesAtInitialQty = $produit->prixPromoPourQuantite($initialQty) !== null;
+                $promoStartLabel = $produit->promo_start_at?->format('d/m/Y');
+                $promoEndLabel = $produit->normalizedPromotionEnd()?->format('d/m/Y');
             @endphp
 
             <div class="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-[24px] border border-slate-200/80 bg-gradient-to-r from-slate-50 to-white p-4">
                 @if(($can_show_prices ?? false) || ($client ?? null))
-                    <div>
-                        <div class="text-xs uppercase tracking-[0.2em] text-slate-400">{{ __('Prix unitaire') }}</div>
-                        <div class="force-ltr text-2xl font-extrabold">
-                            <span id="unitPrice">{{ number_format($initialUnit, 2, '.', ' ') }}</span> DA
+                    @if($promoActiveNow && $promoPrice !== null)
+                        <div class="promo-price-card rounded-[26px] px-5 py-4 min-w-[240px]">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.18em] promo-badge">
+                                    <i class="fa-solid fa-bolt"></i>
+                                    <span>{{ __('Promo') }}</span>
+                                </span>
+                                <span class="text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-800">{{ __('Offre spéciale') }}</span>
+                            </div>
+                            <div class="mt-3 text-xs uppercase tracking-[0.2em] text-slate-500">{{ __('Prix unitaire') }}</div>
+                            <div id="standardPriceWrap" class="force-ltr mt-1 promo-old-price text-sm font-bold {{ $promoAppliesAtInitialQty && $initialStandardUnit > $initialUnit ? '' : 'hidden' }}">
+                                <span id="standardPriceValue">{{ number_format($initialStandardUnit, 2, '.', ' ') }}</span> DA
+                            </div>
+                            <div class="force-ltr text-3xl font-extrabold">
+                                <span id="unitPrice" class="promo-new-price">{{ number_format($initialUnit, 2, '.', ' ') }}</span> DA
+                            </div>
                         </div>
-                    </div>
+                    @else
+                        <div>
+                            <div class="text-xs uppercase tracking-[0.2em] text-slate-400">{{ __('Prix unitaire') }}</div>
+                            <div id="standardPriceWrap" class="force-ltr text-sm font-bold text-slate-400 hidden">
+                                <span id="standardPriceValue" class="line-through">{{ number_format($initialStandardUnit, 2, '.', ' ') }}</span> DA
+                            </div>
+                            <div class="force-ltr text-2xl font-extrabold">
+                                <span id="unitPrice">{{ number_format($initialUnit, 2, '.', ' ') }}</span> DA
+                            </div>
+                        </div>
+                    @endif
                 @else
                     <div class="text-sm font-extrabold text-slate-500">
                         {{ __('Connectez-vous pour voir le prix') }}
@@ -118,6 +147,26 @@
             @if(($can_show_prices ?? false) || ($client ?? null))
                 <div class="mt-1 text-xs text-slate-500">
                     {{ __('Total:') }} <span class="force-ltr font-bold text-slate-700"><span id="totalPrice">{{ number_format($initialUnit * $initialQty, 2, '.', ' ') }}</span> DA</span>
+                </div>
+            @endif
+
+            @if($promoActiveNow && (($can_show_prices ?? false) || ($client ?? null)) && $promoPrice !== null)
+                <div class="mt-4 rounded-[24px] border border-rose-200 bg-rose-50/80 p-4">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <div class="text-xs font-extrabold uppercase tracking-[0.2em] text-rose-500">{{ __('Promotion active') }}</div>
+                            <div class="mt-1 text-sm font-semibold text-slate-700">
+                                {{ __('Prix promo:') }}
+                                <span class="force-ltr font-extrabold text-emerald-700">{{ number_format($promoPrice, 2, '.', ' ') }} DA</span>
+                            </div>
+                        </div>
+                        <div class="text-sm text-slate-600">
+                            {{ __('Dès :qty pièce(s)', ['qty' => $promoThreshold]) }}
+                        </div>
+                    </div>
+                    <div class="mt-2 text-xs text-slate-500" id="promoHint">
+                        {{ __('Période: :start au :end', ['start' => $promoStartLabel ?? '—', 'end' => $promoEndLabel ?? '—']) }}
+                    </div>
                 </div>
             @endif
 
@@ -258,12 +307,18 @@
             const unitEl = document.getElementById('unitPrice');
             const totalEl = document.getElementById('totalPrice');
             const formEl = document.getElementById('addToCartForm');
+            const standardPriceWrap = document.getElementById('standardPriceWrap');
+            const standardPriceValue = document.getElementById('standardPriceValue');
+            const promoHint = document.getElementById('promoHint');
 
             if (!qtyInput || !unitEl || !totalEl) return;
 
             const enableTier = '{{ (int) $tierEnabled }}' === '1';
             const tiers = JSON.parse('{{ addslashes(json_encode($tiers)) }}');
-            const baseUnit = Number('{{ $initialUnit }}');
+            const baseUnit = Number('{{ $initialStandardUnit }}');
+            const promoEnabled = '{{ (int) ($promoActiveNow && $promoPrice !== null) }}' === '1';
+            const promoThreshold = Number('{{ $promoThreshold }}');
+            const promoPrice = Number('{{ $promoPrice ?? 0 }}');
 
             function matchTier(qty) {
                 if (!enableTier) return null;
@@ -286,9 +341,21 @@
 
             function update() {
                 const qty = Math.max(1, Number(qtyInput.value || 1));
-                const unit = matchTier(qty) ?? baseUnit;
+                const standardUnit = matchTier(qty) ?? baseUnit;
+                const promoApplies = promoEnabled && promoPrice > 0 && qty >= promoThreshold;
+                const unit = promoApplies ? promoPrice : standardUnit;
                 unitEl.textContent = fmt(unit);
                 totalEl.textContent = fmt(unit * qty);
+                unitEl.classList.toggle('promo-new-price', promoApplies);
+                if (standardPriceWrap && standardPriceValue) {
+                    standardPriceWrap.classList.toggle('hidden', !promoApplies || !(standardUnit > unit));
+                    standardPriceValue.textContent = fmt(standardUnit);
+                }
+                if (promoHint && promoEnabled) {
+                    promoHint.textContent = promoApplies
+                        ? @json(__('La promotion est appliquée à cette quantité.'))
+                        : @json(__('Augmentez la quantité pour atteindre le seuil promo.'));
+                }
                 if (formEl) {
                     formEl.setAttribute('data-pixel-price', String(unit));
                 }

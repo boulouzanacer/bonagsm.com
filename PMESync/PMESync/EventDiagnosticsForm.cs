@@ -15,58 +15,62 @@ public sealed class EventDiagnosticsForm : Form
         StartPosition = FormStartPosition.CenterParent;
         MinimumSize = new Size(760, 420);
         Size = new Size(900, 520);
-        BackColor = Color.FromArgb(241, 245, 249);
+        UiTheme.ApplyDialogChrome(this);
 
         var topPanel = new Panel
         {
             Dock = DockStyle.Top,
-            Height = 56,
-            Padding = new Padding(16, 12, 16, 8),
+            Height = 74,
+            Padding = new Padding(20, 18, 20, 12),
+            BackColor = UiTheme.HeaderBackground,
         };
 
         var title = new Label
         {
             AutoSize = true,
-            Font = new Font("Segoe UI", 11F, FontStyle.Bold),
-            ForeColor = Color.FromArgb(15, 23, 42),
+            Font = new Font("Segoe UI", 13F, FontStyle.Bold),
+            ForeColor = Color.White,
             Text = "Journal des evenements Firebird",
-            Location = new Point(16, 14),
+            Location = new Point(20, 22),
         };
 
         btnClose.Text = "Fermer";
         btnClose.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        btnClose.BackColor = Color.White;
-        btnClose.FlatStyle = FlatStyle.Flat;
-        btnClose.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
-        btnClose.ForeColor = Color.FromArgb(51, 65, 85);
         btnClose.Size = new Size(96, 32);
-        btnClose.Location = new Point(772, 12);
+        btnClose.Location = new Point(772, 20);
         btnClose.Click += (_, _) => Close();
 
         btnClear.Text = "Vider";
         btnClear.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        btnClear.BackColor = Color.FromArgb(37, 99, 235);
-        btnClear.FlatStyle = FlatStyle.Flat;
-        btnClear.FlatAppearance.BorderSize = 0;
-        btnClear.ForeColor = Color.White;
         btnClear.Size = new Size(96, 32);
-        btnClear.Location = new Point(670, 12);
+        btnClear.Location = new Point(670, 20);
         btnClear.Click += (_, _) => ClearRequested?.Invoke(this, EventArgs.Empty);
 
         topPanel.Controls.Add(title);
         topPanel.Controls.Add(btnClear);
         topPanel.Controls.Add(btnClose);
 
+        var logHost = new Panel
+        {
+            Dock = DockStyle.Fill,
+            BackColor = UiTheme.CardBorder,
+            Padding = new Padding(1),
+            Margin = new Padding(20, 18, 20, 18),
+        };
+
         txtLog.Dock = DockStyle.Fill;
         txtLog.Multiline = true;
         txtLog.ReadOnly = true;
         txtLog.ScrollBars = ScrollBars.Both;
         txtLog.WordWrap = false;
-        txtLog.Font = new Font("Consolas", 10F);
-        txtLog.BackColor = Color.White;
-        txtLog.BorderStyle = BorderStyle.FixedSingle;
+        UiTheme.StyleInput(txtLog, mono: true);
+        txtLog.BorderStyle = BorderStyle.None;
 
-        Controls.Add(txtLog);
+        UiTheme.StylePrimaryButton(btnClear);
+        UiTheme.StyleSecondaryButton(btnClose);
+
+        logHost.Controls.Add(txtLog);
+        Controls.Add(logHost);
         Controls.Add(topPanel);
     }
 

@@ -126,59 +126,6 @@ class CommandeController extends Controller
                     return ['changed' => false, 'commande' => $commande];
                 }
 
-                $lines = Cmd2::query()
-                    ->where('id_cmd', $commande->id)
-                    ->get(['id_produit', 'quantite']);
-
-                if ($old !== 'annulee' && $new === 'annulee') {
-                    foreach ($lines as $l) {
-                        $qty = (int) $l->quantite;
-                        if ($qty <= 0) {
-                            continue;
-                        }
-
-                        Produit::query()
-                            ->where('id', (int) $l->id_produit)
-                            ->where('id_frs', $frsId)
-                            ->lockForUpdate()
-                            ->increment('stock', $qty);
-                    }
-                }
-
-                if ($old === 'annulee' && $new !== 'annulee') {
-                    $products = [];
-
-                    foreach ($lines as $l) {
-                        $qty = (int) $l->quantite;
-                        if ($qty <= 0) {
-                            continue;
-                        }
-
-                        $p = Produit::query()
-                            ->where('id', (int) $l->id_produit)
-                            ->where('id_frs', $frsId)
-                            ->lockForUpdate()
-                            ->first();
-
-                        if (! $p) {
-                            throw new \RuntimeException('Produit introuvable.');
-                        }
-
-                        if ((int) $p->stock < $qty) {
-                            throw new \InvalidArgumentException('Stock insuffisant');
-                        }
-
-                        $products[] = ['model' => $p, 'qty' => $qty];
-                    }
-
-                    foreach ($products as $row) {
-                        /** @var Produit $p */
-                        $p = $row['model'];
-                        $qty = (int) $row['qty'];
-                        $p->update(['stock' => (int) $p->stock - $qty]);
-                    }
-                }
-
                 $commande->update(['statut' => $new]);
 
                 return ['changed' => true, 'commande' => $commande];
@@ -237,23 +184,20 @@ class CommandeController extends Controller
 
                 $diff = $newQty - $oldQty;
 
-                $produit = Produit::query()
-                    ->where('id', (int) $ligne->id_produit)
-                    ->where('id_frs', $frsId)
-                    ->lockForUpdate()
-                    ->first();
-
-                if (! $produit) {
-                    throw new \RuntimeException('Produit introuvable.');
-                }
-
                 if ($diff > 0) {
+                    $produit = Produit::query()
+                        ->where('id', (int) $ligne->id_produit)
+                        ->where('id_frs', $frsId)
+                        ->lockForUpdate()
+                        ->first();
+
+                    if (! $produit) {
+                        throw new \RuntimeException('Produit introuvable.');
+                    }
+
                     if ((int) $produit->stock < $diff) {
                         throw new \InvalidArgumentException('Stock insuffisant');
                     }
-                    $produit->decrement('stock', $diff);
-                } elseif ($diff < 0) {
-                    $produit->increment('stock', abs($diff));
                 }
 
                 $prixUnitaire = (float) $ligne->prix_unitaire;

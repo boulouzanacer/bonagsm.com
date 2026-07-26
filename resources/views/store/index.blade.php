@@ -87,6 +87,12 @@
                 @php
                     $img = \App\Services\ImageProduitService::publicUrl($p->image_principale ?? '');
                     $isFavorite = in_array((int) $p->id, $wishlist_ids ?? [], true);
+                    $standardUnit = (float) $p->prixStandardPourQuantite($client ?? null, 1);
+                    $currentUnit = (float) $p->prixUnitairePourQuantite($client ?? null, 1);
+                    $promoActiveNow = $p->isPromotionActive();
+                    $promoThreshold = $p->promoThresholdQuantity();
+                    $promoPrice = $p->promo_price === null ? null : (float) $p->promo_price;
+                    $promoAppliesAtOne = $p->prixPromoPourQuantite(1) !== null;
                 @endphp
                 <div class="interactive-lift soft-card group rounded-[24px] overflow-hidden">
                     <a href="{{ url('/produits/'.$p->id) }}" class="block">
@@ -110,6 +116,12 @@
                             <div class="card-badge-float absolute left-3 top-3 inline-flex items-center rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-bold text-slate-600 shadow-sm">
                                 {{ $p->categorie ?: __('Produit') }}
                             </div>
+                            @if($promoActiveNow && $promoPrice !== null)
+                                <div class="absolute left-3 bottom-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.18em] promo-badge">
+                                    <i class="fa-solid fa-bolt"></i>
+                                    <span>{{ __('Promo') }}</span>
+                                </div>
+                            @endif
                         </div>
                     </a>
                     <div class="p-3 sm:p-4">
@@ -123,9 +135,30 @@
                         <div class="mt-3 flex items-center justify-between gap-2">
                             <div>
                                 @if(($can_show_prices ?? false) || ($client ?? null))
-                                    <div class="force-ltr font-extrabold text-base text-slate-900 whitespace-nowrap">
-                                        {{ number_format((float)$p->prixUnitairePourQuantite($client ?? null, 1), 2, '.', ' ') }} <span class="text-[10px] opacity-70">DA</span>
-                                    </div>
+                                    @if($promoActiveNow && $promoPrice !== null)
+                                        <div class="promo-price-card rounded-2xl px-3 py-2.5">
+                                            @if($promoAppliesAtOne && $standardUnit > $currentUnit)
+                                                <div class="force-ltr promo-old-price text-[11px] font-bold whitespace-nowrap">
+                                                    {{ number_format($standardUnit, 2, '.', ' ') }} DA
+                                                </div>
+                                            @endif
+                                            <div class="force-ltr promo-new-price text-lg font-extrabold whitespace-nowrap">
+                                                {{ number_format($currentUnit, 2, '.', ' ') }} <span class="text-[10px] opacity-80">DA</span>
+                                            </div>
+                                            <div class="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-700">
+                                                {{ __('Prix promo') }}
+                                            </div>
+                                        </div>
+                                        @if(! $promoAppliesAtOne)
+                                            <div class="mt-1 text-[10px] font-bold promo-inline-note">
+                                                {{ __('Dès :qty pcs', ['qty' => $promoThreshold]) }}
+                                            </div>
+                                        @endif
+                                    @else
+                                        <div class="force-ltr font-extrabold text-base text-slate-900 whitespace-nowrap">
+                                            {{ number_format($currentUnit, 2, '.', ' ') }} <span class="text-[10px] opacity-70">DA</span>
+                                        </div>
+                                    @endif
                                 @else
                                     <div class="text-[11px] font-bold text-slate-400 whitespace-nowrap">{{ __('Connectez-vous') }}</div>
                                 @endif

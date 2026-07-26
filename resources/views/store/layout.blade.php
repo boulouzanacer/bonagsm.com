@@ -87,9 +87,53 @@
         .store-gradient{
             background:linear-gradient(135deg, var(--store-primary) 0%, var(--store-primary-dark) 55%, #111827 100%);
         }
+        .promo-badge{
+            background:linear-gradient(135deg, #f43f5e 0%, #ec4899 45%, #f59e0b 100%);
+            color:#fff;
+            box-shadow:0 10px 25px rgba(244,63,94,0.30);
+            animation:promoPulse 2.4s ease-in-out infinite;
+        }
+        .promo-price-card{
+            position:relative;
+            overflow:hidden;
+            background:linear-gradient(135deg, rgba(236,253,245,0.96) 0%, rgba(209,250,229,0.92) 55%, rgba(240,253,250,0.92) 100%);
+            border:1px solid rgba(16,185,129,0.20);
+            box-shadow:0 16px 35px rgba(16,185,129,0.12);
+        }
+        .promo-price-card::after{
+            content:"";
+            position:absolute;
+            inset:-40% auto auto -15%;
+            width:120px;
+            height:180%;
+            background:linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+            transform:rotate(18deg);
+            animation:promoShine 3.8s ease-in-out infinite;
+            pointer-events:none;
+        }
+        .promo-old-price{
+            color:#94a3b8;
+            text-decoration:line-through;
+            text-decoration-thickness:2px;
+        }
+        .promo-new-price{
+            color:#047857;
+            text-shadow:0 1px 0 rgba(255,255,255,0.6);
+        }
+        .promo-inline-note{
+            color:#e11d48;
+        }
         @keyframes floatY{
             0%,100%{transform:translateY(0);}
             50%{transform:translateY(-10px);}
+        }
+        @keyframes promoPulse{
+            0%,100%{transform:scale(1); box-shadow:0 10px 25px rgba(244,63,94,0.28);}
+            50%{transform:scale(1.04); box-shadow:0 14px 32px rgba(244,63,94,0.36);}
+        }
+        @keyframes promoShine{
+            0%{transform:translateX(-180%) rotate(18deg);}
+            55%,100%{transform:translateX(380%) rotate(18deg);}
         }
         html[dir="rtl"] .store-search-icon{
             left:auto;
