@@ -165,9 +165,9 @@
                     @if(($storeFrs?->logo_url ?? '') !== '')
                         <img src="{{ $storeFrs->logo_url }}"
                              alt=""
-                             class="h-14 w-7 sm:h-20 sm:w-10 rounded-3xl object-contain border border-white/80 bg-white p-2 sm:p-2.5 flex-shrink-0 shadow-lg shadow-slate-200/80">
+                             class="h-14 w-28 sm:h-20 sm:w-40 rounded-3xl object-contain border border-white/80 bg-white p-2 sm:p-2.5 flex-shrink-0 shadow-lg shadow-slate-200/80">
                     @else
-                        <div class="h-14 w-7 sm:h-20 sm:w-10 rounded-3xl flex items-center justify-center text-sm sm:text-xl font-extrabold text-white flex-shrink-0 store-gradient shadow-lg shadow-emerald-900/20">
+                        <div class="h-14 w-28 sm:h-20 sm:w-40 rounded-3xl flex items-center justify-center text-lg sm:text-2xl font-extrabold text-white flex-shrink-0 store-gradient shadow-lg shadow-emerald-900/20">
                             {{ strtoupper(substr((string)($storeFrs?->nom_frs ?? 'S'), 0, 1)) }}
                         </div>
                     @endif
