@@ -160,24 +160,24 @@
     <div class="hero-orb hero-orb-b h-72 w-72 top-28 right-0 animate-float-delay"></div>
     <header class="sticky top-0 z-40 border-b border-white/50 bg-white/70 backdrop-blur-xl">
         <div class="max-w-7xl mx-auto px-4 py-3">
-            <div class="grid grid-cols-[auto,1fr] items-center gap-3 sm:flex sm:flex-wrap sm:items-center sm:justify-between">
-                <a href="{{ url('/') }}" class="inline-flex items-center gap-3 min-w-0">
+            <div class="grid grid-cols-[auto,1fr] items-center gap-3 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-5">
+                <a href="{{ url('/') }}" class="inline-flex items-center gap-4 min-w-0 sm:min-w-[280px]">
                     @if(($storeFrs?->logo_url ?? '') !== '')
                         <img src="{{ $storeFrs->logo_url }}"
                              alt=""
-                             class="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl object-contain border border-white/80 bg-white p-1.5 flex-shrink-0 shadow-lg shadow-slate-200/80">
+                             class="h-14 w-14 sm:h-20 sm:w-20 rounded-3xl object-contain border border-white/80 bg-white p-2 sm:p-2.5 flex-shrink-0 shadow-lg shadow-slate-200/80">
                     @else
-                        <div class="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl flex items-center justify-center font-extrabold text-white flex-shrink-0 store-gradient shadow-lg shadow-emerald-900/20">
+                        <div class="h-14 w-14 sm:h-20 sm:w-20 rounded-3xl flex items-center justify-center text-lg sm:text-2xl font-extrabold text-white flex-shrink-0 store-gradient shadow-lg shadow-emerald-900/20">
                             {{ strtoupper(substr((string)($storeFrs?->nom_frs ?? 'S'), 0, 1)) }}
                         </div>
                     @endif
 
                     <div class="leading-tight min-w-0 hidden sm:block">
                         <div class="flex items-center gap-2">
-                            <div class="font-extrabold tracking-wide truncate">{{ $storeFrs?->nom_frs ?? config('app.name') }}</div>
+                            <div class="text-xl font-extrabold tracking-wide truncate">{{ $storeFrs?->nom_frs ?? config('app.name') }}</div>
                             <span class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.2em] text-emerald-700">{{ __('Store') }}</span>
                         </div>
-                        <div class="text-xs text-slate-500">
+                        <div class="text-sm text-slate-500">
                             @if(($storeFrs?->telephone ?? '') !== '')
                                 <a href="tel:{{ $storeFrs->telephone }}" class="hover:underline force-ltr">{{ $storeFrs->telephone }}</a>
                             @else
