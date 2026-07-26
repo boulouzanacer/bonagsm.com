@@ -206,6 +206,9 @@ class PmeController extends Controller
                     'pv_1' => $item['pv_1'] ?? ($item['prix'] ?? 0),
                     'pv_2' => $item['pv_2'] ?? ($item['pv_1'] ?? ($item['prix'] ?? 0)),
                     'pv_3' => $item['pv_3'] ?? ($item['pv_1'] ?? ($item['prix'] ?? 0)),
+                    'tva' => array_key_exists('tva', $item) && $item['tva'] !== null && $item['tva'] !== ''
+                        ? (float) $item['tva']
+                        : null,
                     'promo_enabled' => (int) ($item['promo'] ?? 0) === 1 ? 1 : 0,
                     'promo_start_at' => $item['date_debut_promo'] ?? null,
                     'promo_end_at' => $item['date_fin_promo'] ?? null,

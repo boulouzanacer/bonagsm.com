@@ -157,6 +157,9 @@
                             <div class="text-xs font-extrabold uppercase tracking-[0.2em] text-rose-500">{{ __('Promotion active') }}</div>
                             <div class="mt-1 text-sm font-semibold text-slate-700">
                                 {{ __('Prix promo:') }}
+                                @if($initialStandardUnit > $promoPrice)
+                                    <span class="force-ltr promo-old-price mr-2 inline-block font-bold">{{ number_format($initialStandardUnit, 2, '.', ' ') }} DA</span>
+                                @endif
                                 <span class="force-ltr font-extrabold text-emerald-700">{{ number_format($promoPrice, 2, '.', ' ') }} DA</span>
                             </div>
                         </div>

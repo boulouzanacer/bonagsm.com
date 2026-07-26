@@ -83,9 +83,9 @@
                     $promoPrice = $p->promo_price === null ? null : (float) $p->promo_price;
                     $promoAppliesAtOne = $p->prixPromoPourQuantite(1) !== null;
                 @endphp
-                <div class="rounded-xl border border-slate-200 bg-[var(--store-card)] overflow-hidden">
+                <div class="product-card-compact rounded-xl border border-slate-200 bg-[var(--store-card)] overflow-hidden {{ $promoActiveNow && $promoPrice !== null ? 'promo-product-card' : '' }}">
                     <a href="{{ url('/produits/'.$p->id) }}" class="block">
-                        <div class="relative aspect-square overflow-hidden bg-slate-100">
+                        <div class="product-media relative overflow-hidden bg-slate-100">
                             @if($img !== '')
                                 <img src="{{ $img }}" alt="" class="w-full h-full object-cover">
                             @else
@@ -101,27 +101,27 @@
                             @endif
                         </div>
                     </a>
-                    <div class="p-2">
+                    <div class="product-content p-2.5">
                         <div class="min-w-0">
-                            <a href="{{ url('/produits/'.$p->id) }}" class="block font-extrabold text-xs sm:text-[13px] leading-tight hover:underline truncate" title="{{ $p->designation }}">
+                            <a href="{{ url('/produits/'.$p->id) }}" class="product-title block font-extrabold text-xs sm:text-[13px] leading-tight hover:underline" title="{{ $p->designation }}">
                                 {{ $p->designation }}
                             </a>
-                            <div class="force-ltr text-[10px] text-slate-400 truncate">{{ __('Ref:') }} {{ $p->reference }}</div>
+                            <div class="product-meta force-ltr text-[10px] text-slate-400 truncate">{{ __('Ref:') }} {{ $p->reference }}</div>
                         </div>
 
-                        <div class="mt-1.5 flex items-center justify-between gap-2">
+                        <div class="mt-2 flex items-center justify-between gap-2">
                             <div>
                                 @if($promoActiveNow && $promoPrice !== null)
-                                    <div class="promo-price-card rounded-2xl px-2.5 py-2">
-                                        @if($promoAppliesAtOne && $standardUnit > $currentUnit)
+                                    <div class="promo-price-card rounded-2xl px-2.5 py-1.5">
+                                        @if($standardUnit > $promoPrice)
                                             <div class="force-ltr promo-old-price text-[10px] font-bold whitespace-nowrap">
                                                 {{ number_format($standardUnit, 2, '.', ' ') }} DA
                                             </div>
                                         @endif
                                         <div class="force-ltr promo-new-price font-extrabold text-xs sm:text-[14px] whitespace-nowrap">
-                                            {{ number_format($currentUnit, 2, '.', ' ') }} <span class="text-[10px] opacity-80">DA</span>
+                                            {{ number_format($promoPrice, 2, '.', ' ') }} <span class="text-[10px] opacity-80">DA</span>
                                         </div>
-                                        @if(! $promoAppliesAtOne)
+                                        @if($promoThreshold > 1)
                                             <div class="mt-0.5 text-[10px] font-bold promo-inline-note">
                                                 {{ __('Dès :qty', ['qty' => $promoThreshold]) }}
                                             </div>
@@ -138,7 +138,7 @@
                             </div>
                         </div>
 
-                        <div class="mt-2.5 flex items-center justify-between gap-2">
+                        <div class="product-footer flex items-center justify-between gap-2">
                             <span class="hidden sm:inline-flex text-[10px] font-bold px-2 py-0.5 rounded-lg border border-slate-100 bg-slate-50 text-slate-500 truncate max-w-[80px]">
                                 {{ $p->categorie ?: '—' }}
                             </span>

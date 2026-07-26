@@ -26,9 +26,9 @@
                     $promoPrice = $p->promo_price === null ? null : (float) $p->promo_price;
                     $promoAppliesAtOne = $p->prixPromoPourQuantite(1) !== null;
                 @endphp
-                <div class="interactive-lift soft-card group rounded-[24px] overflow-hidden">
+                <div class="interactive-lift soft-card product-card-compact group rounded-[24px] overflow-hidden {{ $promoActiveNow && $promoPrice !== null ? 'promo-product-card' : '' }}">
                     <a href="{{ url('/produits/'.$p->id) }}" class="block">
-                        <div class="relative aspect-[1/1] overflow-hidden bg-gradient-to-br from-slate-100 via-white to-emerald-50">
+                        <div class="product-media relative overflow-hidden bg-gradient-to-br from-slate-100 via-white to-emerald-50">
                             <form method="POST" action="{{ url('/wishlist/remove') }}" class="card-favorite-float absolute right-3 top-3 z-10">
                                 @csrf
                                 <input type="hidden" name="produit_id" value="{{ $p->id }}">
@@ -53,30 +53,30 @@
                             @endif
                         </div>
                     </a>
-                    <div class="p-3 sm:p-4">
-                        <a href="{{ url('/produits/'.$p->id) }}" class="block text-sm font-extrabold leading-tight text-slate-900 hover:text-[var(--store-primary)]">
+                    <div class="product-content">
+                        <a href="{{ url('/produits/'.$p->id) }}" class="product-title block text-[13px] font-extrabold leading-tight text-slate-900 hover:text-[var(--store-primary)]">
                             {{ $p->designation }}
                         </a>
-                        <div class="force-ltr mt-1 text-[11px] text-slate-400 truncate">{{ __('Ref:') }} {{ $p->reference }}</div>
+                        <div class="product-meta force-ltr text-[11px] text-slate-400 truncate">{{ __('Ref:') }} {{ $p->reference }}</div>
 
-                        <div class="mt-3 flex items-center justify-between gap-2">
+                        <div class="mt-2.5 flex items-center justify-between gap-2">
                             <div>
                                 @if(($can_show_prices ?? false) || ($client ?? null))
                                     @if($promoActiveNow && $promoPrice !== null)
-                                        <div class="promo-price-card rounded-2xl px-3 py-2.5">
-                                            @if($promoAppliesAtOne && $standardUnit > $currentUnit)
+                                        <div class="promo-price-card rounded-2xl px-3 py-2">
+                                            @if($standardUnit > $promoPrice)
                                                 <div class="force-ltr promo-old-price text-[11px] font-bold whitespace-nowrap">
                                                     {{ number_format($standardUnit, 2, '.', ' ') }} DA
                                                 </div>
                                             @endif
-                                            <div class="force-ltr promo-new-price text-lg font-extrabold whitespace-nowrap">
-                                                {{ number_format($currentUnit, 2, '.', ' ') }} <span class="text-[10px] opacity-80">DA</span>
+                                            <div class="force-ltr promo-new-price text-[17px] font-extrabold whitespace-nowrap">
+                                                {{ number_format($promoPrice, 2, '.', ' ') }} <span class="text-[10px] opacity-80">DA</span>
                                             </div>
-                                            <div class="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-700">
+                                            <div class="mt-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-700">
                                                 {{ __('Prix promo') }}
                                             </div>
                                         </div>
-                                        @if(! $promoAppliesAtOne)
+                                        @if($promoThreshold > 1)
                                             <div class="mt-1 text-[10px] font-bold promo-inline-note">
                                                 {{ __('Dès :qty pcs', ['qty' => $promoThreshold]) }}
                                             </div>
@@ -90,12 +90,12 @@
                                     <div class="text-[11px] font-bold text-slate-400 whitespace-nowrap">{{ __('Connectez-vous') }}</div>
                                 @endif
                             </div>
-                            <div class="force-ltr text-[11px] font-bold {{ (int)$p->stock > 0 ? 'text-emerald-600' : 'text-red-500' }}">
+                            <div class="force-ltr text-[10px] font-bold {{ (int)$p->stock > 0 ? 'text-emerald-600' : 'text-red-500' }}">
                                 {{ (int)$p->stock > 0 ? __('Stock: :stock', ['stock' => (int) $p->stock]) : __('Rupture') }}
                             </div>
                         </div>
 
-                        <div class="mt-4 flex items-center justify-between gap-2">
+                        <div class="product-footer flex items-center justify-between gap-2">
                             <span class="inline-flex text-[10px] font-bold px-2.5 py-1 rounded-xl border border-slate-100 bg-slate-50 text-slate-500 truncate max-w-[120px]">
                                 {{ $p->categorie ?: '—' }}
                             </span>

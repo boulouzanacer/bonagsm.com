@@ -159,6 +159,9 @@ public sealed class WebSyncProduct
     [JsonPropertyName("pv_3")]
     public decimal Pv3 { get; set; }
 
+    [JsonPropertyName("tva")]
+    public decimal? Tva { get; set; }
+
     [JsonPropertyName("stock")]
     public int Stock { get; set; }
 

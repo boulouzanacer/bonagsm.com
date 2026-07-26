@@ -33,6 +33,7 @@ public partial class Form1 : Form
         decimal Pv1,
         decimal Pv2,
         decimal Pv3,
+        decimal VatRate,
         decimal PromoPrice,
         decimal Colisage);
 
@@ -1809,6 +1810,7 @@ public partial class Form1 : Form
                 PRODUIT.PV1_HT,
                 PRODUIT.PV2_HT,
                 PRODUIT.PV3_HT,
+                PRODUIT.TVA,
                 DEPOT2.STOCK,
                 PRODUIT.COLISSAGE,
                 PRODUIT.FAMILLE,
@@ -1998,9 +2000,10 @@ public partial class Form1 : Form
             "CODE_BARRE" => "Code-barres",
             "REF_PRODUIT" => "Reference produit",
             "PRODUIT" => "Designation",
-            "PV1_HT" => "Prix vente 1 HT",
-            "PV2_HT" => "Prix vente 2 HT",
-            "PV3_HT" => "Prix vente 3 HT",
+            "PV1_HT" => "Prix vente 1 TTC",
+            "PV2_HT" => "Prix vente 2 TTC",
+            "PV3_HT" => "Prix vente 3 TTC",
+            "TVA" => "TVA %",
             "STOCK" => "Stock depot",
             "COLISSAGE" => "Colisage",
             "FAMILLE" => "Famille",
@@ -2008,7 +2011,7 @@ public partial class Form1 : Form
             "PROMO" => "En promotion",
             "D1" => "Date debut promo",
             "D2" => "Date fin promo",
-            "PP1_HT" => "Prix promo",
+            "PP1_HT" => "Prix promo TTC",
             "QTE_PROMO" => "Quantite promo",
             "MARQUE" => "Marque",
             _ => columnName,
@@ -2362,15 +2365,16 @@ public partial class Form1 : Form
                 Reference = GetPrimaryReference(row),
                 Designation = GetPrimaryDesignation(row),
                 Prix = ReadDecimal(row, "PV1_HT"),
-                Pv1 = ReadDecimal(row, "PV1_HT"),
-                Pv2 = ReadDecimal(row, "PV2_HT"),
-                Pv3 = ReadDecimal(row, "PV3_HT"),
+                Pv1 = ReadDecimalTtc(row, "PV1_HT"),
+                Pv2 = ReadDecimalTtc(row, "PV2_HT"),
+                Pv3 = ReadDecimalTtc(row, "PV3_HT"),
+                Tva = ReadNullableDecimal(row, "TVA"),
                 Stock = Decimal.ToInt32(decimal.Round(ReadDecimal(row, "STOCK"), 0, MidpointRounding.AwayFromZero)),
                 Promo = ReadDecimal(row, "PROMO") > 0,
                 DateDebutPromo = ReadNullableDateTime(row, "D1"),
                 DateFinPromo = ReadNullableDateTime(row, "D2"),
                 QuantitePromo = ReadNullableInt(row, "QTE_PROMO"),
-                PrixPromo = ReadNullableDecimal(row, "PP1_HT"),
+                PrixPromo = ReadNullableDecimalTtc(row, "PP1_HT"),
                 Categorie = GetProductCategory(row),
                 SousCategorie = GetProductSubCategory(row),
                 Marque = GetProductBrand(row),
@@ -2428,10 +2432,11 @@ public partial class Form1 : Form
                 key,
                 GetPrimaryDesignation(row),
                 ReadDecimal(row, "STOCK"),
-                ReadDecimal(row, "PV1_HT"),
-                ReadDecimal(row, "PV2_HT"),
-                ReadDecimal(row, "PV3_HT"),
-                ReadDecimal(row, "PP1_HT"),
+                ReadDecimalTtc(row, "PV1_HT"),
+                ReadDecimalTtc(row, "PV2_HT"),
+                ReadDecimalTtc(row, "PV3_HT"),
+                ReadDecimal(row, "TVA"),
+                ReadDecimalTtc(row, "PP1_HT"),
                 ReadDecimal(row, "COLISSAGE"));
         }
 
@@ -2477,6 +2482,7 @@ public partial class Form1 : Form
             LogProductFieldChange(previous, current, "prix vente 1", previous.Pv1, current.Pv1);
             LogProductFieldChange(previous, current, "prix vente 2", previous.Pv2, current.Pv2);
             LogProductFieldChange(previous, current, "prix vente 3", previous.Pv3, current.Pv3);
+            LogProductFieldChange(previous, current, "tva", previous.VatRate, current.VatRate);
             LogProductFieldChange(previous, current, "prix promo", previous.PromoPrice, current.PromoPrice);
             LogProductFieldChange(previous, current, "colisage", previous.Colisage, current.Colisage);
 
@@ -2904,10 +2910,22 @@ public partial class Form1 : Form
 
         if (IsPriceColumn(columnName))
         {
-            var value = ReadDecimal(row, columnName);
+            var value = columnName == "COLISSAGE"
+                ? ReadDecimal(row, columnName)
+                : ReadDecimalTtc(row, columnName);
             e.Value = value.ToString("0.00", CultureInfo.InvariantCulture);
             e.CellStyle!.BackColor = Color.FromArgb(239, 246, 255);
             e.CellStyle.ForeColor = Color.FromArgb(30, 64, 175);
+            e.FormattingApplied = true;
+            return;
+        }
+
+        if (columnName == "TVA")
+        {
+            var value = ReadDecimal(row, columnName);
+            e.Value = value.ToString("0.##", CultureInfo.InvariantCulture) + " %";
+            e.CellStyle!.BackColor = Color.FromArgb(236, 253, 245);
+            e.CellStyle.ForeColor = Color.FromArgb(5, 150, 105);
             e.FormattingApplied = true;
             return;
         }
@@ -3098,6 +3116,31 @@ public partial class Form1 : Form
         }
 
         return Convert.ToDecimal(row[columnName], CultureInfo.InvariantCulture);
+    }
+
+    private static decimal ReadDecimalTtc(DataRow row, string columnName)
+    {
+        var htValue = ReadDecimal(row, columnName);
+        var vatRate = ReadDecimal(row, "TVA");
+        return ApplyVat(htValue, vatRate);
+    }
+
+    private static decimal? ReadNullableDecimalTtc(DataRow row, string columnName)
+    {
+        var htValue = ReadNullableDecimal(row, columnName);
+        if (!htValue.HasValue)
+        {
+            return null;
+        }
+
+        var vatRate = ReadDecimal(row, "TVA");
+        return ApplyVat(htValue.Value, vatRate);
+    }
+
+    private static decimal ApplyVat(decimal amountHt, decimal vatRate)
+    {
+        var multiplier = 1m + (vatRate / 100m);
+        return decimal.Round(amountHt * multiplier, 2, MidpointRounding.AwayFromZero);
     }
 
     private static string ReadText(DataRow row, string columnName)

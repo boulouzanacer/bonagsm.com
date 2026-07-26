@@ -22,6 +22,7 @@ class PmeSyncProduitsRequest extends FormRequest
             'produits.*.pv_1' => ['nullable', 'numeric', 'min:0'],
             'produits.*.pv_2' => ['nullable', 'numeric', 'min:0'],
             'produits.*.pv_3' => ['nullable', 'numeric', 'min:0'],
+            'produits.*.tva' => ['nullable', 'numeric', 'min:0'],
             'produits.*.stock' => ['required', 'numeric'],
             'produits.*.promo' => ['nullable', 'boolean'],
             'produits.*.date_debut_promo' => ['nullable', 'date'],
