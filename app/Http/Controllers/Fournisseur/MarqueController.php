@@ -8,6 +8,7 @@ use App\Models\Produit;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class MarqueController extends Controller
@@ -17,12 +18,27 @@ class MarqueController extends Controller
         $frsId = (int) session('frs_id');
         $q = trim((string) $request->query('q', ''));
 
+        $productsCountExpr = DB::raw('COALESCE((
+            SELECT COUNT(*)
+            FROM produit p
+            WHERE p.id_frs = marques.id_frs
+              AND p.id_marque = marques.id
+              AND p.deleted_at IS NULL
+        ), 0)');
+
         $marques = Marque::query()
-            ->where('id_frs', $frsId)
-            ->when($q !== '', fn ($query) => $query->where('nom', 'like', "%{$q}%"))
-            ->orderBy('nom')
+            ->select('marques.*')
+            ->selectSub($productsCountExpr, 'products_count')
+            ->where('marques.id_frs', $frsId)
+            ->when($q !== '', fn ($query) => $query->where('marques.nom', 'like', "%{$q}%"))
+            ->orderBy('marques.nom')
             ->paginate(20)
             ->withQueryString();
+
+        foreach ($marques as $m) {
+            $m->setAttribute('used_products_count', (int) ($m->products_count ?? 0));
+            $m->setAttribute('can_delete', (int) $m->used_products_count === 0);
+        }
 
         return view('fournisseur.marques.index', [
             'title' => 'Marques',

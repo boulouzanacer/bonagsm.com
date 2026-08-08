@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Fournisseur;
 use App\Http\Controllers\Controller;
 use App\Models\Categorie;
 use App\Models\Produit;
+use App\Models\SousCategorie;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -18,12 +20,48 @@ class CategorieController extends Controller
         $frsId = (int) session('frs_id');
         $q = trim((string) $request->query('q', ''));
 
+        $productsByIdExpr = DB::raw('COALESCE((
+            SELECT COUNT(*)
+            FROM produit pbyid
+            WHERE pbyid.id_frs = categories.id_frs
+              AND pbyid.id_categorie = categories.id
+              AND pbyid.deleted_at IS NULL
+        ), 0)');
+
+        $productsByNameExpr = DB::raw('COALESCE((
+            SELECT COUNT(*)
+            FROM produit pbyname
+            WHERE pbyname.id_frs = categories.id_frs
+              AND pbyname.categorie = categories.nom
+              AND pbyname.deleted_at IS NULL
+        ), 0)');
+
+        $subCategoriesExpr = DB::raw('COALESCE((
+            SELECT COUNT(*)
+            FROM sous_categories sc
+            WHERE sc.id_frs = categories.id_frs
+              AND sc.id_categorie = categories.id
+        ), 0)');
+
         $categories = Categorie::query()
-            ->where('id_frs', $frsId)
-            ->when($q !== '', fn ($query) => $query->where('nom', 'like', "%{$q}%"))
-            ->orderBy('nom')
+            ->select('categories.*')
+            ->selectSub($productsByIdExpr, 'products_by_id_count')
+            ->selectSub($productsByNameExpr, 'products_by_name_count')
+            ->selectSub($subCategoriesExpr, 'sub_categories_count')
+            ->where('categories.id_frs', $frsId)
+            ->when($q !== '', fn ($query) => $query->where('categories.nom', 'like', "%{$q}%"))
+            ->orderBy('categories.nom')
             ->paginate(20)
             ->withQueryString();
+
+        foreach ($categories as $c) {
+            $c->setAttribute('used_products_count', (int) max(
+                (int) ($c->products_by_id_count ?? 0),
+                (int) ($c->products_by_name_count ?? 0)
+            ));
+            $c->setAttribute('used_sub_categories_count', (int) ($c->sub_categories_count ?? 0));
+            $c->setAttribute('can_delete', (int) $c->used_products_count === 0 && (int) $c->used_sub_categories_count === 0);
+        }
 
         return view('fournisseur.categories.index', [
             'title' => 'Catégories',

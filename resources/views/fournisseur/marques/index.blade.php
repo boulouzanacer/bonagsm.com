@@ -50,6 +50,11 @@
                 <div class="p-4 flex items-center justify-between gap-3">
                     <div>
                         <div class="font-extrabold">{{ $m->nom }}</div>
+                        <div class="text-xs text-white/50">
+                            <span class="{{ (int)$m->used_products_count > 0 ? 'text-amber-300' : 'text-white/40' }}">
+                                {{ __('Produits: :count', ['count' => (int)$m->used_products_count]) }}
+                            </span>
+                        </div>
                     </div>
                     <div class="flex items-center gap-2">
                         <a href="{{ url('/fournisseur/marques/'.$m->id.'/edit') }}"
@@ -60,12 +65,21 @@
                         <form method="POST" action="{{ url('/fournisseur/marques/'.$m->id) }}">
                             @csrf
                             @method('DELETE')
-                            <button type="submit"
-                                    onclick="return confirm(@js(__('Supprimer cette marque ?')))"
-                                    class="h-9 w-9 inline-flex items-center justify-center rounded-xl text-xs font-bold border border-red-400/20 text-red-300 hover:bg-red-500/10"
-                                    title="{{ __('Supprimer') }}">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
+                            @if((bool) $m->can_delete)
+                                <button type="submit"
+                                        onclick="return confirm(@js(__('Supprimer cette marque ?')))"
+                                        class="h-9 w-9 inline-flex items-center justify-center rounded-xl text-xs font-bold border border-red-400/20 text-red-300 hover:bg-red-500/10"
+                                        title="{{ __('Supprimer') }}">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            @else
+                                <button type="button"
+                                        disabled
+                                        class="h-9 w-9 inline-flex items-center justify-center rounded-xl text-xs font-bold border border-white/10 text-white/40 bg-white/5 cursor-not-allowed"
+                                        title="{{ __('Supprimer: marque utilisée par produits') }}">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            @endif
                         </form>
                     </div>
                 </div>
