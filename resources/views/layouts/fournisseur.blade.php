@@ -213,8 +213,8 @@
                 </a>
 
                 <a href="{{ url('/fournisseur/parametres-site#database-tools') }}"
-                   class="flex items-center gap-3 rounded-2xl px-4 py-3 {{ request()->is('fournisseur/parametres-site') && request()->fragment() === 'database-tools' ? 'shadow-lg' : '' }}"
-                   :class="dark ? '{{ request()->is('fournisseur/parametres-site') ? 'bg-white/10 shadow-black/10 text-white' : 'text-slate-100 hover:bg-white/10' }}' : '{{ request()->is('fournisseur/parametres-site') ? 'bg-slate-100 shadow-slate-200/80 text-slate-900' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}'">
+                   class="flex items-center gap-3 rounded-2xl px-4 py-3"
+                   :class="dark ? 'text-slate-100 hover:bg-white/10' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'">
                     <i class="fa-solid fa-database w-5 text-[var(--frs-primary)]"></i>
                     <span>{{ __('Base de données') }}</span>
                 </a>
