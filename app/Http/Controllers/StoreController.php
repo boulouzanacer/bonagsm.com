@@ -555,7 +555,7 @@ class StoreController extends Controller
             ->whereNull('deleted_at')
             ->where('actif', 1)
             ->when($singleFrsId > 0, fn ($q) => $q->where('id_frs', $singleFrsId))
-            ->with(['fournisseur:id,actif,deleted_at'])
+            ->with(['fournisseur:id,actif,deleted_at,allow_out_of_stock_orders,show_stock,show_null_stock'])
             ->findOrFail((int) $data['produit_id']);
 
         if (! $p->fournisseur || (int) $p->fournisseur->actif !== 1 || $p->fournisseur->deleted_at) {
@@ -609,6 +609,7 @@ class StoreController extends Controller
             ->whereNull('deleted_at')
             ->where('actif', 1)
             ->when($singleFrsId > 0, fn ($q) => $q->where('id_frs', $singleFrsId))
+            ->with(['fournisseur:id,actif,deleted_at,allow_out_of_stock_orders,show_stock,show_null_stock'])
             ->find($id);
 
         if (! $p) {
@@ -617,7 +618,7 @@ class StoreController extends Controller
             return back();
         }
 
-        $allowOos = $this->allowOutOfStockOrders($this->singleFournisseur());
+        $allowOos = $this->allowOutOfStockOrders($p?->fournisseur ?? $this->singleFournisseur());
 
         $qty = (int) $data['qty'];
         if (! $allowOos) {
