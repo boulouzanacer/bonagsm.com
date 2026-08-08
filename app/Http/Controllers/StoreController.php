@@ -451,6 +451,8 @@ class StoreController extends Controller
             'total' => $summary['total'],
             'boutique' => $boutique,
             'can_show_prices' => $canShowPrices,
+            'can_show_stock' => $this->canShowStock($boutique),
+            'allow_out_of_stock_orders' => $this->allowOutOfStockOrders($boutique),
             'wishlist_count' => $this->wishlistCount($client),
         ]);
     }

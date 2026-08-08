@@ -64,9 +64,11 @@
                                     <div class="force-ltr text-xs sm:text-sm text-slate-500">{{ __('Ref:') }} {{ $p->reference }}</div>
 
                                     <div class="flex flex-wrap items-center gap-2">
-                                        <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-500">
-                                            {{ __('Stock: :stock', ['stock' => (int) $p->stock]) }}
-                                        </span>
+                                        @if(($can_show_stock ?? true))
+                                            <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold {{ (int)$p->stock > 0 ? 'text-emerald-600' : 'text-red-500' }}">
+                                                {{ (int)$p->stock > 0 ? __('Stock: :stock', ['stock' => (int) $p->stock]) : __('Rupture') }}
+                                            </span>
+                                        @endif
                                         @if(($can_show_prices ?? false) || ($client ?? null))
                                             <span class="force-ltr inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-700">
                                                 {{ number_format((float)$it['prix_unitaire'], 2, '.', ' ') }} DA / u
@@ -91,7 +93,9 @@
                                         <input type="number"
                                                name="qty"
                                                min="1"
+                                               @if(!($allow_out_of_stock_orders ?? false))
                                                max="{{ max(1, (int)$p->stock) }}"
+                                               @endif
                                                value="{{ (int)$it['qty'] }}"
                                                class="force-ltr w-20 bg-transparent text-right sm:text-left text-base font-bold outline-none focus:border-[var(--store-primary)]">
                                     </div>
