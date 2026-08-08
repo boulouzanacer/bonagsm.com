@@ -20,47 +20,69 @@ class CategorieController extends Controller
         $frsId = (int) session('frs_id');
         $q = trim((string) $request->query('q', ''));
 
-        $productsByIdExpr = DB::raw('COALESCE((
-            SELECT COUNT(*)
-            FROM produit pbyid
-            WHERE pbyid.id_frs = categories.id_frs
-              AND pbyid.id_categorie = categories.id
-              AND pbyid.deleted_at IS NULL
-        ), 0)');
-
-        $productsByNameExpr = DB::raw('COALESCE((
-            SELECT COUNT(*)
-            FROM produit pbyname
-            WHERE pbyname.id_frs = categories.id_frs
-              AND pbyname.categorie = categories.nom
-              AND pbyname.deleted_at IS NULL
-        ), 0)');
-
-        $subCategoriesExpr = DB::raw('COALESCE((
-            SELECT COUNT(*)
-            FROM sous_categories sc
-            WHERE sc.id_frs = categories.id_frs
-              AND sc.id_categorie = categories.id
-        ), 0)');
-
         $categories = Categorie::query()
-            ->select('categories.*')
-            ->selectSub($productsByIdExpr, 'products_by_id_count')
-            ->selectSub($productsByNameExpr, 'products_by_name_count')
-            ->selectSub($subCategoriesExpr, 'sub_categories_count')
             ->where('categories.id_frs', $frsId)
             ->when($q !== '', fn ($query) => $query->where('categories.nom', 'like', "%{$q}%"))
             ->orderBy('categories.nom')
             ->paginate(20)
             ->withQueryString();
 
-        foreach ($categories as $c) {
-            $c->setAttribute('used_products_count', (int) max(
-                (int) ($c->products_by_id_count ?? 0),
-                (int) ($c->products_by_name_count ?? 0)
-            ));
-            $c->setAttribute('used_sub_categories_count', (int) ($c->sub_categories_count ?? 0));
-            $c->setAttribute('can_delete', (int) $c->used_products_count === 0 && (int) $c->used_sub_categories_count === 0);
+        if ($categories->isNotEmpty()) {
+            $ids = $categories->map(fn ($c) => (int) $c->id)->all();
+
+            $productsByIdCounts = DB::table('produit')
+                ->where('id_frs', $frsId)
+                ->whereNull('deleted_at')
+                ->whereIn('id_categorie', $ids)
+                ->groupBy('id_categorie')
+                ->pluck(DB::raw('COUNT(*)'), 'id_categorie')
+                ->all();
+
+            $productsByNameCounts = [];
+            $catNames = $categories->mapWithKeys(fn ($c) => [$c->id => (string) $c->nom])->all();
+            if ($catNames !== []) {
+                $nameRows = DB::table('produit')
+                    ->select(['categorie', DB::raw('COUNT(*) as cnt')])
+                    ->where('id_frs', $frsId)
+                    ->whereNull('deleted_at')
+                    ->whereIn('categorie', array_values(array_values($catNames)))
+                    ->groupBy('categorie')
+                    ->get()
+                    ->all();
+                $nameToCount = [];
+                foreach ($nameRows as $row) {
+                    $nameToCount[(string) $row->categorie] = (int) ($row->cnt ?? 0);
+                }
+                foreach ($catNames as $cid => $nom) {
+                    if (isset($nameToCount[$nom])) {
+                        $productsByNameCounts[$cid] = $nameToCount[$nom];
+                    }
+                }
+            }
+
+            $subCategoriesCounts = DB::table('sous_categories')
+                ->where('id_frs', $frsId)
+                ->whereIn('id_categorie', $ids)
+                ->groupBy('id_categorie')
+                ->pluck(DB::raw('COUNT(*)'), 'id_categorie')
+                ->all();
+
+            foreach ($categories as $c) {
+                $cid = (int) $c->id;
+                $byId = (int) ($productsByIdCounts[$cid] ?? 0);
+                $byName = (int) ($productsByNameCounts[$cid] ?? 0);
+                $usedProducts = max($byId, $byName);
+                $usedSub = (int) ($subCategoriesCounts[$cid] ?? 0);
+                $c->setAttribute('used_products_count', $usedProducts);
+                $c->setAttribute('used_sub_categories_count', $usedSub);
+                $c->setAttribute('can_delete', $usedProducts === 0 && $usedSub === 0);
+            }
+        } else {
+            foreach ($categories as $c) {
+                $c->setAttribute('used_products_count', 0);
+                $c->setAttribute('used_sub_categories_count', 0);
+                $c->setAttribute('can_delete', true);
+            }
         }
 
         return view('fournisseur.categories.index', [

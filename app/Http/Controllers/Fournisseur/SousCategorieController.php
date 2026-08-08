@@ -19,17 +19,7 @@ class SousCategorieController extends Controller
         $frsId = (int) session('frs_id');
         $q = trim((string) $request->query('q', ''));
 
-        $productsCountExpr = DB::raw('COALESCE((
-            SELECT COUNT(*)
-            FROM produit p
-            WHERE p.id_frs = sous_categories.id_frs
-              AND p.id_sous_categorie = sous_categories.id
-              AND p.deleted_at IS NULL
-        ), 0)');
-
         $sousCategories = SousCategorie::query()
-            ->select('sous_categories.*')
-            ->selectSub($productsCountExpr, 'products_count')
             ->with('categorie')
             ->where('sous_categories.id_frs', $frsId)
             ->when($q !== '', fn ($query) => $query->where('sous_categories.nom', 'like', "%{$q}%"))
@@ -37,9 +27,26 @@ class SousCategorieController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        foreach ($sousCategories as $sc) {
-            $sc->setAttribute('used_products_count', (int) ($sc->products_count ?? 0));
-            $sc->setAttribute('can_delete', (int) $sc->used_products_count === 0);
+        if ($sousCategories->isNotEmpty()) {
+            $ids = $sousCategories->map(fn ($sc) => (int) $sc->id)->all();
+            $counts = DB::table('produit')
+                ->where('id_frs', $frsId)
+                ->whereNull('deleted_at')
+                ->whereIn('id_sous_categorie', $ids)
+                ->groupBy('id_sous_categorie')
+                ->pluck(DB::raw('COUNT(*)'), 'id_sous_categorie')
+                ->all();
+
+            foreach ($sousCategories as $sc) {
+                $used = (int) ($counts[(int) $sc->id] ?? 0);
+                $sc->setAttribute('used_products_count', $used);
+                $sc->setAttribute('can_delete', $used === 0);
+            }
+        } else {
+            foreach ($sousCategories as $sc) {
+                $sc->setAttribute('used_products_count', 0);
+                $sc->setAttribute('can_delete', true);
+            }
         }
 
         return view('fournisseur.sous_categories.index', [
