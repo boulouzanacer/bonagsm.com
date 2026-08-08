@@ -16,6 +16,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -90,13 +91,26 @@ class StoreController extends Controller
             return null;
         }
 
-        return Client::query()->find((int) session('client_id'));
+        $id = (int) session('client_id');
+
+        return Cache::driver('array')->remember('current_client_'.$id.'_'.sha1((string) json_encode(session()->only(['role', 'client_id', 'id_frs']))), 1, static function () use ($id): ?Client {
+            return Client::query()
+                ->with(['wishlistProduits:produit.id,produit.id_frs'])
+                ->find($id);
+        });
     }
 
     private function wishlistProductIds(?Client $client): array
     {
         if (! $client) {
             return [];
+        }
+
+        if ($client->relationLoaded('wishlistProduits')) {
+            return $client->wishlistProduits
+                ->pluck('id')
+                ->map(fn ($v) => (int) $v)
+                ->all();
         }
 
         return DB::table('client_wishlist')
@@ -110,6 +124,10 @@ class StoreController extends Controller
     {
         if (! $client) {
             return 0;
+        }
+
+        if ($client->relationLoaded('wishlistProduits')) {
+            return $client->wishlistProduits->count();
         }
 
         return (int) DB::table('client_wishlist')
@@ -557,7 +575,7 @@ class StoreController extends Controller
             ->whereNull('deleted_at')
             ->where('actif', 1)
             ->when($singleFrsId > 0, fn ($q) => $q->where('id_frs', $singleFrsId))
-            ->with(['fournisseur:id,actif,deleted_at,allow_out_of_stock_orders,show_stock,show_zero_stock'])
+            ->with(['fournisseur:id,nom_frs,actif,deleted_at,allow_out_of_stock_orders,show_stock,show_zero_stock'])
             ->findOrFail((int) $data['produit_id']);
 
         if (! $p->fournisseur || (int) $p->fournisseur->actif !== 1 || $p->fournisseur->deleted_at) {
@@ -573,7 +591,12 @@ class StoreController extends Controller
         $cart = $this->cart();
         $newFrsId = (int) ($singleFrsId > 0 ? $singleFrsId : $p->id_frs);
 
-        $allowOos = $this->allowOutOfStockOrders($p?->fournisseur ?? $this->singleFournisseur());
+        $existingFrsId = $this->cartFournisseurId();
+        if ($existingFrsId !== null && (int) $existingFrsId !== $newFrsId) {
+            $cart = [];
+        }
+
+        $allowOos = $this->allowOutOfStockOrders($p->fournisseur);
 
         $existing = (int) ($cart[$p->id] ?? 0);
 
@@ -584,6 +607,9 @@ class StoreController extends Controller
                 return back()->with('error', __('Produit en rupture de stock.'));
             }
             $next = min($existing + $qty, (int) $p->stock);
+            if ($next <= 0) {
+                return back()->with('error', __('Quantité maximale atteinte en stock.'));
+            }
             $cart[$p->id] = $next;
         }
 
@@ -617,14 +643,21 @@ class StoreController extends Controller
         if (! $p) {
             unset($cart[$id]);
             $this->setCart($cart, $this->cartFournisseurId());
+
             return back();
         }
 
-        $allowOos = $this->allowOutOfStockOrders($p?->fournisseur ?? $this->singleFournisseur());
+        $allowOos = $this->allowOutOfStockOrders($p->fournisseur);
 
         $qty = (int) $data['qty'];
         if (! $allowOos) {
             $qty = min($qty, (int) $p->stock);
+            if ($qty <= 0) {
+                unset($cart[$id]);
+                $this->setCart($cart, count($cart) > 0 ? $this->cartFournisseurId() : null);
+
+                return back()->with('error', __('Produit en rupture de stock.'));
+            }
         }
 
         if ($qty <= 0) {
