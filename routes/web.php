@@ -11,6 +11,7 @@ use App\Http\Controllers\Fournisseur\SousCategorieController as FrsSousCategorie
 use App\Http\Controllers\Fournisseur\MarqueController as FrsMarqueController;
 use App\Http\Controllers\Fournisseur\ClientController as FrsClientController;
 use App\Http\Controllers\Fournisseur\CommandeController as FrsCommandeController;
+use App\Http\Controllers\Fournisseur\DatabaseToolsController as FrsDatabaseToolsController;
 use App\Http\Controllers\Fournisseur\FraisLivraisonController as FrsFraisLivraisonController;
 use App\Http\Controllers\Fournisseur\ProfileController as FrsProfileController;
 use App\Http\Controllers\Fournisseur\SiteSettingsController as FrsSiteSettingsController;
@@ -103,8 +104,11 @@ Route::prefix('fournisseur')->middleware('auth.fournisseur')->group(function () 
 
         Route::get('/parametres-site', [FrsSiteSettingsController::class, 'edit']);
         Route::put('/parametres-site', [FrsSiteSettingsController::class, 'update']);
-        Route::post('/parametres-site/database/unlock', [FrsSiteSettingsController::class, 'unlockDatabaseTools']);
-        Route::post('/parametres-site/database/reset', [FrsSiteSettingsController::class, 'resetDatabaseTables']);
+
+        Route::get('/base-de-donnees', [FrsDatabaseToolsController::class, 'index']);
+        Route::post('/base-de-donnees/unlock', [FrsDatabaseToolsController::class, 'unlock']);
+        Route::post('/base-de-donnees/reset', [FrsDatabaseToolsController::class, 'reset']);
+
         Route::get('/token', [FrsTokenController::class, 'index']);
 
         Route::get('/utilisateurs', [FrsUtilisateurController::class, 'index']);
