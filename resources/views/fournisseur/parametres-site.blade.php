@@ -85,11 +85,11 @@
 
                     <label class="flex items-center gap-3 cursor-pointer select-none">
                         <input type="checkbox"
-                               name="show_null_stock"
+                               name="show_zero_stock"
                                value="1"
                                class="h-5 w-5 rounded border-white/20 bg-black/20"
-                               @checked((int)old('show_null_stock', $frs->show_null_stock ?? 1) === 1)>
-                        <span class="text-sm font-semibold text-white/70">{{ __('Afficher les produits avec stock null') }}</span>
+                               @checked((int)old('show_zero_stock', $frs->show_zero_stock ?? 1) === 1)>
+                        <span class="text-sm font-semibold text-white/70">{{ __('Afficher les produits avec stock 0') }}</span>
                     </label>
                 </div>
 

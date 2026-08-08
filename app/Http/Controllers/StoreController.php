@@ -45,9 +45,9 @@ class StoreController extends Controller
         return $frs && (int) ($frs->allow_out_of_stock_orders ?? 0) === 1;
     }
 
-    private function shouldHideNullStock(?Fournisseur $frs): bool
+    private function shouldHideZeroStock(?Fournisseur $frs): bool
     {
-        return !($frs && (int) ($frs->show_null_stock ?? 1) === 1);
+        return !($frs && (int) ($frs->show_zero_stock ?? 1) === 1);
     }
 
     private function fraisLivraisonEnabled(?Fournisseur $frs): bool
@@ -257,7 +257,7 @@ class StoreController extends Controller
         $produitsQuery = Produit::query()
             ->whereNull('deleted_at')
             ->where('actif', 1)
-            ->when($this->shouldHideNullStock($boutique), fn ($q) => $q->where('stock', '>', 0))
+            ->when($this->shouldHideZeroStock($boutique), fn ($q) => $q->where('stock', '>', 0))
             ->when(! $client || (string) $client->type_client !== 'abonne', fn ($q) => $q->where('abonne_only', 0))
             ->with(['fournisseur:id,nom_frs,actif,is_visible,deleted_at', 'quantityPrices'])
             ->when($fournisseurId, fn ($q) => $q->where('id_frs', $fournisseurId), fn ($q) => $q->whereRaw('1=0'))
@@ -321,9 +321,9 @@ class StoreController extends Controller
         $produitsQuery = Produit::query()
             ->whereNull('deleted_at')
             ->where('actif', 1)
-            ->when($this->shouldHideNullStock($boutique), fn ($q2) => $q2->where('stock', '>', 0))
+            ->when($this->shouldHideZeroStock($boutique), fn ($q2) => $q2->where('stock', '>', 0))
             ->when(! $client || (string) $client->type_client !== 'abonne', fn ($q2) => $q2->where('abonne_only', 0))
-            ->with(['fournisseur:id,nom_frs,actif,is_visible,deleted_at', 'quantityPrices'])
+            ->with(['fournisseur:id,nom_frs,actif,is_visible,deleted_at,allow_out_of_stock_orders,show_stock,show_zero_stock', 'quantityPrices'])
             ->where('id_frs', $fournisseurId)
             ->when($categorie !== '', fn ($q2) => $q2->where('categorie', $categorie))
             ->when($q !== '', function ($q2) use ($q) {
@@ -472,7 +472,7 @@ class StoreController extends Controller
         $produits = $client->wishlistProduits()
             ->whereNull('produit.deleted_at')
             ->where('produit.actif', 1)
-            ->when($this->shouldHideNullStock($boutique), fn ($q) => $q->where('produit.stock', '>', 0))
+            ->when($this->shouldHideZeroStock($boutique), fn ($q) => $q->where('produit.stock', '>', 0))
             ->when((string) $client->type_client !== 'abonne', fn ($q) => $q->where('produit.abonne_only', 0))
             ->when($fournisseurId > 0, fn ($q) => $q->where('produit.id_frs', $fournisseurId))
             ->with(['fournisseur:id,nom_frs,actif,is_visible,deleted_at', 'quantityPrices'])
@@ -557,7 +557,7 @@ class StoreController extends Controller
             ->whereNull('deleted_at')
             ->where('actif', 1)
             ->when($singleFrsId > 0, fn ($q) => $q->where('id_frs', $singleFrsId))
-            ->with(['fournisseur:id,actif,deleted_at,allow_out_of_stock_orders,show_stock,show_null_stock'])
+            ->with(['fournisseur:id,actif,deleted_at,allow_out_of_stock_orders,show_stock,show_zero_stock'])
             ->findOrFail((int) $data['produit_id']);
 
         if (! $p->fournisseur || (int) $p->fournisseur->actif !== 1 || $p->fournisseur->deleted_at) {
@@ -611,7 +611,7 @@ class StoreController extends Controller
             ->whereNull('deleted_at')
             ->where('actif', 1)
             ->when($singleFrsId > 0, fn ($q) => $q->where('id_frs', $singleFrsId))
-            ->with(['fournisseur:id,actif,deleted_at,allow_out_of_stock_orders,show_stock,show_null_stock'])
+            ->with(['fournisseur:id,actif,deleted_at,allow_out_of_stock_orders,show_stock,show_zero_stock'])
             ->find($id);
 
         if (! $p) {

@@ -38,7 +38,7 @@ class Fournisseur extends Authenticatable
         'tiktok_pixel_id',
         'show_stock',
         'allow_out_of_stock_orders',
-        'show_null_stock',
+        'show_zero_stock',
     ];
 
     protected $appends = [
