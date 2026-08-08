@@ -102,8 +102,8 @@
                                 <input type="hidden" name="produit_id" value="{{ $p->id }}">
                                 <button type="submit"
                                         aria-label="{{ $isFavorite ? __('Retirer des favoris') : __('Ajouter aux favoris') }}"
-                                        class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/80 bg-white/90 text-sm shadow-sm transition hover:scale-105 {{ $isFavorite ? 'text-rose-500' : 'text-slate-500 hover:text-[var(--store-primary)]' }}">
-                                    <i class="{{ $isFavorite ? 'fa-solid' : 'fa-regular' }} fa-heart"></i>
+                                        class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/80 bg-white/90 text-sm shadow-sm transition hover:scale-105 {{ $isFavorite ? 'text-[var(--store-primary)]' : 'text-slate-500 hover:text-[var(--store-primary)]' }}">
+                                    <i class="fa-solid fa-heart {{ !$isFavorite ? 'opacity-60' : '' }}"></i>
                                 </button>
                             </form>
                             @if($img !== '')

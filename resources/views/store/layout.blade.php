@@ -308,7 +308,7 @@
 
                     <a href="{{ url('/wishlist') }}"
                        class="interactive-lift inline-flex items-center gap-2 rounded-2xl px-3.5 py-2.5 text-sm font-semibold border border-white/70 bg-white/90 hover:bg-white shadow-sm">
-                        <i class="fa-regular fa-heart text-[var(--store-primary)]"></i>
+                        <i class="fa-solid fa-heart text-[var(--store-primary)]"></i>
                         <span class="hidden sm:inline">{{ __('Favoris') }}</span>
                         <span class="header-counter ml-1 inline-flex items-center justify-center min-w-[22px] h-5 px-1.5 rounded-full text-xs font-extrabold bg-emerald-50 text-emerald-700">
                             {{ $wishlistCount }}

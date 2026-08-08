@@ -34,7 +34,7 @@
                                 <input type="hidden" name="produit_id" value="{{ $p->id }}">
                                 <button type="submit"
                                         aria-label="{{ __('Retirer des favoris') }}"
-                                        class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/80 bg-white/90 text-sm text-rose-500 shadow-sm transition hover:scale-105">
+                                        class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/80 bg-white/90 text-sm text-[var(--store-primary)] shadow-sm transition hover:scale-105">
                                     <i class="fa-solid fa-heart"></i>
                                 </button>
                             </form>

@@ -237,8 +237,8 @@
                         @csrf
                         <input type="hidden" name="produit_id" value="{{ $produit->id }}">
                         <button type="submit"
-                                class="interactive-lift inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-extrabold text-slate-700 shadow-sm hover:bg-slate-50 sm:w-auto">
-                            <i class="{{ ($is_favorite ?? false) ? 'fa-solid text-rose-500' : 'fa-regular text-[var(--store-primary)]' }} fa-heart"></i>
+                                class="interactive-lift inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-extrabold shadow-sm hover:bg-slate-50 sm:w-auto {{ ($is_favorite ?? false) ? 'text-[var(--store-primary)]' : 'text-slate-700' }}">
+                            <i class="fa-solid fa-heart {{ !($is_favorite ?? false) ? 'opacity-60' : '' }}"></i>
                             {{ ($is_favorite ?? false) ? __('Retirer des favoris') : __('Ajouter aux favoris') }}
                         </button>
                     </form>
