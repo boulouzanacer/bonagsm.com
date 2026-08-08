@@ -106,13 +106,13 @@ class MarqueController extends Controller
             ->where('id_frs', $frsId)
             ->findOrFail($id);
 
-        $used = Produit::query()
+        $usedProducts = (int) Produit::query()
             ->where('id_frs', $frsId)
             ->where('id_marque', $marque->id)
-            ->exists();
+            ->count();
 
-        if ($used) {
-            return back()->with('error', __('Impossible de supprimer: marque utilisée par des produits.'));
+        if ($usedProducts > 0) {
+            return back()->with('error', __('Impossible de supprimer: marque utilisée par produits: :count.', ['count' => $usedProducts]));
         }
 
         $marque->delete();

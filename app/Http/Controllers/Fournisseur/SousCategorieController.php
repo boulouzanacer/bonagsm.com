@@ -130,13 +130,13 @@ class SousCategorieController extends Controller
             ->where('id_frs', $frsId)
             ->findOrFail($id);
 
-        $used = Produit::query()
+        $usedProducts = (int) Produit::query()
             ->where('id_frs', $frsId)
             ->where('id_sous_categorie', $sousCategorie->id)
-            ->exists();
+            ->count();
 
-        if ($used) {
-            return back()->with('error', __('Impossible de supprimer: sous-catégorie utilisée par des produits.'));
+        if ($usedProducts > 0) {
+            return back()->with('error', __('Impossible de supprimer: sous-catégorie utilisée par produits: :count.', ['count' => $usedProducts]));
         }
 
         $sousCategorie->delete();

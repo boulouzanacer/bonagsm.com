@@ -127,13 +127,32 @@ class CategorieController extends Controller
             ->where('id_frs', $frsId)
             ->findOrFail($id);
 
-        $used = Produit::query()
+        $productsById = Produit::query()
+            ->where('id_frs', $frsId)
+            ->where('id_categorie', $categorie->id)
+            ->count();
+
+        $productsByName = Produit::query()
             ->where('id_frs', $frsId)
             ->where('categorie', $categorie->nom)
-            ->exists();
+            ->count();
 
-        if ($used) {
-            return back()->with('error', __('Impossible de supprimer: catégorie utilisée par des produits.'));
+        $usedProducts = (int) max($productsById, $productsByName);
+        $usedSubCategories = (int) \App\Models\SousCategorie::query()
+            ->where('id_frs', $frsId)
+            ->where('id_categorie', $categorie->id)
+            ->count();
+
+        if ($usedProducts > 0 || $usedSubCategories > 0) {
+            $parts = [];
+            if ($usedProducts > 0) {
+                $parts[] = __('produits: :count', ['count' => $usedProducts]);
+            }
+            if ($usedSubCategories > 0) {
+                $parts[] = __('sous-catégories: :count', ['count' => $usedSubCategories]);
+            }
+
+            return back()->with('error', __('Impossible de supprimer: catégorie utilisée par :list.', ['list' => implode(', ', $parts)]));
         }
 
         $categorie->delete();
