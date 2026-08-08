@@ -133,9 +133,11 @@
                                     </div>
                                 @endif
                             </div>
-                            <div class="hidden sm:block text-[10px] font-bold {{ (int)$p->stock > 0 ? 'text-emerald-600' : 'text-red-500' }}">
-                                {{ (int)$p->stock > 0 ? __('Stock: :stock', ['stock' => (int) $p->stock]) : __('Rupture') }}
-                            </div>
+                            @if(($can_show_stock ?? true))
+                                <div class="hidden sm:block text-[10px] font-bold {{ (int)$p->stock > 0 ? 'text-emerald-600' : 'text-red-500' }}">
+                                    {{ (int)$p->stock > 0 ? __('Stock: :stock', ['stock' => (int) $p->stock]) : __('Rupture') }}
+                                </div>
+                            @endif
                         </div>
 
                         <div class="product-footer flex items-center justify-between gap-2">
@@ -154,7 +156,7 @@
                                         aria-label="{{ __('Ajouter au panier') }}"
                                         class="inline-flex items-center justify-center gap-2 rounded-xl w-9 h-9 sm:w-auto sm:h-auto sm:px-2.5 sm:py-2 text-xs font-extrabold text-white disabled:opacity-40"
                                         style="background: linear-gradient(135deg, var(--store-primary), #0A3D7A);"
-                                        @disabled((int)$p->stock <= 0)>
+                                        @disabled((!($allow_out_of_stock_orders ?? false) && (int)$p->stock <= 0))>
                                     <i class="fa-solid fa-cart-plus"></i>
                                     <span class="sr-only sm:not-sr-only">{{ __('Ajouter') }}</span>
                                 </button>

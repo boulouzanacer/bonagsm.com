@@ -90,9 +90,11 @@
                                     <div class="text-[11px] font-bold text-slate-400 whitespace-nowrap">{{ __('Connectez-vous') }}</div>
                                 @endif
                             </div>
-                            <div class="force-ltr text-[10px] font-bold {{ (int)$p->stock > 0 ? 'text-emerald-600' : 'text-red-500' }}">
-                                {{ (int)$p->stock > 0 ? __('Stock: :stock', ['stock' => (int) $p->stock]) : __('Rupture') }}
-                            </div>
+                            @if(($can_show_stock ?? true))
+                                <div class="force-ltr text-[10px] font-bold {{ (int)$p->stock > 0 ? 'text-emerald-600' : 'text-red-500' }}">
+                                    {{ (int)$p->stock > 0 ? __('Stock: :stock', ['stock' => (int) $p->stock]) : __('Rupture') }}
+                                </div>
+                            @endif
                         </div>
 
                         <div class="product-footer flex items-center justify-between gap-2">
@@ -110,7 +112,7 @@
                                 <button type="submit"
                                         aria-label="{{ __('Ajouter au panier') }}"
                                         class="interactive-lift inline-flex items-center justify-center gap-2 rounded-2xl min-w-[42px] h-[42px] sm:px-4 text-xs font-extrabold text-white store-gradient disabled:opacity-40 shadow-lg shadow-emerald-950/15"
-                                        @disabled((int)$p->stock <= 0)>
+                                        @disabled((!($allow_out_of_stock_orders ?? false) && (int)$p->stock <= 0))>
                                     <i class="fa-solid fa-cart-plus"></i>
                                     <span class="sr-only sm:not-sr-only">{{ __('Ajouter') }}</span>
                                 </button>

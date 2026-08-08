@@ -62,6 +62,37 @@
                     </label>
                 </div>
 
+                <div class="space-y-3">
+                    <div class="text-sm font-extrabold tracking-wide text-white/80 pt-2">{{ __('Options Stock') }}</div>
+
+                    <label class="flex items-center gap-3 cursor-pointer select-none">
+                        <input type="checkbox"
+                               name="show_stock"
+                               value="1"
+                               class="h-5 w-5 rounded border-white/20 bg-black/20"
+                               @checked((int)old('show_stock', $frs->show_stock ?? 1) === 1)>
+                        <span class="text-sm font-semibold text-white/70">{{ __('Afficher le stock sur la boutique') }}</span>
+                    </label>
+
+                    <label class="flex items-center gap-3 cursor-pointer select-none">
+                        <input type="checkbox"
+                               name="allow_out_of_stock_orders"
+                               value="1"
+                               class="h-5 w-5 rounded border-white/20 bg-black/20"
+                               @checked((int)old('allow_out_of_stock_orders', $frs->allow_out_of_stock_orders ?? 0) === 1)>
+                        <span class="text-sm font-semibold text-white/70">{{ __('Autoriser les commandes en rupture de stock') }}</span>
+                    </label>
+
+                    <label class="flex items-center gap-3 cursor-pointer select-none">
+                        <input type="checkbox"
+                               name="show_null_stock"
+                               value="1"
+                               class="h-5 w-5 rounded border-white/20 bg-black/20"
+                               @checked((int)old('show_null_stock', $frs->show_null_stock ?? 1) === 1)>
+                        <span class="text-sm font-semibold text-white/70">{{ __('Afficher les produits avec stock null') }}</span>
+                    </label>
+                </div>
+
                 <div class="pt-2">
                     <div class="text-sm font-extrabold tracking-wide text-white/80">{{ __('Pixels') }}</div>
                     <div class="text-xs text-white/60 mt-1">{{ __('Meta Pixel et TikTok Pixel pour le suivi.') }}</div>

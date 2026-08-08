@@ -35,6 +35,21 @@ class StoreController extends Controller
         return $frs && (int) ($frs->show_prices_to_guests ?? 1) === 1;
     }
 
+    private function canShowStock(?Fournisseur $frs): bool
+    {
+        return $frs && (int) ($frs->show_stock ?? 1) === 1;
+    }
+
+    private function allowOutOfStockOrders(?Fournisseur $frs): bool
+    {
+        return $frs && (int) ($frs->allow_out_of_stock_orders ?? 0) === 1;
+    }
+
+    private function shouldHideNullStock(?Fournisseur $frs): bool
+    {
+        return !($frs && (int) ($frs->show_null_stock ?? 1) === 1);
+    }
+
     private function fraisLivraisonEnabled(?Fournisseur $frs): bool
     {
         return $frs && (int) ($frs->enable_frais_livraison ?? 0) === 1;
@@ -168,7 +183,7 @@ class StoreController extends Controller
             ->when(! $client || (string) $client->type_client !== 'abonne', fn ($q) => $q->where('abonne_only', 0))
             ->when($singleFrsId > 0, fn ($q) => $q->where('id_frs', $singleFrsId))
             ->whereIn('id', $ids)
-            ->with(['fournisseur:id,nom_frs,actif,is_visible,deleted_at', 'quantityPrices'])
+            ->with(['fournisseur:id,nom_frs,actif,is_visible,deleted_at,allow_out_of_stock_orders', 'quantityPrices'])
             ->get()
             ->keyBy('id');
 
@@ -188,13 +203,15 @@ class StoreController extends Controller
                 continue;
             }
 
-            $qty = min($qty, (int) $p->stock);
-            if ($qty <= 0) {
-                unset($cart[$id]);
-                continue;
+            $allowOos = (int) ($p->fournisseur?->allow_out_of_stock_orders ?? 0) === 1;
+            if (! $allowOos) {
+                $qty = min($qty, (int) $p->stock);
+                if ($qty <= 0) {
+                    unset($cart[$id]);
+                    continue;
+                }
+                $cart[$id] = $qty;
             }
-
-            $cart[$id] = $qty;
 
             $prixUnitaire = (float) $p->prixUnitairePourQuantite($client, $qty);
             $line = $prixUnitaire * $qty;
@@ -240,6 +257,7 @@ class StoreController extends Controller
         $produitsQuery = Produit::query()
             ->whereNull('deleted_at')
             ->where('actif', 1)
+            ->when($this->shouldHideNullStock($boutique), fn ($q) => $q->where('stock', '>', 0))
             ->when(! $client || (string) $client->type_client !== 'abonne', fn ($q) => $q->where('abonne_only', 0))
             ->with(['fournisseur:id,nom_frs,actif,is_visible,deleted_at', 'quantityPrices'])
             ->when($fournisseurId, fn ($q) => $q->where('id_frs', $fournisseurId), fn ($q) => $q->whereRaw('1=0'))
@@ -278,6 +296,8 @@ class StoreController extends Controller
             'cart_total' => $cartSummary['total'],
             'cart_count' => count($cartSummary['items']),
             'can_show_prices' => $canShowPrices,
+            'can_show_stock' => $this->canShowStock($boutique),
+            'allow_out_of_stock_orders' => $this->allowOutOfStockOrders($boutique),
             'wishlist_ids' => $this->wishlistProductIds($client),
             'wishlist_count' => $this->wishlistCount($client),
         ]);
@@ -285,7 +305,64 @@ class StoreController extends Controller
 
     public function boutique(int $id, Request $request): View
     {
-        return $this->index($request);
+        $client = $this->currentClient();
+        $boutique = Fournisseur::query()
+            ->where('id', $id)
+            ->where('actif', 1)
+            ->whereNull('deleted_at')
+            ->firstOrFail();
+
+        $canShowPrices = $this->canShowPrices($client, $boutique);
+
+        $q = trim((string) $request->query('q', ''));
+        $categorie = trim((string) $request->query('categorie', ''));
+        $fournisseurId = (int) $boutique->id;
+
+        $produitsQuery = Produit::query()
+            ->whereNull('deleted_at')
+            ->where('actif', 1)
+            ->when($this->shouldHideNullStock($boutique), fn ($q2) => $q2->where('stock', '>', 0))
+            ->when(! $client || (string) $client->type_client !== 'abonne', fn ($q2) => $q2->where('abonne_only', 0))
+            ->with(['fournisseur:id,nom_frs,actif,is_visible,deleted_at', 'quantityPrices'])
+            ->where('id_frs', $fournisseurId)
+            ->when($categorie !== '', fn ($q2) => $q2->where('categorie', $categorie))
+            ->when($q !== '', function ($q2) use ($q) {
+                $q2->where(function ($sub) use ($q) {
+                    $sub->where('designation', 'like', "%{$q}%")
+                        ->orWhere('reference', 'like', "%{$q}%")
+                        ->orWhere('categorie', 'like', "%{$q}%");
+                });
+            });
+
+        $catsQuery = Categorie::query()
+            ->where('id_frs', $fournisseurId)
+            ->orderBy('nom')
+            ->pluck('nom')
+            ->values();
+
+        $produits = $produitsQuery
+            ->orderByDesc('created_at')
+            ->paginate(18)
+            ->withQueryString();
+
+        $cartSummary = $this->cartSummary();
+
+        return view('store.boutique', [
+            'title' => $boutique->nom_frs,
+            'client' => $client,
+            'boutique' => $boutique,
+            'produits' => $produits,
+            'categories' => $catsQuery,
+            'selected_categorie' => $categorie,
+            'q' => $q,
+            'cart_total' => $cartSummary['total'],
+            'cart_count' => count($cartSummary['items']),
+            'can_show_prices' => $canShowPrices,
+            'can_show_stock' => $this->canShowStock($boutique),
+            'allow_out_of_stock_orders' => $this->allowOutOfStockOrders($boutique),
+            'wishlist_ids' => $this->wishlistProductIds($client),
+            'wishlist_count' => $this->wishlistCount($client),
+        ]);
     }
 
     public function produit(int $id): View
@@ -353,6 +430,8 @@ class StoreController extends Controller
             'cart_total' => $cartSummary['total'],
             'cart_count' => count($cartSummary['items']),
             'can_show_prices' => $canShowPrices,
+            'can_show_stock' => $this->canShowStock($boutique),
+            'allow_out_of_stock_orders' => $this->allowOutOfStockOrders($boutique),
             'is_favorite' => in_array((int) $p->id, $this->wishlistProductIds($client), true),
             'wishlist_count' => $this->wishlistCount($client),
         ]);
@@ -391,6 +470,7 @@ class StoreController extends Controller
         $produits = $client->wishlistProduits()
             ->whereNull('produit.deleted_at')
             ->where('produit.actif', 1)
+            ->when($this->shouldHideNullStock($boutique), fn ($q) => $q->where('produit.stock', '>', 0))
             ->when((string) $client->type_client !== 'abonne', fn ($q) => $q->where('produit.abonne_only', 0))
             ->when($fournisseurId > 0, fn ($q) => $q->where('produit.id_frs', $fournisseurId))
             ->with(['fournisseur:id,nom_frs,actif,is_visible,deleted_at', 'quantityPrices'])
@@ -408,6 +488,8 @@ class StoreController extends Controller
             'cart_total' => $cartSummary['total'],
             'cart_count' => count($cartSummary['items']),
             'can_show_prices' => $canShowPrices,
+            'can_show_stock' => $this->canShowStock($boutique),
+            'allow_out_of_stock_orders' => $this->allowOutOfStockOrders($boutique),
             'wishlist_ids' => $wishlistIds,
             'wishlist_count' => count($wishlistIds),
         ]);
@@ -486,16 +568,23 @@ class StoreController extends Controller
             }
         }
 
-        if ((int) $p->stock <= 0) {
-            return back()->with('error', __('Produit en rupture de stock.'));
-        }
-
         $cart = $this->cart();
         $newFrsId = (int) ($singleFrsId > 0 ? $singleFrsId : $p->id_frs);
 
+        $allowOos = $this->allowOutOfStockOrders($p?->fournisseur ?? $this->singleFournisseur());
+
         $existing = (int) ($cart[$p->id] ?? 0);
-        $next = min($existing + $qty, (int) $p->stock);
-        $cart[$p->id] = $next;
+
+        if ($allowOos) {
+            $cart[$p->id] = $existing + $qty;
+        } else {
+            if ((int) $p->stock <= 0) {
+                return back()->with('error', __('Produit en rupture de stock.'));
+            }
+            $next = min($existing + $qty, (int) $p->stock);
+            $cart[$p->id] = $next;
+        }
+
         $this->setCart($cart, $newFrsId);
 
         return back()->with('success', __('Ajouté au panier.'));
@@ -528,7 +617,13 @@ class StoreController extends Controller
             return back();
         }
 
-        $qty = min((int) $data['qty'], (int) $p->stock);
+        $allowOos = $this->allowOutOfStockOrders($this->singleFournisseur());
+
+        $qty = (int) $data['qty'];
+        if (! $allowOos) {
+            $qty = min($qty, (int) $p->stock);
+        }
+
         if ($qty <= 0) {
             unset($cart[$id]);
         } else {
@@ -686,6 +781,8 @@ class StoreController extends Controller
                     throw new \RuntimeException(__('Fournisseur introuvable.'));
                 }
 
+                $allowOos = (int) ($frs->allow_out_of_stock_orders ?? 0) === 1;
+
                 $sousTotal = 0.0;
                 $lines = [];
 
@@ -710,7 +807,7 @@ class StoreController extends Controller
                         throw new \RuntimeException(__('Produit :id réservé aux abonnés.', ['id' => $pdb->id]));
                     }
 
-                    if ((int) $pdb->stock < $qty) {
+                    if (! $allowOos && (int) $pdb->stock < $qty) {
                         throw new \RuntimeException(__('Stock insuffisant pour :designation.', ['designation' => $pdb->designation]));
                     }
 

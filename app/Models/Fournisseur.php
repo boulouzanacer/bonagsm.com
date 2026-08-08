@@ -36,6 +36,9 @@ class Fournisseur extends Authenticatable
         'enable_frais_livraison',
         'meta_pixel_id',
         'tiktok_pixel_id',
+        'show_stock',
+        'allow_out_of_stock_orders',
+        'show_null_stock',
     ];
 
     protected $appends = [

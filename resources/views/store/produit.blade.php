@@ -173,9 +173,11 @@
                 </div>
             @endif
 
-            <div class="force-ltr mt-3 inline-flex items-center rounded-full px-3 py-1.5 text-sm font-semibold {{ (int)$produit->stock > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600' }}">
-                {{ (int)$produit->stock > 0 ? __('Stock disponible: :stock', ['stock' => (int) $produit->stock]) : __('Rupture de stock') }}
-            </div>
+            @if(($can_show_stock ?? true))
+                <div class="force-ltr mt-3 inline-flex items-center rounded-full px-3 py-1.5 text-sm font-semibold {{ (int)$produit->stock > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600' }}">
+                    {{ (int)$produit->stock > 0 ? __('Stock disponible: :stock', ['stock' => (int) $produit->stock]) : __('Rupture de stock') }}
+                </div>
+            @endif
 
             <div class="mt-5 text-sm leading-7 text-slate-700">
                 {{ trim((string)$produit->description) !== '' ? $produit->description : '—' }}
@@ -217,13 +219,15 @@
                                    name="qty"
                                    id="qtyInput"
                                    min="1"
+                                   @if(!($allow_out_of_stock_orders ?? false))
                                    max="{{ max(1, (int)$produit->stock) }}"
+                                   @endif
                                    value="1"
                                    class="force-ltr w-20 bg-transparent text-base font-bold outline-none focus:border-[var(--store-primary)]">
                         </div>
                         <button type="submit"
                                 class="interactive-lift flex-1 inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-extrabold text-white disabled:opacity-40 store-gradient shadow-lg shadow-emerald-950/15"
-                                @disabled((int)$produit->stock <= 0)>
+                                @disabled((!($allow_out_of_stock_orders ?? false) && (int)$produit->stock <= 0))>
                             <i class="fa-solid fa-cart-plus"></i>
                             {{ __('Ajouter au panier') }}
                         </button>
