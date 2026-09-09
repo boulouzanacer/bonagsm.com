@@ -93,6 +93,24 @@
                     </label>
                 </div>
 
+                <div class="space-y-3">
+                    <div class="text-sm font-extrabold tracking-wide text-white/80 pt-2">{{ __('Gestion Clients') }}</div>
+
+                    <label class="flex items-start gap-3 cursor-pointer select-none">
+                        <input type="checkbox"
+                               name="admin_approval_required"
+                               value="1"
+                               class="h-5 w-5 rounded border-white/20 bg-black/20 mt-0.5"
+                               @checked((int)old('admin_approval_required', $frs->admin_approval_required ?? 0) === 1)>
+                        <div>
+                            <span class="text-sm font-semibold text-white/70">{{ __("L'admin doit autoriser les nouveaux clients manuellement") }}</span>
+                            <div class="text-xs text-white/50 mt-1">
+                                {{ __("Lorsque cette option est activée, chaque nouveau client qui s'inscrit devra être approuvé manuellement par l'administrateur avant de pouvoir se connecter et accéder à son compte.") }}
+                            </div>
+                        </div>
+                    </label>
+                </div>
+
                 <div class="pt-2">
                     <div class="text-sm font-extrabold tracking-wide text-white/80">{{ __('Pixels') }}</div>
                     <div class="text-xs text-white/60 mt-1">{{ __('Meta Pixel et TikTok Pixel pour le suivi.') }}</div>

@@ -93,11 +93,28 @@ class StoreController extends Controller
 
         $id = (int) session('client_id');
 
-        return Cache::driver('array')->remember('current_client_'.$id.'_'.sha1((string) json_encode(session()->only(['role', 'client_id', 'id_frs']))), 1, static function () use ($id): ?Client {
+        $client = Cache::driver('array')->remember('current_client_'.$id.'_'.sha1((string) json_encode(session()->only(['role', 'client_id', 'id_frs']))), 1, static function () use ($id): ?Client {
             return Client::query()
                 ->with(['wishlistProduits:produit.id,produit.id_frs'])
                 ->find($id);
         });
+
+        if (! $client) {
+            return null;
+        }
+
+        if ((int) $client->actif !== 1) {
+            session()->forget(['role', 'client_id']);
+            return null;
+        }
+
+        $frs = $client->fournisseur ?? Fournisseur::single();
+        if ($frs && (int) $frs->admin_approval_required === 1 && (int) $client->approved_by_admin !== 1) {
+            session()->forget(['role', 'client_id']);
+            return null;
+        }
+
+        return $client;
     }
 
     private function wishlistProductIds(?Client $client): array

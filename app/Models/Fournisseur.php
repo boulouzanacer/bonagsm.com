@@ -39,6 +39,7 @@ class Fournisseur extends Authenticatable
         'show_stock',
         'allow_out_of_stock_orders',
         'show_zero_stock',
+        'admin_approval_required',
     ];
 
     protected $appends = [

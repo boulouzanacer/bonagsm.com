@@ -22,15 +22,53 @@
         </div>
     @endif
 
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
-            <div class="text-2xl font-extrabold tracking-wide">{{ $client->prenom }} {{ $client->nom }}</div>
-            <div class="force-ltr text-sm text-white/60">{{ $client->email }}</div>
+            <div class="flex flex-wrap items-center gap-3">
+                <div class="text-2xl font-extrabold tracking-wide">{{ $client->prenom }} {{ $client->nom }}</div>
+                @php
+                    $isPending = (int)($client->approved_by_admin ?? 1) !== 1;
+                @endphp
+                @if($isPending)
+                    <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-amber-500/15 text-amber-300 border border-amber-400/20">
+                        <i class="fa-solid fa-hourglass-half"></i>
+                        {{ __("En attente d'approbation") }}
+                    </span>
+                @else
+                    <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-emerald-500/15 text-emerald-300 border border-emerald-400/20">
+                        <i class="fa-solid fa-check"></i>
+                        {{ __("Approuvé") }}
+                    </span>
+                @endif
+            </div>
+            <div class="force-ltr text-sm text-white/60 mt-1">{{ $client->email }}</div>
         </div>
-        <a href="{{ url('/fournisseur/clients') }}"
-           class="rounded-2xl px-4 py-3 font-bold border border-white/10 hover:bg-white/10">
-            {{ __('Retour') }}
-        </a>
+        <div class="flex items-center gap-2">
+            @if($isPending)
+                <form method="POST" action="{{ url('/fournisseur/clients/'.$client->id.'/approve') }}" class="inline">
+                    @csrf
+                    <button type="submit"
+                            class="rounded-2xl px-4 py-3 text-sm font-extrabold text-white inline-flex items-center gap-2"
+                            style="background: linear-gradient(135deg, #10b981, #059669);">
+                        <i class="fa-solid fa-check"></i>
+                        {{ __("Approuver le client") }}
+                    </button>
+                </form>
+            @else
+                <form method="POST" action="{{ url('/fournisseur/clients/'.$client->id.'/reject') }}" class="inline">
+                    @csrf
+                    <button type="submit"
+                            class="rounded-2xl px-4 py-3 text-sm font-extrabold border border-red-400/30 text-red-300 hover:bg-red-500/10 inline-flex items-center gap-2">
+                        <i class="fa-solid fa-xmark"></i>
+                        {{ __("Désapprouver") }}
+                    </button>
+                </form>
+            @endif
+            <a href="{{ url('/fournisseur/clients') }}"
+               class="rounded-2xl px-4 py-3 font-bold border border-white/10 hover:bg-white/10">
+                {{ __('Retour') }}
+            </a>
+        </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">

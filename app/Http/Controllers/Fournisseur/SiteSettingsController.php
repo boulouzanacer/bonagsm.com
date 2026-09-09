@@ -32,6 +32,7 @@ class SiteSettingsController extends Controller
             'show_stock' => ['nullable', 'boolean'],
             'allow_out_of_stock_orders' => ['nullable', 'boolean'],
             'show_zero_stock' => ['nullable', 'boolean'],
+            'admin_approval_required' => ['nullable', 'boolean'],
             'meta_pixel_id' => ['nullable', 'string', 'max:50', 'regex:/^[0-9]+$/'],
             'tiktok_pixel_id' => ['nullable', 'string', 'max:50', 'regex:/^[0-9A-Za-z]+$/'],
         ]);
@@ -41,6 +42,7 @@ class SiteSettingsController extends Controller
             'show_stock' => (int) ($data['show_stock'] ?? 0) === 1 ? 1 : 0,
             'allow_out_of_stock_orders' => (int) ($data['allow_out_of_stock_orders'] ?? 0) === 1 ? 1 : 0,
             'show_zero_stock' => (int) ($data['show_zero_stock'] ?? 0) === 1 ? 1 : 0,
+            'admin_approval_required' => (int) ($data['admin_approval_required'] ?? 0) === 1 ? 1 : 0,
             'meta_pixel_id' => isset($data['meta_pixel_id']) && trim((string) $data['meta_pixel_id']) !== '' ? trim((string) $data['meta_pixel_id']) : null,
             'tiktok_pixel_id' => isset($data['tiktok_pixel_id']) && trim((string) $data['tiktok_pixel_id']) !== '' ? trim((string) $data['tiktok_pixel_id']) : null,
         ];

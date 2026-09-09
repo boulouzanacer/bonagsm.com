@@ -16,6 +16,7 @@ class ClientController extends Controller
     {
         $frsId = (int) session('frs_id');
         $q = trim((string) $request->query('q', ''));
+        $status = trim((string) $request->query('status', 'all'));
 
         $cmdCounts = DB::table('cmd1')
             ->selectRaw('id_client, COUNT(*) as nb')
@@ -33,6 +34,12 @@ class ClientController extends Controller
                 DB::raw('COALESCE(cc.nb, 0) as nb_commandes'),
             ])
             ->where('client.id_frs', $frsId)
+            ->when($status === 'pending', function ($query) {
+                $query->where('client.approved_by_admin', 0);
+            })
+            ->when($status === 'approved', function ($query) {
+                $query->where('client.approved_by_admin', 1);
+            })
             ->when($q !== '', function ($query) use ($q) {
                 $query->where(function ($sub) use ($q) {
                     $sub->where('client.nom', 'like', "%{$q}%")
@@ -41,14 +48,28 @@ class ClientController extends Controller
                         ->orWhere('client.code_client', 'like', "%{$q}%");
                 });
             })
-            ->orderByDesc('client.created_at')
+            ->orderByRaw('client.approved_by_admin ASC, client.created_at DESC')
             ->paginate(15)
             ->withQueryString();
+
+        $pendingCount = Client::query()
+            ->where('id_frs', $frsId)
+            ->where('approved_by_admin', 0)
+            ->count();
+
+        $approvedCount = Client::query()
+            ->where('id_frs', $frsId)
+            ->where('approved_by_admin', 1)
+            ->count();
 
         return view('fournisseur.clients.index', [
             'title' => 'Mes Clients',
             'q' => $q,
+            'status' => $status,
             'clients' => $clients,
+            'pendingCount' => $pendingCount,
+            'approvedCount' => $approvedCount,
+            'totalCount' => $pendingCount + $approvedCount,
         ]);
     }
 
@@ -90,5 +111,33 @@ class ClientController extends Controller
         $client->update(['tarif' => (int) $data['tarif']]);
 
         return back()->with('success', __('Tarif mis à jour.'));
+    }
+
+    public function approve(int $id): RedirectResponse
+    {
+        $frsId = (int) session('frs_id');
+
+        $client = Client::query()
+            ->where('id', $id)
+            ->where('id_frs', $frsId)
+            ->firstOrFail();
+
+        $client->update(['approved_by_admin' => 1]);
+
+        return back()->with('success', __("Client approuvé. Il peut maintenant se connecter."));
+    }
+
+    public function reject(int $id): RedirectResponse
+    {
+        $frsId = (int) session('frs_id');
+
+        $client = Client::query()
+            ->where('id', $id)
+            ->where('id_frs', $frsId)
+            ->firstOrFail();
+
+        $client->update(['approved_by_admin' => 0]);
+
+        return back()->with('success', __("Client désapprouvé. Il ne pourra plus se connecter."));
     }
 }

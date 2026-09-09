@@ -43,6 +43,10 @@ class AuthController extends Controller
             return $this->error('Email déjà utilisé', null, 422);
         }
 
+        $frs = Fournisseur::single();
+        $frsId = (int) ($frs?->id ?? 0) ?: null;
+        $needsAdminApproval = $frs && (int) $frs->admin_approval_required === 1;
+
         $payload = [
             'nom' => $data['nom'],
             'prenom' => $data['prenom'],
@@ -53,8 +57,9 @@ class AuthController extends Controller
             'id_wilaya' => $idWilaya,
             'id_commune' => $idCommune,
             'type_client' => 'simple',
-            'id_frs' => null,
+            'id_frs' => $frsId,
             'actif' => 1,
+            'approved_by_admin' => $needsAdminApproval ? 0 : 1,
             'email_verified_at' => null,
         ];
 
@@ -89,6 +94,13 @@ class AuthController extends Controller
 
         if ($client->type_client === 'simple' && empty($client->email_verified_at)) {
             return $this->error('Email non vérifié', null, 403);
+        }
+
+        $frs = $client->fournisseur ?? Fournisseur::single();
+        if ($frs && (int) $frs->admin_approval_required === 1 && (int) $client->approved_by_admin !== 1) {
+            return $this->error("Compte en attente d'approbation par l'administrateur", [
+                'approval_pending' => true,
+            ], 403);
         }
 
         $token = $client->createToken('client')->plainTextToken;
@@ -139,7 +151,16 @@ class AuthController extends Controller
             return $this->error('Non autorisé', null, 403);
         }
 
+        $frs = $client->fournisseur ?? Fournisseur::single();
+        $approvalRequired = $frs && (int) $frs->admin_approval_required === 1 && (int) $client->approved_by_admin !== 1;
+
         if (! empty($client->email_verified_at)) {
+            if ($approvalRequired) {
+                return $this->success([
+                    'approval_pending' => true,
+                    'email' => $client->email,
+                ], "Email déjà vérifié. Compte en attente d'approbation");
+            }
             $token = $client->createToken('client')->plainTextToken;
             return $this->success([
                 'token' => $token,
@@ -174,6 +195,13 @@ class AuthController extends Controller
             'email_verification_code_hash' => null,
             'email_verification_expires_at' => null,
         ])->save();
+
+        if ($approvalRequired) {
+            return $this->success([
+                'approval_pending' => true,
+                'email' => $client->email,
+            ], "Email vérifié. Compte en attente d'approbation par l'administrateur");
+        }
 
         $token = $client->createToken('client')->plainTextToken;
 
@@ -297,15 +325,26 @@ class AuthController extends Controller
         /** @var Client $client */
         $client = $request->user();
 
+        $frs = $client->fournisseur ?? Fournisseur::single();
+        if ($frs && (int) $frs->admin_approval_required === 1 && (int) $client->approved_by_admin !== 1) {
+            $token = $client->currentAccessToken();
+            if ($token) {
+                $token->delete();
+            }
+            return $this->error("Compte en attente d'approbation par l'administrateur", [
+                'approval_pending' => true,
+            ], 403);
+        }
+
         $fournisseur = null;
         if ($client->id_frs) {
-            $frs = Fournisseur::query()->find($client->id_frs);
-            if ($frs) {
+            $frsData = Fournisseur::query()->find($client->id_frs);
+            if ($frsData) {
                 $fournisseur = [
-                    'id' => $frs->id,
-                    'nom_frs' => $frs->nom_frs,
-                    'email' => $frs->email,
-                    'telephone' => $frs->telephone,
+                    'id' => $frsData->id,
+                    'nom_frs' => $frsData->nom_frs,
+                    'email' => $frsData->email,
+                    'telephone' => $frsData->telephone,
                 ];
             }
         }

@@ -79,6 +79,8 @@ Route::prefix('fournisseur')->middleware('auth.fournisseur')->group(function () 
     Route::get('/clients', [FrsClientController::class, 'index']);
     Route::get('/clients/{id}', [FrsClientController::class, 'show'])->whereNumber('id');
     Route::put('/clients/{id}/tarif', [FrsClientController::class, 'updateTarif'])->whereNumber('id');
+    Route::post('/clients/{id}/approve', [FrsClientController::class, 'approve'])->whereNumber('id');
+    Route::post('/clients/{id}/reject', [FrsClientController::class, 'reject'])->whereNumber('id');
 
     Route::get('/commandes', [FrsCommandeController::class, 'index']);
     Route::get('/commandes/{id}', [FrsCommandeController::class, 'show'])->whereNumber('id');

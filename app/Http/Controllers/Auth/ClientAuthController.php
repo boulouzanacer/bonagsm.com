@@ -53,6 +53,13 @@ class ClientAuthController extends Controller
                     ->withErrors(['email' => __('Email non vérifié. Veuillez vérifier votre boîte mail.')]);
             }
 
+            $frs = $client->fournisseur ?? Fournisseur::single();
+            if ($frs && (int) $frs->admin_approval_required === 1 && (int) $client->approved_by_admin !== 1) {
+                return back()
+                    ->withInput($request->only('email'))
+                    ->withErrors(['email' => __("Compte en attente d'approbation par l'administrateur.")]);
+            }
+
             $request->session()->regenerate();
             $request->session()->put([
                 'role' => 'client',
@@ -125,6 +132,10 @@ class ClientAuthController extends Controller
                 ->withErrors(['email' => __('Email déjà utilisé.')]);
         }
 
+        $frs = Fournisseur::single();
+        $frsId = (int) ($frs?->id ?? 0) ?: null;
+        $needsAdminApproval = $frs && (int) $frs->admin_approval_required === 1;
+
         $payload = [
             'nom' => $data['nom'],
             'prenom' => $data['prenom'],
@@ -135,8 +146,9 @@ class ClientAuthController extends Controller
             'id_wilaya' => $idWilaya,
             'id_commune' => $idCommune,
             'type_client' => 'simple',
-            'id_frs' => (int) (Fournisseur::single()?->id ?? 0) ?: null,
+            'id_frs' => $frsId,
             'actif' => 1,
+            'approved_by_admin' => $needsAdminApproval ? 0 : 1,
             'email_verified_at' => null,
         ];
 
@@ -204,6 +216,12 @@ class ClientAuthController extends Controller
         ])->save();
 
         $request->session()->forget(['pending_client_id', 'pending_client_email']);
+
+        $frs = $client->fournisseur ?? Fournisseur::single();
+        if ($frs && (int) $frs->admin_approval_required === 1 && (int) $client->approved_by_admin !== 1) {
+            return redirect()->to('/login')->with('success', __("Email vérifié. Votre compte est en attente d'approbation par l'administrateur."));
+        }
+
         $request->session()->regenerate();
         $request->session()->put([
             'role' => 'client',

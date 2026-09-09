@@ -36,6 +36,7 @@ class Client extends Authenticatable
         'tarif',
         'id_frs',
         'actif',
+        'approved_by_admin',
     ];
 
     protected $hidden = [
