@@ -97,11 +97,82 @@
         </div>
     @endif
 
+    @if(session('error'))
+        <div class="rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-red-200">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    <template x-if="selectedIds.length > 0">
+        <div class="rounded-2xl border border-[var(--frs-primary)]/30 bg-[var(--frs-primary)]/10 p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="h-9 w-9 inline-flex items-center justify-center rounded-xl bg-[var(--frs-primary)]/20 border border-[var(--frs-primary)]/30">
+                    <i class="fa-solid fa-check-double"></i>
+                </div>
+                <div>
+                    <div class="font-extrabold">
+                        <span class="force-ltr" x-text="selectedIds.length"></span>
+                        {{ __('produit(s) sélectionné(s)') }}
+                    </div>
+                    <button type="button"
+                            @click="clearSelection()"
+                            class="text-xs text-white/60 hover:text-white underline">
+                        {{ __('Tout désélectionner') }}
+                    </button>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <form method="POST" action="{{ url('/fournisseur/produits/bulk-show') }}"
+                      @submit.prevent="submitBulk($el, '{{ url('/fournisseur/produits/bulk-show') }}', @js(__('Afficher les produits sélectionnés sur le site ?')))">
+                    @csrf
+                    <template x-for="id in selectedIds" :key="'show_'+id">
+                        <input type="hidden" name="ids[]" :value="id">
+                    </template>
+                    <button type="submit"
+                            class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-extrabold bg-emerald-500/15 text-emerald-200 border border-emerald-400/20 hover:bg-emerald-500/25">
+                        <i class="fa-solid fa-eye"></i>
+                        <span class="hidden sm:inline">{{ __('Afficher') }}</span>
+                    </button>
+                </form>
+                <form method="POST" action="{{ url('/fournisseur/produits/bulk-hide') }}"
+                      @submit.prevent="submitBulk($el, '{{ url('/fournisseur/produits/bulk-hide') }}', @js(__('Cacher les produits sélectionnés sur le site ?')))">
+                    @csrf
+                    <template x-for="id in selectedIds" :key="'hide_'+id">
+                        <input type="hidden" name="ids[]" :value="id">
+                    </template>
+                    <button type="submit"
+                            class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-extrabold bg-amber-500/15 text-amber-200 border border-amber-400/20 hover:bg-amber-500/25">
+                        <i class="fa-solid fa-eye-slash"></i>
+                        <span class="hidden sm:inline">{{ __('Cacher') }}</span>
+                    </button>
+                </form>
+                <form method="POST" action="{{ url('/fournisseur/produits/bulk-delete') }}"
+                      @submit.prevent="submitBulk($el, '{{ url('/fournisseur/produits/bulk-delete') }}', @js(__('Supprimer définitivement les produits sélectionnés ?')))">
+                    @csrf
+                    <template x-for="id in selectedIds" :key="'del_'+id">
+                        <input type="hidden" name="ids[]" :value="id">
+                    </template>
+                    <button type="submit"
+                            class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-extrabold bg-red-500/15 text-red-200 border border-red-400/20 hover:bg-red-500/25">
+                        <i class="fa-solid fa-trash"></i>
+                        <span class="hidden sm:inline">{{ __('Supprimer') }}</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </template>
+
     <div class="rounded-2xl border border-white/10 bg-[var(--frs-card)] overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full text-sm">
                 <thead class="text-white/60">
                     <tr>
+                        <th class="py-3 px-4 text-center" style="width: 48px;">
+                            <input type="checkbox"
+                                   class="h-5 w-5 rounded border-white/20 bg-black/20"
+                                   :checked="allVisibleSelected"
+                                   @change="toggleSelectAll()">
+                        </th>
                         <th class="table-align-start text-left py-3 px-4 font-semibold">{{ __('Produit') }}</th>
                         <th class="table-align-start text-left py-3 px-4 font-semibold">{{ __('Référence') }}</th>
                         <th class="table-align-start text-left py-3 px-4 font-semibold">{{ __('Catégorie') }}</th>
@@ -123,7 +194,15 @@
                                     : [__('Disponible'), 'bg-sky-500/15 text-sky-200 border border-sky-400/20']);
                             $actif = (int)($p->actif ?? 0) === 1;
                         @endphp
-                        <tr class="hover:bg-white/5">
+                        <tr class="hover:bg-white/5"
+                            :class="isSelected({{ (int)$p->id }}) ? 'bg-[var(--frs-primary)]/10' : ''">
+                            <td class="py-3 px-4 text-center" onclick="event.stopPropagation()">
+                                <input type="checkbox"
+                                       class="row-check h-5 w-5 rounded border-white/20 bg-black/20"
+                                       :data-id="{{ (int)$p->id }}"
+                                       :checked="isSelected({{ (int)$p->id }})"
+                                       @change="toggleRow({{ (int)$p->id }})">
+                            </td>
                             <td class="py-3 px-4">
                                 <div class="flex items-center gap-3 min-w-0">
                                     <div class="h-10 w-12 rounded-xl overflow-hidden border border-white/10 bg-black/20 flex-shrink-0">
@@ -205,7 +284,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="py-10 text-center text-white/60">{{ __('Aucun produit.') }}</td>
+                            <td colspan="9" class="py-10 text-center text-white/60">{{ __('Aucun produit.') }}</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -538,6 +617,68 @@
             },
             updateFields: ['designation', 'description', 'pv_1', 'pv_2', 'pv_3', 'stock', 'categorie', 'sous_categorie', 'marque'],
             stockMode: 'replace',
+
+            selectedIds: [],
+
+            get visibleProductIds() {
+                const checks = document.querySelectorAll('.row-check');
+                const ids = [];
+                checks.forEach((el) => {
+                    const id = parseInt(el.getAttribute('data-id'), 10);
+                    if (!Number.isNaN(id) && id > 0) ids.push(id);
+                });
+                return ids;
+            },
+
+            get allVisibleSelected() {
+                const visible = this.visibleProductIds;
+                if (visible.length === 0) return false;
+                return visible.every((id) => this.selectedIds.includes(id));
+            },
+
+            isSelected(id) {
+                return this.selectedIds.includes(id);
+            },
+
+            toggleRow(id) {
+                const idx = this.selectedIds.indexOf(id);
+                if (idx >= 0) {
+                    this.selectedIds.splice(idx, 1);
+                } else {
+                    this.selectedIds.push(id);
+                }
+            },
+
+            toggleSelectAll() {
+                const visible = this.visibleProductIds;
+                if (visible.length === 0) return;
+                const allSelected = visible.every((id) => this.selectedIds.includes(id));
+                if (allSelected) {
+                    this.selectedIds = this.selectedIds.filter((id) => !visible.includes(id));
+                } else {
+                    const set = new Set(this.selectedIds);
+                    visible.forEach((id) => set.add(id));
+                    this.selectedIds = Array.from(set);
+                }
+            },
+
+            clearSelection() {
+                this.selectedIds = [];
+            },
+
+            submitBulk(formEl, url, message) {
+                if (!message || window.confirm(message)) {
+                    const inputs = formEl.querySelectorAll('input[name="ids[]"]');
+                    inputs.forEach((input) => {
+                        const id = parseInt(input.value, 10);
+                        if (Number.isNaN(id) || !this.selectedIds.includes(id)) {
+                            input.remove();
+                        }
+                    });
+                    formEl.action = url;
+                    formEl.submit();
+                }
+            },
 
             openImport() {
                 this.importError = '';

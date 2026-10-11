@@ -854,4 +854,66 @@ class ProduitController extends Controller
 
         return back()->with('success', __('Statut produit mis à jour.'));
     }
+
+    private function parseIds(Request $request): array
+    {
+        $ids = $request->input('ids', []);
+        if (! is_array($ids)) {
+            $ids = explode(',', (string) $ids);
+        }
+        $ids = array_map('intval', $ids);
+        $ids = array_values(array_unique(array_filter($ids, fn ($v) => $v > 0)));
+        return $ids;
+    }
+
+    public function bulkDelete(Request $request): RedirectResponse
+    {
+        $frsId = (int) session('frs_id');
+        $ids = $this->parseIds($request);
+
+        if (count($ids) === 0) {
+            return back()->with('error', __('Aucun produit sélectionné.'));
+        }
+
+        $deleted = Produit::query()
+            ->where('id_frs', $frsId)
+            ->whereIn('id', $ids)
+            ->delete();
+
+        return back()->with('success', __(':count produit(s) supprimé(s).', ['count' => (int) $deleted]));
+    }
+
+    public function bulkHide(Request $request): RedirectResponse
+    {
+        $frsId = (int) session('frs_id');
+        $ids = $this->parseIds($request);
+
+        if (count($ids) === 0) {
+            return back()->with('error', __('Aucun produit sélectionné.'));
+        }
+
+        $updated = Produit::query()
+            ->where('id_frs', $frsId)
+            ->whereIn('id', $ids)
+            ->update(['actif' => 0]);
+
+        return back()->with('success', __(':count produit(s) caché(s) sur le site.', ['count' => (int) $updated]));
+    }
+
+    public function bulkShow(Request $request): RedirectResponse
+    {
+        $frsId = (int) session('frs_id');
+        $ids = $this->parseIds($request);
+
+        if (count($ids) === 0) {
+            return back()->with('error', __('Aucun produit sélectionné.'));
+        }
+
+        $updated = Produit::query()
+            ->where('id_frs', $frsId)
+            ->whereIn('id', $ids)
+            ->update(['actif' => 1]);
+
+        return back()->with('success', __(':count produit(s) affiché(s) sur le site.', ['count' => (int) $updated]));
+    }
 }

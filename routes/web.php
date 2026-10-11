@@ -95,6 +95,9 @@ Route::prefix('fournisseur')->middleware('auth.fournisseur')->group(function () 
 
     Route::middleware('auth.admin')->group(function () {
         Route::post('/produits/import', [FrsProduitController::class, 'import']);
+        Route::post('/produits/bulk-delete', [FrsProduitController::class, 'bulkDelete']);
+        Route::post('/produits/bulk-hide', [FrsProduitController::class, 'bulkHide']);
+        Route::post('/produits/bulk-show', [FrsProduitController::class, 'bulkShow']);
         Route::delete('/produits/{id}', [FrsProduitController::class, 'destroy'])->whereNumber('id');
         Route::post('/produits/{id}/toggle-actif', [FrsProduitController::class, 'toggleActif'])->whereNumber('id');
 
